@@ -5,7 +5,8 @@ cd "$(dirname "${BASH_SOURCE}")";
 git pull origin master;
 
 function doIt() {
-  rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
+  # force used to delete non-empty dirs like .git/ (oh-my-zsh)
+  rsync --force --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
     --exclude "README.md" -avh --no-perms . ~;
 }
 
