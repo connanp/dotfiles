@@ -1,3 +1,6 @@
+# update without git
+alias update="rsyncnogit .dotfiles $1:~/.dotfiles && ssh $1 'set -- -f; source .dotfiles/bootstrap.sh'"
+
 alias ..="cd .."
 
 alias addtoken="ssh-add -s libeToken.so.8"
@@ -11,7 +14,6 @@ alias rsyncnogit="rsync -av --filter=':- .gitignore' --exclude .git"
 
 alias g="git"
 alias gcs="git clone --depth 1"
-alias gitcloneshallow="gcs"
 
 # Detect which `ls` flavor is in use
 if ls --color > /dev/null 2>&1; then # GNU `ls`
