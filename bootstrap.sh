@@ -6,7 +6,7 @@ git pull origin master
 git submodule update
 
 function doIt() {
-  rsync --delete-excluded --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
+  rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
     --exclude "README.md" -avh --no-perms . ~;
 }
 
