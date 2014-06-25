@@ -1,0 +1,9 @@
+# Install native apps
+# Usage: `brew bundle Caskfile`
+
+install caskroom/cask/brew-cask
+tap caskroom/versions
+
+cask install dropbox 2> /dev/null
+cask install google-chrome 2> /dev/null
+cask install iterm2 2> /dev/null
