@@ -11,7 +11,8 @@ ZSH_CUSTOM=$HOME/.config/oh-my-zsh
 ########## Begin path additions for /opt/ssh-wrapper {{{
 
 #PATH="/opt/ssh-wrapper/bin:${PATH}:${HOME}/Cloud9BrazilBuild-1.0/bin"
-PATH="${PATH}:${HOME}/Cloud9BrazilBuild-1.0/bin:${HOME}/Library/Python/2.7/bin"
+PATH="/usr/local/bin:${PATH}:${HOME}/Cloud9BrazilBuild-1.0/bin:${HOME}/Library/Python/2.7/bin"
+typeset -U PATH  # remove dupes
 export PATH
 
 ########## }}} End of path additions for /opt/ssh-wrapper
@@ -53,13 +54,14 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git jira extract osx virtualenv virtualenvwrapper)
+plugins=(git jira extract osx virtualenv virtualenvwrapper vi-mode)
 
 source $ZSH/oh-my-zsh.sh
 source ~/.aliases
 
 # vi mode
 bindkey -v
+bindkey '^R' history-incremental-search-backward
 
 # Customize to your needs...
 #export PATH=/usr/local/bin:$PATH:/usr/lib/lightdm/lightdm:/usr/bin:/bin:/usr/lib/jvm/java-7-oracle/bin:/usr/lib/jvm/java-7-oracle/db/bin:/usr/lib/jvm/java-7-oracle/jre/bin
