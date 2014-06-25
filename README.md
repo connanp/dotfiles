@@ -6,19 +6,19 @@ Loosely based off Mathias’s dotfiles
 ### Using Git and the bootstrap script
 
 ```bash
-git clone https://github.com/connanp/dotfiles.git .dotfiles && cd .dotfiles && sh bootstrap.sh
+git clone https://github.com/connanp/dotfiles.git .dotfiles && cd .dotfiles && bash bootstrap.sh
 ```
 
 To update, `cd` into your local `dotfiles` repository and then:
 
 ```bash
-sh bootstrap.sh
+bash bootstrap.sh
 ```
 
 Alternatively, to update while avoiding the confirmation prompt:
 
 ```bash
-set -- -f; sh bootstrap.sh
+set -- -f; bash bootstrap.sh
 ```
 
 ### Git-free install
