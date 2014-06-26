@@ -68,7 +68,7 @@ bindkey -v
 bindkey '^R' history-incremental-search-backward
 
 export WORKON_HOME=$HOME/.virtualenvs
-[ -a /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
+[ -f /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
 
 JIRA_URL="https://network-tracking.amazon.com"
 
