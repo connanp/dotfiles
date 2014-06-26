@@ -3,6 +3,7 @@
 cd "$(dirname "${BASH_SOURCE}")"
 
 git pull origin master
+git submodule init
 git submodule update
 
 function doIt() {
