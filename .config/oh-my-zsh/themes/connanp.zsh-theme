@@ -22,6 +22,10 @@
 # jobs are running in this shell will all be displayed automatically when
 # appropriate.
 
+### Reset right-hand prompt
+RPS1=""
+RPS2=""
+
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
