@@ -1,3 +1,7 @@
+LANG="en_US.UTF-8"
+LANGUAGE="en_US:"
+LC_ALL="en_US.UTF-8"
+LC_CTYPE="en_US.UTF-8"
 platform=$(uname)
 export TERM="xterm-256color"
 ZSH_CUSTOM=$HOME/.config/oh-my-zsh
