@@ -75,3 +75,10 @@ JIRA_URL="https://network-tracking.amazon.com"
 if [[ "$platform" == "Darwin" ]]; then
   source $HOME/.ssh/environment-$(hostname -s)
 fi
+
+if [ -d $HOME/.config/site ]; then
+  for f in $HOME/.config/site/*; do
+    source $f
+  done
+fi
+
