@@ -216,4 +216,6 @@ set iskeyword+=_,$,@,%,#
 " Show matching brackets
 set sm
 
-" source ~/Library/Python/2.7/lib/python/site-packages/powerline/bindings/vim/plugin/powerline.vim
+if filereadable(expand('~/.vim/extra'))
+  execute 'source ~/.vim/extra'
+endif
