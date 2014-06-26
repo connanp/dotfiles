@@ -5,6 +5,14 @@ LC_CTYPE="en_US.UTF-8"
 platform=$(uname)
 export TERM="xterm-256color"
 ZSH_CUSTOM=$HOME/.config/oh-my-zsh
+
+# pre-load before any of this for certain situations
+if [ -d $HOME/.config/site/preload ]; then
+  for f in $HOME/.config/site/preload/*; do
+    source $f
+  done
+fi
+
 ########## Begin environment variables for /opt/ssh-wrapper {{{
 
 #SSH_AUTH_SOCK="${HOME}/.ssh/environment-$(hostname -s)"
