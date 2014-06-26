@@ -31,6 +31,3 @@ cd; curl -#L https://github.com/connanp/dotfiles/tarball/master | tar -xzv --str
 
 ### Extras
 
-```bash
-curl http://beyondgrep.com/ack-2.12-single-file > ~/bin/ack && chmod 0755 !#:3
-```

@@ -21,3 +21,4 @@ install macvim --env-std --override-system-vim
 install git
 install llvm
 install valgrind
+instal the_silver_searcher
