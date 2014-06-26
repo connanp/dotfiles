@@ -63,10 +63,8 @@ source ~/.aliases
 bindkey -v
 bindkey '^R' history-incremental-search-backward
 
-# Customize to your needs...
-#export PATH=/usr/local/bin:$PATH:/usr/lib/lightdm/lightdm:/usr/bin:/bin:/usr/lib/jvm/java-7-oracle/bin:/usr/lib/jvm/java-7-oracle/db/bin:/usr/lib/jvm/java-7-oracle/jre/bin
 export WORKON_HOME=$HOME/.virtualenvs
-source /usr/local/bin/virtualenvwrapper.sh
+[ -a /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
 
 JIRA_URL="https://network-tracking.amazon.com"
 
