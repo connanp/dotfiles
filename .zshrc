@@ -66,7 +66,11 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git jira extract osx virtualenv virtualenvwrapper vi-mode)
+plugins=(git jira extract vi-mode)
+if [[ "$platform" == "Darwin" ]]; then
+  plugins+=(osx)
+fi
+[ -f /usr/local/bin/virtualenvwrapper.sh ] && plugins+=(virtualenv virtualenvwrapper)
 
 source $ZSH/oh-my-zsh.sh
 source ~/.aliases
