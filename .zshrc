@@ -5,6 +5,7 @@ LC_CTYPE="en_US.UTF-8"
 platform=$(uname)
 export TERM="xterm-256color"
 ZSH_CUSTOM=$HOME/.config/oh-my-zsh
+EDITOR="vim"
 
 # pre-load before any of this for certain situations
 if [ -d $HOME/.config/site/preload ]; then
