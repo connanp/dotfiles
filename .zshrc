@@ -73,11 +73,24 @@ fi
 [ -f /usr/local/bin/virtualenvwrapper.sh ] && plugins+=(virtualenv virtualenvwrapper)
 
 source $ZSH/oh-my-zsh.sh
-source ~/.aliases
+# vi mode text-objects, e.g.: ciw
+source $HOME/.config/opp.zsh/opp.zsh
+source $HOME/.config/opp.zsh/opp/*
+source $HOME/.aliases
 
 # vi mode
 bindkey -v
-bindkey '^R' history-incremental-search-backward
+bindkey '^P' up-history
+bindkey '^N' down-history
+bindkey '^?' backward-delete-char
+bindkey '^h' backward-delete-char
+bindkey '^w' backward-kill-word
+bindkey '^r' history-incremental-search-backward
+export KEYTIMEOUT=1
+# http://www.zsh.org/mla/users/2009/msg00813.html
+# vi insert mode to respect backspace
+zle -A .backward-kill-word vi-backward-kill-word
+zle -A .backward-delete-char vi-backward-delete-char
 
 export WORKON_HOME=$HOME/.virtualenvs
 [ -f /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh

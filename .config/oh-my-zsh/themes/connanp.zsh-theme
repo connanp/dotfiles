@@ -32,6 +32,9 @@ RPS2=""
 CURRENT_BG='NONE'
 SEGMENT_SEPARATOR="\ue0b0"
 ZSH_THEME_GIT_PROMPT_PREFIX="\ue0a0"
+ZSH_THEME_INSERT_MODE="%F{white}\u2b82%f%K{white}%F{blue} INSERT"
+ZSH_THEME_NORMAL_MODE="%F{190}\u2b82%f%K{190}%F{green} NORMAL"
+MODE_INDICATOR=" "
 
 # Begin a segment
 # Takes two arguments, background and foreground. Both can be omitted,
@@ -107,10 +110,19 @@ prompt_status() {
   [[ -n "$symbols" ]] && prompt_segment black default "$symbols"
 }
 
+# Vi mode, customized
+prompt_vi_mode() {
+  local vmode
+  vmode="${${KEYMAP/vicmd/190}/(main|viins)/white}"
+  prompt_segment $vmode
+  echo -n "${${KEYMAP/vicmd/$ZSH_THEME_NORMAL_MODE}/(main|viins)/$ZSH_THEME_INSERT_MODE}"
+}
+
 ## Main prompt
 build_prompt() {
   RETVAL=$?
   prompt_status
+  prompt_vi_mode
   prompt_context
   prompt_dir
   prompt_git

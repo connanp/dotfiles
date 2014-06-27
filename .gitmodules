@@ -4,3 +4,6 @@
 [submodule ".vim/bundle/neobundle.vim"]
 	path = .vim/bundle/neobundle.vim
 	url = https://github.com/Shougo/neobundle.vim
+[submodule ".config/opp.zsh"]
+	path = .config/opp.zsh
+	url = https://github.com/hchbaw/opp.zsh
