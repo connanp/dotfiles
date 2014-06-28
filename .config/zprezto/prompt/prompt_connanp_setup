@@ -32,10 +32,9 @@ prompt_end() {
   CURRENT_BG=''
 }
 
-# exit code; elevated perms check; jobs check; user@host; last 2 in PWD; git status
 function build_prompt {
   print -Pn "${editor_info[keymap]}%K{235}$SEGMENT_SEPARATOR"
-  prompt_segment 235 245 '%(1?;%{%F{red}%}✘ ;)%(!;%{%F{yellow}%}⚡ ;)%(1j;%{%F{cyan}%}%j⚙ ;)%n%{%F{154}%}@%{%F{white}%}%m'
+  prompt_segment 235 245 '%(!;%{%F{yellow}%}⚡ ;)%n%{%F{white}%}@%{%F{245}%}%m'
   prompt_segment 240 250 '%2~'
   if $git_status; then
     prompt_segment green black '${(e)git_info[prompt]}${git_info[status]}'
@@ -92,7 +91,7 @@ function prompt_connanp_setup {
   PROMPT='
 %{%f%b%k%}$(build_prompt)
 %B%F{190}❯%f%b '
-  RPROMPT='[%D{%L:%M:%S %p}]'
+  RPROMPT='%(1?;%{%F{red}%}✘ ;)%f%(1j;%{%F{cyan}%}%j⚙ ;)%f[%D{%L:%M:%S %p}]'
   SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f [nyae]? '
 }
 
