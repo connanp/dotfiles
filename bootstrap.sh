@@ -16,6 +16,8 @@ function doIt() {
   ln -s $HOME/.zprezto/zprofile $HOME/.zprofile
   ln -s $HOME/.zprezto/zshenv $HOME/.zshenv
   ln -s $HOME/.config/zprezto/prompt/* $HOME/.zprezto/modules/prompt/functions/
+  # custom modules
+  rsync -avh --no-perms $HOME/.config/zprezto/modules $HOME/.zprezto/
 }
 
 if [ "$1" = "--force" -o "$1" = "-f" ]; then

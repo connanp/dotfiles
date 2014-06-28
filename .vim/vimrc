@@ -323,6 +323,7 @@
       else
         let g:airline_powerline_fonts = 1
       endif
+      let g:airline#extensions#hunks#non_zero_only = 1
     "}}}
     NeoBundle 'tpope/vim-surround'
     NeoBundle 'tpope/vim-repeat'
@@ -391,7 +392,12 @@
   endif "}}}
   if count(s:settings.plugin_groups, 'python') "{{{
     NeoBundleLazy 'klen/python-mode', {'autoload':{'filetypes':['python']}} "{{{
-      let g:pymode_rope=0
+      nmap <silent><Leader>n :PymodeLint<CR>
+      let g:pymode_lint=1
+      let g:pymode_lint_on_write=0
+      let g:pymode_rope=1
+      let g:pymode_rope_completion=0
+      let g:pymode_rope_complete_on_dot=1
     "}}}
     NeoBundleLazy 'davidhalter/jedi-vim', {'autoload':{'filetypes':['python']}} "{{{
       let g:jedi#popup_on_dot=0
@@ -414,19 +420,28 @@
       NeoBundle 'bitbucket:ludovicchabant/vim-lawrencium'
     endif
     NeoBundle 'tpope/vim-fugitive' "{{{
+      nnoremap <silent> <Leader>gn :Unite output:echo\ system("git\ init")<CR>
       nnoremap <silent> <leader>gs :Gstatus<CR>
       nnoremap <silent> <leader>gd :Gdiff<CR>
       nnoremap <silent> <leader>gc :Gcommit<CR>
       nnoremap <silent> <leader>gb :Gblame<CR>
       nnoremap <silent> <leader>gl :Glog<CR>
-      nnoremap <silent> <leader>gp :Git push<CR>
+      nnoremap <silent> <leader>gp :Git! push<CR>
+      nnoremap <silent> <leader>gP :Git! pull<CR>
       nnoremap <silent> <leader>gw :Gwrite<CR>
-      nnoremap <silent> <leader>gr :Gremove<CR>
+      nnoremap <silent> <leader>gR :Gremove<CR>
+      nnoremap <Leader>gl :exe "silent Glog <Bar> Unite -no-quit quickfix"<CR>:redraw!<CR>
+      nnoremap <Leader>gL :exe "silent Glog -- <Bar> Unite -no-quit quickfix"<CR>:redraw!<CR>
+      nnoremap <Leader>gg :exe 'silent Ggrep -i '.input("Pattern: ")<Bar>Unite quickfix -no-quit<CR>
+      nnoremap <Leader>ggm :exe 'silent Glog --grep='.input("Pattern: ").' <Bar>Unite -no-quit quickfix'<CR>
+      nnoremap <Leader>ggt :exe 'silent Glog -S='.input("Pattern: ").' <Bar>Unite -no-quit quickfix'<CR>
+      nnoremap <Leader>ggc :silent! Ggrep -i<Space>
       autocmd BufReadPost fugitive://* set bufhidden=delete
     "}}}
     NeoBundleLazy 'gregsexton/gitv', {'depends':['tpope/vim-fugitive'], 'autoload':{'commands':'Gitv'}} "{{{
       nnoremap <silent> <leader>gv :Gitv<CR>
       nnoremap <silent> <leader>gV :Gitv!<CR>
+      autocmd FileType git set nofoldenable
     "}}}
   endif "}}}
   if count(s:settings.plugin_groups, 'autocomplete') "{{{
@@ -459,7 +474,19 @@
     if s:settings.autocomplete_method == 'neocomplete' "{{{
       NeoBundleLazy 'Shougo/neocomplete.vim', {'autoload':{'insert':1}, 'vim_version':'7.3.885'} "{{{
         let g:neocomplete#enable_at_startup=1
+        let g:neocomplete#enable_smart_case = 1
+        let g:neocomplete#enable_refresh_always = 1
+        let g:neocomplete#max_list = 30
         let g:neocomplete#data_directory=s:get_cache_dir('neocomplete')
+        if !exists('g:neocomplete#sources#omni#input_patterns')
+          let g:neocomplete#sources#omni#input_patterns = {}
+        endif
+        let g:neocomplete#sources#omni#input_patterns.python='[^. \t]\.\w*'
+        autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
+        autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+        autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+        autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
+        autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
       "}}}
     endif "}}}
     if s:settings.autocomplete_method == 'neocomplcache' "{{{
@@ -540,19 +567,26 @@
       nnoremap [ctrlp]o :CtrlPFunky<cr>
       nnoremap [ctrlp]b :CtrlPBuffer<cr>
     "}}}
-    NeoBundleLazy 'scrooloose/nerdtree', {'autoload':{'commands':['NERDTreeToggle','NERDTreeFind']}} "{{{
-      let NERDTreeShowHidden=1
-      let NERDTreeQuitOnOpen=0
-      let NERDTreeShowLineNumbers=1
-      let NERDTreeChDirMode=0
-      let NERDTreeShowBookmarks=1
-      let NERDTreeIgnore=['\.git','\.hg']
-      let NERDTreeBookmarksFile=s:get_cache_dir('NERDTreeBookmarks')
-      nnoremap <F2> :NERDTreeToggle<CR>
-      nnoremap <F3> :NERDTreeFind<CR>
+    " NeoBundleLazy 'scrooloose/nerdtree', {'autoload':{'commands':['NERDTreeToggle','NERDTreeFind']}} "{{{
+    "   let NERDTreeShowHidden=1
+    "   let NERDTreeQuitOnOpen=0
+    "   let NERDTreeShowLineNumbers=1
+    "   let NERDTreeChDirMode=0
+    "   let NERDTreeShowBookmarks=1
+    "   let NERDTreeIgnore=['\.git','\.hg']
+    "   let NERDTreeBookmarksFile=s:get_cache_dir('NERDTreeBookmarks')
+    "   nnoremap <F2> :NERDTreeToggle<CR>
+    "   nnoremap <F3> :NERDTreeFind<CR>
     "}}}
     NeoBundleLazy 'majutsushi/tagbar', {'autoload':{'commands':'TagbarToggle'}} "{{{
       nnoremap <silent> <F9> :TagbarToggle<CR>
+    "}}}
+    NeoBundle 'Shougo/vimfiler.vim', { 'depends': 'Shougo/unite.vim' } "{{{
+      let g:vimfiler_as_default_explorer = 1
+      let g:vimfiler_ignore_pattern = '^\%(.git\|.DS_Store\)$'
+      let g:vimfiler_time_format = '%m-%d-%Y %H:%M:%S'
+      nnoremap <F2> :VimFilerExplorer<CR>
+      nnoremap <F3> :VimFilerBufferDir<CR>
     "}}}
   endif "}}}
   if count(s:settings.plugin_groups, 'unite') "{{{
@@ -570,6 +604,9 @@
       let g:unite_source_history_yank_enable=1
       let g:unite_source_rec_max_cache_files=5000
       let g:unite_prompt='» '
+      let g:unite_source_buffer_time_format = '(%m-%d-%Y %H:%M:%S) '
+      let g:unite_source_file_mru_time_format = '(%m-%d-%Y %H:%M:%S) '
+      let g:unite_source_directory_mru_time_format = '(%m-%d-%Y %H:%M:%S) '
 
       if executable('ag')
         let g:unite_source_grep_command='ag'
@@ -836,6 +873,24 @@
     nnoremap <silent> <leader>DP :exe ":profile pause"<cr>
     nnoremap <silent> <leader>DC :exe ":profile continue"<cr>
     nnoremap <silent> <leader>DQ :exe ":profile pause"<cr>:noautocmd qall!<cr>
+  "}}}
+  " Toggle the Quickfix window {{{
+
+  function! s:QuickfixToggle()
+      for i in range(1, winnr('$'))
+          let bnum = winbufnr(i)
+          if getbufvar(bnum, '&buftype') == 'quickfix'
+              cclose
+              lclose
+              return
+          endif
+      endfor
+      copen
+  endfunction
+  command! ToggleQuickfix call <SID>QuickfixToggle()
+
+  nnoremap <silent> <Leader>q :ToggleQuickfix<CR>
+
   "}}}
 "}}}
 

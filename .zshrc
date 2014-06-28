@@ -59,7 +59,6 @@ zstyle ':prezto:load' pmodule \
   'fasd' \
   'python' \
   'rsync' \
-  'ssh' \
   'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
@@ -96,3 +95,5 @@ if [ -d $HOME/.config/site ]; then
   done
 fi
 
+# must be the last thing executed, otherwise OS X fails to load the session
+pmodload ssh
