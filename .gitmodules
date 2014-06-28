@@ -7,3 +7,6 @@
 [submodule ".config/opp.zsh"]
 	path = .config/opp.zsh
 	url = https://github.com/hchbaw/opp.zsh
+[submodule ".zprezto"]
+	path = .zprezto
+	url = https://github.com/sorin-ionescu/prezto
