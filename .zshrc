@@ -25,7 +25,7 @@ fi
 #PATH="/opt/ssh-wrapper/bin:${PATH}:${HOME}/Cloud9BrazilBuild-1.0/bin"
 ########## }}} End of path additions for /opt/ssh-wrapper
 
-PATH="/usr/local/bin:${PATH}"
+PATH="/usr/local/bin:${PATH}:$HOME/bin"
 typeset -U PATH  # remove dupes
 export PATH
 
@@ -55,11 +55,10 @@ zstyle ':prezto:load' pmodule \
   'completion' \
   'archive' \
   'osx' \
-  'git' \
   'fasd' \
+  'git' \
   'python' \
   'rsync' \
-  'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
 
@@ -94,6 +93,4 @@ if [ -d $HOME/.config/site ]; then
     source $f
   done
 fi
-
-# must be the last thing executed, otherwise OS X fails to load the session
 pmodload ssh
