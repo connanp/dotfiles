@@ -37,6 +37,10 @@ zstyle ':prezto:module:history-substring-search' color 'yes'
 
 zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'personal_rsa'
 
+zstyle ':prezto:module:terminal' auto-title 'yes'
+zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
+zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
+
 zstyle ':prezto:module:syntax-highlighting' highlighters \
   'main' \
   'brackets' \
@@ -55,10 +59,11 @@ zstyle ':prezto:load' pmodule \
   'completion' \
   'archive' \
   'osx' \
-  'fasd' \
   'git' \
+  'fasd' \
   'python' \
   'rsync' \
+  'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
 
@@ -93,4 +98,6 @@ if [ -d $HOME/.config/site ]; then
     source $f
   done
 fi
+
+# must be the last thing executed, otherwise OS X fails to load the session
 pmodload ssh

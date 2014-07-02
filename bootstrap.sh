@@ -10,11 +10,8 @@ git submodule update --recursive
 function doIt() {
   rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
     --exclude "README.md" -avh --no-perms . ~;
-  ln -s $HOME/.zprezto/zlogin $HOME/.zlogin
-  ln -s $HOME/.zprezto/zlogout $HOME/.zlogout
-  ln -s $HOME/.zprezto/zpreztorc $HOME/.zpreztorc
-  ln -s $HOME/.zprezto/zprofile $HOME/.zprofile
-  ln -s $HOME/.zprezto/zshenv $HOME/.zshenv
+  ln -s $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin
+  ln -s $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv
   ln -s $HOME/.config/zprezto/prompt/* $HOME/.zprezto/modules/prompt/functions/
   # custom modules
   rsync -avh --no-perms $HOME/.config/zprezto/modules $HOME/.zprezto/
