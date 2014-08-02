@@ -1,6 +1,3 @@
-# update without git
-alias update="rsyncnogit .dotfiles $1:~/.dotfiles && ssh $1 'set -- -f; source .dotfiles/bootstrap.sh'"
-
 alias ..="cd .."
 
 alias addtoken="ssh-add -s libeToken.so.8"
