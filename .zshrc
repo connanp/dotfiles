@@ -13,18 +13,6 @@ if [ -d $HOME/.config/site/preload ]; then
   done
 fi
 
-########## Begin environment variables for /opt/ssh-wrapper {{{
-
-#SSH_AUTH_SOCK="${HOME}/.ssh/environment-$(hostname -s)"
-#export SSH_AUTH_SOCK
-
-########## }}} End of environment variables for /opt/ssh-wrapper
-
-########## Begin path additions for /opt/ssh-wrapper {{{
-
-#PATH="/opt/ssh-wrapper/bin:${PATH}:${HOME}/Cloud9BrazilBuild-1.0/bin"
-########## }}} End of path additions for /opt/ssh-wrapper
-
 PATH="/usr/local/bin:${PATH}:$HOME/bin"
 typeset -U PATH  # remove dupes
 export PATH

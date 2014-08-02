@@ -7,7 +7,7 @@ let g:dotvim_settings.plugin_groups_include = ['web', 'python', 'javascript']
 let g:dotvim_settings.plugin_groups_exclude = []
 
 " Put all site-local dotvim_settings in the below file
-" to add to plugin groups, do 
+" to add to plugin groups, do
 " call add(g:dotvim_settings.plugin_groups_include, 'blah')
 if filereadable(expand('~/.vim/vimrc.local'))
   execute 'source ~/.vim/vimrc.local'
