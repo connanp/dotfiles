@@ -1,0 +1,25 @@
+"1.1
+
+loadplugins '\.(js|penta)$'
+group user
+
+colorscheme molokai
+
+set complete=search,bookmark,location,file
+
+set hlfind
+set incfind
+
+"Allow user to click in address bar.
+set! browser.urlbar.clickSelectsAll=true
+set! browser.urlbar.doubleClickSelectsAll=true
+
+" disable default search
+:map <M-f> /
+
+" firebug menu shortcut mapping
+:map ,fb :emenu Tools.Web Developer.Firebug.Open Firebug<CR>
+:map ,fi :emenu Tools.Web Developer.Firebug.Inspect Element<CR>
+:map ,fl :emenu Tools.Web Developer.Firebug.Command Line<CR>
+
+" vim: set ft=pentadactyl:
