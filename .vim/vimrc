@@ -632,7 +632,7 @@
       function! s:unite_settings()
         nmap <buffer> Q <plug>(unite_exit)
         nmap <buffer> <esc> <plug>(unite_exit)
-        imap <buffer> <esc> <plug>(unite_exit)
+        imap <buffer> <esc> <plug>(unite_insert_leave)
       endfunction
       autocmd FileType unite call s:unite_settings()
 
