@@ -66,3 +66,5 @@ if [[ "$platform" == "Darwin" ]]; then
     alias show="defaults write com.apple.finder AppleShowAllFiles -bool true && killall Finder"
     alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 fi
+
+h() { if [ -z "$*"  ]; then history 1; else history 1 | egrep "$@"; fi;  }
