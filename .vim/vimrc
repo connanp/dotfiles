@@ -510,7 +510,15 @@
     NeoBundle 'thinca/vim-visualstar'
     NeoBundle 'tomtom/tcomment_vim'
     NeoBundle 'terryma/vim-expand-region'
-    NeoBundle 'terryma/vim-multiple-cursors'
+    NeoBundle 'kris89/vim-multiple-cursors' "{{{
+      function! Multiple_cursors_before()
+        exe 'NeoCompleteLock'
+      endfunction
+
+      function! Multiple_cursors_after()
+        exe 'NeoCompleteUnlock'
+      endfunction
+    "}}}
     NeoBundle 'chrisbra/NrrwRgn'
     NeoBundleLazy 'godlygeek/tabular', {'autoload':{'commands':'Tabularize'}} "{{{
       nmap <Leader>a& :Tabularize /&<CR>
@@ -633,6 +641,9 @@
         nmap <buffer> Q <plug>(unite_exit)
         nmap <buffer> <esc> <plug>(unite_exit)
         imap <buffer> <esc> <plug>(unite_insert_leave)
+        " Enable navigation with control-j and control-k in insert mode
+        imap <buffer> <C-j> <Plug>(unite_select_next_line)
+        imap <buffer> <C-k> <Plug>(unite_select_previous_line)
       endfunction
       autocmd FileType unite call s:unite_settings()
 
@@ -926,6 +937,19 @@
   command! -bang Q q<bang>
   command! -bang QA qa<bang>
   command! -bang Qa qa<bang>
+  " Z - cd to recent / frequent directories
+  command! -nargs=* Z :call Fasd(<f-args>)
+  function! Fasd(...)
+    let cmd = 'fasd -d -e printf'
+    for arg in a:000
+      let cmd = cmd . ' ' . arg
+    endfor
+    let path = system(cmd)
+    if isdirectory(path)
+      echo path
+      exec 'cd ' . path
+    endif
+  endfunction
 "}}}
 
 " autocmd {{{
