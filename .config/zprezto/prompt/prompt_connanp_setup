@@ -32,20 +32,23 @@ prompt_end() {
   CURRENT_BG=''
 }
 
-function prompt_sorin_pwd {
+function prompt_connanp_pwd {
   local pwd="${PWD/#$HOME/~}"
 
   if [[ "$pwd" == (#m)[/~] ]]; then
-    _prompt_sorin_pwd="$MATCH"
+    _prompt_connanp_pwd="$MATCH"
     unset MATCH
   else
-    _prompt_sorin_pwd="${${${(@j:/:M)${(@s:/:)pwd}##.#?}:h}%/}/${pwd:t}"
+    _prompt_connanp_pwd="${${${(@j:/:M)${(@s:/:)pwd}##.#?}:h}%/}/${pwd:t}"
   fi
 }
 
 function build_prompt {
   prompt_segment 235 245 '%(!;%{%F{yellow}%}⚡ ;)%n%{%F{white}%}@%{%F{245}%}%m'
-  prompt_segment 240 250 '$_prompt_sorin_pwd'
+  prompt_segment 240 250 '$_prompt_connanp_pwd'
+  if [ -n "$python_info[virtualenv]" ]; then
+    prompt_segment 235 245 '${python_info[virtualenv]}'
+  fi
   if $git_status; then
     prompt_segment green black '${(e)git_info[prompt]}${git_info[status]}'
   fi
@@ -56,7 +59,11 @@ function prompt_connanp_precmd {
   setopt LOCAL_OPTIONS
   unsetopt XTRACE KSH_ARRAYS
 
-  prompt_sorin_pwd
+  prompt_connanp_pwd
+
+  if (( $+functions[python-info] )); then
+    python-info
+  fi
 
   # Get Git repository information.
   if (( $+functions[git-info] )); then
@@ -96,6 +103,7 @@ function prompt_connanp_setup {
   zstyle ':prezto:module:git:info:keys' format \
     'prompt' '$(coalesce "%b" "%p" "%c")%s' \
     'status' ' %A%B%S%a%d%m%r%U%u'
+  zstyle ':prezto:module:python:info:virtualenv' format 'v:%v'
 
   # Define prompts.
   PROMPT='

@@ -68,14 +68,19 @@ bindkey '^?' backward-delete-char
 bindkey '^h' backward-delete-char
 bindkey '^w' backward-kill-word
 bindkey '^r' history-incremental-search-backward
+# save line to recall later after executing something else, like changing directory.
+bindkey '^B' push-line-or-edit
+bindkey -M vicmd "q" push-line-or-edit
+# Search based on what you typed in already
+bindkey -M vicmd "//" history-beginning-search-backward
+bindkey -M vicmd "??" history-beginning-search-forward
 export KEYTIMEOUT=1
 # http://www.zsh.org/mla/users/2009/msg00813.html
 # vi insert mode to respect backspace
 zle -A .backward-kill-word vi-backward-kill-word
 zle -A .backward-delete-char vi-backward-delete-char
 
-export WORKON_HOME=$HOME/.virtualenvs
-[ -f /usr/local/bin/virtualenvwrapper.sh ] && source /usr/local/bin/virtualenvwrapper.sh
+setopt NUMERIC_GLOB_SORT
 
 if [[ "$platform" == "Darwin" ]]; then
   source $HOME/.ssh/environment-$(hostname -s)
