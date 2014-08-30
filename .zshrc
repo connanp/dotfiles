@@ -51,7 +51,6 @@ zstyle ':prezto:load' pmodule \
   'fasd' \
   'python' \
   'rsync' \
-  'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
 
