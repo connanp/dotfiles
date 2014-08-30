@@ -113,6 +113,8 @@ clean_yt = function (d) {
 EOF
 au DOMLoad youtube.com js clean_yt(<doc>)
 
+command restoresession -js 'ss=Cc["@mozilla.org/browser/sessionstore;1"].getService(Ci.nsISessionStore); ss.restoreLastSession()'
+
 
 " Styles
 style mail.google.com,groups.google.com -name google-monospace * { font-family: 'Droid Sans Mono' !important }
