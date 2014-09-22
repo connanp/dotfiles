@@ -391,6 +391,7 @@
       let g:pymode_rope=1
       let g:pymode_rope_completion=0
       let g:pymode_rope_complete_on_dot=1
+      let g:pymode_options_colorcolumn = 0
     "}}}
     NeoBundleLazy 'davidhalter/jedi-vim', {'autoload':{'filetypes':['python']}} "{{{
       let g:jedi#popup_on_dot=0
@@ -602,7 +603,7 @@
     "}}}
     NeoBundle 'Shougo/vimfiler.vim', { 'depends': 'Shougo/unite.vim' } "{{{
       let g:vimfiler_as_default_explorer = 1
-      let g:vimfiler_ignore_pattern = '^\%(.git\|.DS_Store\)$'
+      let g:vimfiler_ignore_pattern = '^\%(.git\|.DS_Store\)$\|.pyc$'
       let g:vimfiler_time_format = '%m-%d-%Y %H:%M:%S'
       nnoremap <F2> :VimFilerExplorer<CR>
       nnoremap <F3> :VimFilerBufferDir<CR>
@@ -726,6 +727,9 @@
       let g:startify_session_dir = s:get_cache_dir('sessions')
       let g:startify_change_to_vcs_root = 1
       let g:startify_show_sessions = 1
+      highlight StartifyPath ctermfg=245
+      highlight StartifyFile ctermfg=155
+      highlight StartifySpecial ctermfg=245
       nnoremap <F1> :Startify<cr>
     "}}}
     NeoBundle 'scrooloose/syntastic' "{{{
