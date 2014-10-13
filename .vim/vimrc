@@ -483,12 +483,15 @@
         let g:neocomplete#enable_at_startup=1
         let g:neocomplete#enable_smart_case = 1
         let g:neocomplete#enable_refresh_always = 1
-        let g:neocomplete#max_list = 30
+        let g:neocomplete#max_list = 1000
+        let g:neocomplete#skip_auto_completion_time = '0.20'
         let g:neocomplete#data_directory=s:get_cache_dir('neocomplete')
         if !exists('g:neocomplete#sources#omni#input_patterns')
           let g:neocomplete#sources#omni#input_patterns = {}
         endif
-        let g:neocomplete#sources#omni#input_patterns.python='[^. \t]\.\w*'
+        let g:neocomplete#force_overwrite_completefunc = 1
+        let g:neocomplete#force_omni_input_patterns = get(g:, 'neocomplete#force_omni_input_patterns', {})
+        let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*' 
         autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
         autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
         autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
@@ -603,10 +606,14 @@
     "}}}
     NeoBundle 'Shougo/vimfiler.vim', { 'depends': 'Shougo/unite.vim' } "{{{
       let g:vimfiler_as_default_explorer = 1
-      let g:vimfiler_ignore_pattern = '^\%(.git\|.DS_Store\)$\|.pyc$'
+      let g:vimfiler_data_directory = s:get_cache_dir('unite')
+      let g:vimfiler_ignore_pattern = '^\.\%(git\|DS_Store\|ropeproject\|tmp\)$\|\.pyc$'
       let g:vimfiler_time_format = '%m-%d-%Y %H:%M:%S'
       nnoremap <F2> :VimFilerExplorer<CR>
       nnoremap <F3> :VimFilerBufferDir<CR>
+      nmap <buffer> <C-r> <Plug>(vimfiler_redraw_screen)
+      nmap <buffer><expr> e vimfiler#smart_cursor_map("\<Plug>(vimfiler_cd_file)", "\<Plug>(vimfiler_edit_file)")
+      silent! call delete('.DS_Store')
     "}}}
   endif "}}}
   if count(s:settings.plugin_groups, 'unite') "{{{
@@ -615,7 +622,7 @@
       function! bundle.hooks.on_source(bundle)
         call unite#filters#matcher_default#use(['matcher_fuzzy'])
         call unite#filters#sorter_default#use(['sorter_rank'])
-        call unite#set_profile('files', 'smartcase', 1)
+        call unite#set_profile('files', 'context.smartcase', 1)
         call unite#custom#source('line,outline','matchers','matcher_fuzzy')
       endfunction
 
@@ -631,6 +638,7 @@
       if executable('ag')
         let g:unite_source_grep_command='ag'
         let g:unite_source_grep_default_opts='--nocolor --line-numbers --nogroup -S -C4'
+        let g:unite_source_rec_async_command= 'ag --nocolor --nogroup --hidden -g ""'
         let g:unite_source_grep_recursive_opt=''
       elseif executable('ack')
         let g:unite_source_grep_command='ack'
@@ -658,7 +666,9 @@
         nnoremap <silent> [unite]<space> :<C-u>Unite -toggle -auto-resize -buffer-name=mixed file_rec/async:! buffer file_mru bookmark<cr><c-u>
         nnoremap <silent> [unite]f :<C-u>Unite -toggle -auto-resize -buffer-name=files file_rec/async:!<cr><c-u>
       endif
+      nnoremap <silent> [unite]g :<C-u>Unite -auto-resize -buffer-name=gitfiles file_rec/git<cr><c-u>
       nnoremap <silent> [unite]e :<C-u>Unite -buffer-name=recent file_mru<cr>
+      nnoremap <silent> [unite]n :<C-u>Unite -auto-resize -buffer-name=file/new,directory/new file/new,directory/new<cr>
       nnoremap <silent> [unite]y :<C-u>Unite -buffer-name=yanks history/yank<cr>
       nnoremap <silent> [unite]l :<C-u>Unite -auto-resize -buffer-name=line line<cr>
       nnoremap <silent> [unite]b :<C-u>Unite -auto-resize -buffer-name=buffers buffer<cr>
@@ -680,6 +690,9 @@
       nnoremap <silent> [unite]o :<C-u>Unite -auto-resize -buffer-name=outline outline<cr>
     "}}}
     NeoBundleLazy 'Shougo/unite-help', {'autoload':{'unite_sources':'help'}} "{{{
+      nnoremap <silent> [unite]h :<C-u>Unite -auto-resize -buffer-name=help help<cr>
+    "}}}
+    NeoBundleLazy 'pasela/unite-webcolorname', {'autoload':{'filetypes':['html', 'css', 'javascript']}} "{{{
       nnoremap <silent> [unite]h :<C-u>Unite -auto-resize -buffer-name=help help<cr>
     "}}}
     NeoBundleLazy 'Shougo/junkfile.vim', {'autoload':{'commands':'JunkfileOpen','unite_sources':['junkfile','junkfile/new']}} "{{{
@@ -737,6 +750,7 @@
       let g:syntastic_style_error_symbol = '✠'
       let g:syntastic_warning_symbol = '∆'
       let g:syntastic_style_warning_symbol = '≈'
+      let g:syntastic_html_tidy_ignore_errors = ['proprietary attribute', 'is not recognized']
     "}}}
     NeoBundleLazy 'mattn/gist-vim', { 'depends': 'mattn/webapi-vim', 'autoload': { 'commands': 'Gist' } } "{{{
       let g:gist_post_private=1
@@ -988,6 +1002,7 @@
   NeoBundle 'chriskempson/base16-vim'
   NeoBundle 'w0ng/vim-hybrid'
   NeoBundle 'sjl/badwolf'
+  NeoBundle 'Pychimp/vim-luna'
   NeoBundle 'zeis/vim-kolor' "{{{
     let g:kolor_underlined=1
   "}}}
