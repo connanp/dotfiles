@@ -10,11 +10,15 @@ git submodule update --recursive
 function doIt() {
   rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
     --exclude "README.md" -avh --no-perms . ~;
-  ln -s $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin
-  ln -s $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv
-  ln -s $HOME/.config/zprezto/prompt/* $HOME/.zprezto/modules/prompt/functions/
+  ln -sf $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin
+  ln -sf $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv
+  ln -sf $HOME/.config/zprezto/prompt/* $HOME/.zprezto/modules/prompt/functions/
   # custom modules
-  rsync -avh --no-perms $HOME/.config/zprezto/modules $HOME/.zprezto/
+  exclude="--exclude='.gitmodules' --exclude='README.md'"
+  if [[ ! -f "$HOME/.gitconfig" ]]; then
+    exclude="${exclude} --exclude='.git*'"
+  fi
+  rsync -avh --no-perms $exclude $HOME/.config/zprezto/modules $HOME/.zprezto/
 }
 
 if [ "$1" = "--force" -o "$1" = "-f" ]; then
