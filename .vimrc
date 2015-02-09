@@ -3,8 +3,8 @@ let g:dotvim_settings.version = 1
 
 let g:dotvim_settings.colorscheme = 'ir_black'
 
-let g:dotvim_settings.plugin_groups_include = ['web', 'python', 'javascript']
-let g:dotvim_settings.plugin_groups_exclude = []
+let g:dotvim_settings.plugin_groups_include = ['web', 'python', 'javascript', 'ruby']
+" let g:dotvim_settings.plugin_groups_exclude = []
 
 " Put all site-local dotvim_settings in the below file
 " to add to plugin groups, do

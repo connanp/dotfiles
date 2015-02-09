@@ -23,13 +23,13 @@
   let s:settings = {}
   let s:settings.default_indent = 2
   let s:settings.max_column = 120
-  let s:settings.autocomplete_method = 'neocomplcache'
+  let s:settings.autocomplete_method = 'ycm'
   let s:settings.enable_cursorcolumn = 0
   let s:settings.colorscheme = 'jellybeans'
-  if has('lua')
-    let s:settings.autocomplete_method = 'neocomplete'
-  elseif filereadable(expand("~/.vim/bundle/YouCompleteMe/python/ycm_core.*"))
+  if filereadable(expand("~/.vim/bundle/YouCompleteMe/python/ycm_core.*"))
     let s:settings.autocomplete_method = 'ycm'
+  elseif has('lua')
+    let s:settings.autocomplete_method = 'neocomplete'
   endif
 
   if exists('g:dotvim_settings.plugin_groups')
@@ -43,6 +43,8 @@
     call add(s:settings.plugin_groups, 'python')
     call add(s:settings.plugin_groups, 'scala')
     call add(s:settings.plugin_groups, 'go')
+    call add(s:settings.plugin_groups, 'clojure')
+    call add(s:settings.plugin_groups, 'rust')
     call add(s:settings.plugin_groups, 'scm')
     call add(s:settings.plugin_groups, 'editing')
     call add(s:settings.plugin_groups, 'indents')
@@ -57,7 +59,7 @@
 
     " exclude all language-specific plugins by default
     if !exists('g:dotvim_settings.plugin_groups_exclude')
-      let g:dotvim_settings.plugin_groups_exclude = ['web','javascript','ruby','python','go','scala']
+      let g:dotvim_settings.plugin_groups_exclude = ['web','javascript','ruby','python','go','scala', 'clojure', 'rust']
     endif
     for group in g:dotvim_settings.plugin_groups_exclude
       let i = index(s:settings.plugin_groups, group)
@@ -321,6 +323,7 @@
     NeoBundle 'tpope/vim-surround'
     NeoBundle 'tpope/vim-repeat'
     NeoBundle 'tpope/vim-dispatch'
+    NeoBundle 'tpope/vim-projectionist'
     NeoBundle 'tpope/vim-eunuch'
     NeoBundle 'tpope/vim-unimpaired' "{{{
       nmap <c-up> [e
@@ -418,6 +421,20 @@
       au FileType go nmap <leader>b <Plug>(go-build)
       au FileType go nmap <leader>t <Plug>(go-test)
   endif "}}}
+  if count(s:settings.plugin_groups, 'clojure') "{{{
+    NeoBundleLazy 'guns/vim-clojure-static', {'autoload':{'filetypes':['clojure']}}
+      au BufRead,BufNewFile *.cljs setlocal filetype=clojure
+    NeoBundleLazy 'guns/vim-sexp', {'autoload':{'filetypes':['clojure']}}
+      au FileType clojure nnoremap <buffer> <LocalLeader>F <Plug>FireplacePrint<Plug>(sexp_outer_top_list)``
+      au FileType clojure nnoremap <buffer> <LocalLeader>f <Plug>FireplacePrint<Plug>(sexp_outer_list)``
+      au FileType clojure nnoremap <buffer> <LocalLeader>e <Plug>FireplacePrint<Plug>(sexp_inner_element)``
+    NeoBundleLazy 'tpope/vim-sexp-mappings-for-regular-people', {'depends': ['guns/vim-sexp'], 'autoload':{'filetypes':['clojure']}}
+    NeoBundleLazy 'tpope/vim-leiningen', {'autoload':{'filetypes':['clojure']}}
+    NeoBundleLazy 'tpope/vim-fireplace', {'autoload':{'filetypes':['clojure']}}
+  endif "}}}
+  if count(s:settings.plugin_groups, 'rust') "{{{
+    NeoBundle 'wting/rust.vim'
+  endif "}}}
   if count(s:settings.plugin_groups, 'scm') "{{{
     NeoBundle 'mhinz/vim-signify' "{{{
       let g:signify_update_on_bufenter=0
@@ -455,10 +472,25 @@
     NeoBundle 'honza/vim-snippets'
     if s:settings.autocomplete_method == 'ycm' "{{{
       NeoBundle 'Valloric/YouCompleteMe', {'vim_version':'7.3.584'} "{{{
-        let g:ycm_complete_in_comments_and_strings=1
+        let g:ycm_complete_in_comments_and_strings=2
+        let g:ycm_min_num_identifier_candidate_chars=3
         let g:ycm_key_list_select_completion=['<C-n>', '<Down>']
         let g:ycm_key_list_previous_completion=['<C-p>', '<Up>']
         let g:ycm_filetype_blacklist={'unite': 1}
+        let g:ycm_semantic_triggers =  {
+          \   'c' : ['->', '.'],
+          \   'objc' : ['->', '.'],
+          \   'ocaml' : ['.', '#'],
+          \   'cpp,objcpp' : ['->', '.', '::'],
+          \   'perl' : ['->'],
+          \   'php' : ['->', '::'],
+          \   'cs,java,javascript,d,python,perl6,scala,vb,elixir,go' : ['.'],
+          \   'vim' : ['re![_a-zA-Z]+[_\w]*\.'],
+          \   'ruby,rust' : ['.', '::'],
+          \   'lua' : ['.', ':'],
+          \   'erlang' : [':'],
+          \   'clojure' : ['/', '.'],
+          \ }
       "}}}
       NeoBundle 'SirVer/ultisnips' "{{{
         let g:UltiSnipsExpandTrigger="<tab>"
@@ -491,7 +523,7 @@
         endif
         let g:neocomplete#force_overwrite_completefunc = 1
         let g:neocomplete#force_omni_input_patterns = get(g:, 'neocomplete#force_omni_input_patterns', {})
-        let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*' 
+        let g:neocomplete#force_omni_input_patterns.python = '\%([^. \t]\.\|^\s*@\|^\s*from\s.\+import \|^\s*from \|^\s*import \)\w*'
         autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
         autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
         autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
@@ -539,6 +571,8 @@
       vmap <Leader>a<Bar> :Tabularize /<Bar><CR>
     "}}}
     NeoBundle 'jiangmiao/auto-pairs'
+      " clojure has ' for symbols so we exclude it from auto-pair
+      au FileType clojure let b:AutoPairs = {'(':')', '[':']', '{':'}','"':'"', '`':'`'}
     NeoBundle 'justinmk/vim-sneak' "{{{
       let g:sneak#streak = 1
     "}}}
