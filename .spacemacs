@@ -24,12 +24,14 @@
                                        ruby
                                        html
                                        go
+                                       c-c++
                                        syntax-checking
                                        editorconfig
                                        evil-commentary
                                        evil-snipe
                                        repl
                                        org
+                                       restclient
                                        (rcirc
                                         :variables rcirc-enable-authinfo-support t))
    ;; A list of packages and/or extensions that will not be install and loaded.
@@ -144,6 +146,29 @@ layers configuration."
            :channels "#core")))
 
   (evil-leader/set-key "oc" 'org-capture)
+  (exec-path-from-shell-copy-envs '("PATH" "GOPATH"))
+
+  ;; active Org-babel languages
+  (org-babel-do-load-languages
+    'org-babel-load-languages
+    '((emacs-lisp . t)
+      (ditaa . t)
+      (dot . t)
+      (python . t)
+      (plantuml . t)
+      (sh . t)))
+  (setq org-plantuml-jar-path
+    (expand-file-name "/usr/local/Cellar/plantuml/8024/plantuml.8024.jar"))
+  ;; Always enable auto indent mode
+  (setq org-indent-mode t)
+  ;; fontify source code
+  (setq org-src-fontify-natively t)
+  ;; Use current window when switch to source block
+  (setq org-src-window-setup 'current-window)
+  ;; Disable prompting to evaluate babel blocks
+  (setq org-confirm-babel-evaluate nil)
+  ;; Disable add validation link when export to HTML
+  (setq org-html-validation-link nil)
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
