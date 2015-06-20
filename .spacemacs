@@ -10,19 +10,27 @@
    dotspacemacs-configuration-layer-path '()
    ;; List of configuration layers to load. If it is the symbol `all' instead
    ;; of a list then all discovered layers will be installed.
-   dotspacemacs-configuration-layers '(auto-completion
+   dotspacemacs-configuration-layers '((auto-completion :variables
+                                                         auto-completion-use-tab-instead-of-enter t
+                                                         auto-completion-enable-sort-by-usage t)
                                        osx
                                        git
                                        fasd
+                                       emacs-lisp
+                                       (shell :variables
+                                               shell-default-shell 'eshell)
+                                       eshell-tweaks
                                        (colors :variables
                                                colors-enable-nyan-cat-progress-bar t)
                                        dash
                                        (perspectives :variables
                                                      perspective-enable-persp-projectile t)
-                                       python
+                                       (python :variables
+                                               python-enable-yapf-format-on-save t)
                                        javascript
                                        ruby
                                        html
+                                       haskell
                                        go
                                        c-c++
                                        syntax-checking
@@ -32,8 +40,9 @@
                                        repl
                                        org
                                        restclient
-                                       (rcirc
-                                        :variables rcirc-enable-authinfo-support t))
+                                       (rcirc :variables
+                                               rcirc-enable-authinfo-support t)
+                                       prodigy)
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
@@ -73,7 +82,7 @@ before layers configuration."
    dotspacemacs-leader-key "SPC"
    ;; Major mode leader key is a shortcut key which is the equivalent of
    ;; pressing `<leader> m`. Set it to `nil` to disable it.
-   dotspacemacs-major-mode-leader-key ","
+   dotspacemacs-major-mode-leader-key nil
    ;; The command key used for Evil commands (ex-commands) and
    ;; Emacs commands (M-x).
    ;; By default the command key is `:' so ex-commands are executed like in Vim
@@ -122,7 +131,6 @@ before layers configuration."
    ;; Not used for now.
    dotspacemacs-default-package-repository nil)
   ;; User initialization goes here
-  (setq auto-completion-use-tab-instead-of-enter t)
   (setq evil-escape-key-sequence "jk")
   ;; too annoying because new projects are never cached
   (setq projectile-enable-caching nil)
@@ -169,7 +177,32 @@ layers configuration."
   (setq org-confirm-babel-evaluate nil)
   ;; Disable add validation link when export to HTML
   (setq org-html-validation-link nil)
+
+  ;; nyan cat freezes eshell during scrolling (probably due to animation)
+  (defun my-disable-nyan-cat-in-modes ()
+    (if (eq major-mode 'eshell-mode)
+        (nyan-mode -1)
+      (nyan-mode)))
+  (add-hook 'buffer-list-update-hook 'my-disable-nyan-cat-in-modes)
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ahs-case-fold-search nil)
+ '(ahs-default-range (quote ahs-range-whole-buffer))
+ '(ahs-idle-interval 0.25)
+ '(ahs-idle-timer 0 t)
+ '(ahs-inhibit-face-list nil)
+ '(paradox-github-token t)
+ '(ring-bell-function (quote ignore) t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
