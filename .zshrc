@@ -17,7 +17,7 @@ PATH="/usr/local/bin:${PATH}:$HOME/bin"
 typeset -U PATH  # remove dupes
 export PATH
 
-zstyle ':prezto:module:prompt' theme 'connanp'
+zstyle ':prezto:module:prompt' theme 'garrett'
 
 zstyle ':prezto:module:editor' key-bindings 'vi'
 
