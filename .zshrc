@@ -1,3 +1,8 @@
+# Source Prezto.
+if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
+    source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
+fi
+
 LANG="en_US.UTF-8"
 LANGUAGE="en_US:"
 LC_ALL="en_US.UTF-8"

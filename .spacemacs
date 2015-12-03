@@ -6,6 +6,10 @@
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration."
   (setq-default
+  ;; Base distribution to use. This is a layer contained in the directory
+  ;; `+distribution'. For now available distributions are `spacemacs-base'
+  ;; or `spacemacs'. (default 'spacemacs)
+  dotspacemacs-distribution 'spacemacs
   ;; List of additional paths where to look for configuration layers.
   ;; Paths must have a trailing slash (ie. `~/.mycontribs/')
   dotspacemacs-configuration-layer-path '()
@@ -16,18 +20,17 @@
                                                        auto-completion-enable-sort-by-usage t)
                                       osx
                                       git
+                                      version-control
                                       fasd
                                       emacs-lisp
                                       (shell :variables
                                               shell-default-shell 'eshell)
-                                      eshell-tweaks
                                       (colors :variables
                                               colors-enable-nyan-cat-progress-bar t)
                                       dash
                                       (perspectives :variables
                                                     perspective-enable-persp-projectile t)
-                                      (python :variables
-                                              python-enable-yapf-format-on-save t)
+                                      python
                                       javascript
                                       ruby
                                       (haskell :variables
@@ -36,17 +39,23 @@
                                       go
                                       c-c++
                                       syntax-checking
-                                      editorconfig
                                       evil-commentary
                                       evil-snipe
                                       repl
                                       org
+                                      markdown
+                                      yaml
                                       restclient
-                                      (rcirc :variables
-                                              rcirc-enable-authinfo-support t)
                                       prodigy)
   ;; A list of packages and/or extensions that will not be install and loaded.
   dotspacemacs-excluded-packages '()
+  ;; List of additional packages that will be installed without being
+  ;; wrapped in a layer. If you need some configuration for these
+  ;; packages then consider to create a layer, you can also put the
+  ;; configuration in `dotspacemacs/config'.
+  dotspacemacs-additional-packages '(material-theme
+                                     editorconfig
+                                     epresent)
   ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
   ;; are declared in a layer which is not a member of
   ;; the list `dotspacemacs-configuration-layers'
@@ -66,10 +75,19 @@ before layers configuration."
   ;; If the value is nil then no banner is displayed.
   ;; dotspacemacs-startup-banner 'official
   dotspacemacs-startup-banner 'official
+  dotspacemacs-editing-style 'vim
+  ;; If non nil output loading progress in `*Messages*' buffer. (default nil)
+  dotspacemacs-verbose-loading nil
+  ;; List of items to show in the startup buffer. If nil it is disabled.
+  ;; Possible values are: `recents' `bookmarks' `projects'.
+  ;; (default '(recents projects))
+  dotspacemacs-startup-lists '(recents projects)
   ;; List of themes, the first of the list is loaded when spacemacs starts.
   ;; Press <SPC> T n to cycle to the next theme in the list (works great
   ;; with 2 themes variants, one dark and one light)
-  dotspacemacs-themes '(zenburn
+  dotspacemacs-themes '(material
+                        material-light
+                        zenburn
                         leuven)
   ;; If non nil the cursor color matches the state color.
   dotspacemacs-colorize-cursor-according-to-state t
@@ -82,20 +100,46 @@ before layers configuration."
                               :powerline-scale 1.1)
   ;; The leader key
   dotspacemacs-leader-key "SPC"
+  ;; The leader key accessible in `emacs state' and `insert state'
+  ;; (default "M-m")
+  dotspacemacs-emacs-leader-key "M-m"
   ;; Major mode leader key is a shortcut key which is the equivalent of
-  ;; pressing `<leader> m`. Set it to `nil` to disable it.
-  dotspacemacs-major-mode-leader-key nil
+  ;; pressing `<leader> m`. Set it to `nil` to disable it. (default ",")
+  dotspacemacs-major-mode-leader-key ","
+  ;; Major mode leader key accessible in `emacs state' and `insert state'.
+  ;; (default "C-M-m)
+  dotspacemacs-major-mode-emacs-leader-key "C-M-m"
   ;; The command key used for Evil commands (ex-commands) and
   ;; Emacs commands (M-x).
   ;; By default the command key is `:' so ex-commands are executed like in Vim
   ;; with `:' and Emacs commands are executed with `<leader> :'.
   dotspacemacs-command-key ":"
+  ;; If non nil `Y' is remapped to `y$'. (default t)
+  dotspacemacs-remap-Y-to-y$ t
+  ;; Location where to auto-save files. Possible values are `original' to
+  ;; auto-save the file in-place, `cache' to auto-save the file to another
+  ;; file stored in the cache directory and `nil' to disable auto-saving.
+  ;; (default 'cache)
+  dotspacemacs-auto-save-file-location 'cache
+  ;; If non nil, `helm' will try to miminimize the space it uses. (default nil)
+  dotspacemacs-helm-resize t
+  ;; if non nil, the helm header is hidden when there is only one source.
+  ;; (default nil)
+  dotspacemacs-helm-no-header nil
+  ;; define the position to display `helm', options are `bottom', `top',
+  ;; `left', or `right'. (default 'bottom)
+  dotspacemacs-helm-position 'bottom
   ;; If non nil the paste micro-state is enabled. While enabled pressing `p`
   ;; several times cycle between the kill ring content.
   dotspacemacs-enable-paste-micro-state t
-  ;; Guide-key delay in seconds. The Guide-key is the popup buffer listing
-  ;; the commands bound to the current keystrokes.
-  dotspacemacs-guide-key-delay 0.4
+  ;; Which-key delay in seconds. The which-key buffer is the popup listing
+  ;; the commands bound to the current keystroke sequence. (default 0.4)
+  dotspacemacs-which-key-delay 0.4
+  ;; Which-key frame position. Possible values are `right', `bottom' and
+  ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
+  ;; right; if there is insufficient space it displays it at the bottom.
+  ;; (default 'bottom)
+  dotspacemacs-which-key-position 'bottom
   ;; If non nil a progress bar is displayed when spacemacs is loading. This
   ;; may increase the boot time on some systems and emacs builds, set it to
   ;; nil ;; to boost the loading time.
@@ -126,16 +170,24 @@ before layers configuration."
   dotspacemacs-smooth-scrolling t
   ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
   dotspacemacs-smartparens-strict-mode nil
+  ;; Select a scope to highlight delimiters. Possible values are `any',
+  ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
+  ;; emphasis the current one). (default 'all)
+  dotspacemacs-highlight-delimiters 'all
   ;; If non nil advises quit functions to keep server open when quitting.
   dotspacemacs-persistent-server nil
+  ;; List of search tool executable names. Spacemacs uses the first installed
+  ;; tool of the list. Supported tools are `ag', `pt', `ack' and `grep'.
+  ;; (default '("ag" "pt" "ack" "grep"))
+  dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
   ;; The default package repository used if no explicit repository has been
   ;; specified with an installed package.
   ;; Not used for now.
-  dotspacemacs-default-package-repository nil)
+  dotspacemacs-default-package-repository nil
   ;; User initialization goes here
-  (setq evil-escape-key-sequence "jk")
+  evil-escape-key-sequence "jk"
   ;; too annoying because new projects are never cached
-  (setq projectile-enable-caching nil))
+  projectile-enable-caching nil))
 
 (defun dotspacemacs/config ()
   "Configuration function.
@@ -147,12 +199,6 @@ layers configuration."
     (when (eq major-mode 'compilation-mode)
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   (add-hook 'compilation-filter-hook 'my-colorize-compilation-buffer))
-  (setq rcirc-server-alist
-        '(("amazon"
-           :host "localhost"
-           :port "6669"
-           :auth "spacemacs_user/amazon"
-           :channels "#core")))
 
   ;; nyan cat freezes eshell during scrolling (probably due to animation)
   (defun my-disable-nyan-cat-in-modes ()
@@ -161,26 +207,73 @@ layers configuration."
       (nyan-mode)))
   (add-hook 'buffer-list-update-hook 'my-disable-nyan-cat-in-modes)
 
-
-  (evil-leader/set-key "oc" 'org-capture)
   (exec-path-from-shell-copy-envs '("PATH" "GOPATH"))
 
+  ;; sync to mobile when idle
+  (defvar my-org-mobile-sync-timer nil)
+  (defvar my-org-mobile-sync-secs (* 60 20))
+
+  (defun my-org-mobile-sync-pull-and-push ()
+    (org-mobile-pull)
+    (org-mobile-push))
+
+  (defun my-org-mobile-sync-start ()
+    "Start automated `org-mobile-push'"
+    (interactive)
+    (setq my-org-mobile-sync-timer
+          (run-with-idle-timer my-org-mobile-sync-secs t
+                               'my-org-mobile-sync-pull-and-push)))
+
+  (defun my-org-mobile-sync-stop ()
+    "Stop automated `org-mobile-push'"
+    (interactive)
+    (cancel-timer my-org-mobile-sync-timer))
+
+  (my-org-mobile-sync-start)
+  ;; (setq my-site-config "~/.config/emacs.el")
+  ;; (if (file-exists-p my-site-config)
+  ;;     (load-file my-site-config))
+
+  ;; FIXME: remove this once merged from the develop branch
+  ;; Add global evil-leader mappings. Used to access org-agenda
+  ;; functionalities – and a few others commands – from any other mode.
+  (evil-leader/set-key
+    ;; org-agenda
+    "ao#" 'org-agenda-list-stuck-projects
+    "ao/" 'org-occur-in-agenda-files
+    "aoa" 'org-agenda-list
+    "aoe" 'org-store-agenda-views
+    "aom" 'org-tags-view
+    "aoo" 'org-agenda
+    "aos" 'org-search-view
+    "aot" 'org-todo-list
+    ;; other
+    "aoO" 'org-clock-out
+    "aoc" 'org-capture
+    "aol" 'org-store-link)
+
   ;; org-mode stuff
+  (setq org-directory "~/org")
   (unless (file-exists-p org-directory)
     (make-directory org-directory))
 
   (setq my-inbox-org-file (concat org-directory "/inbox.org"))
   (setq org-default-notes-file my-inbox-org-file)
+  (setq org-agenda-files (quote ("~/org")))
+  (setq org-mobile-inbox-for-pull (concat org-directory "flagged.org"))
+  (setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
 
   (setq org-startup-folded t)
   (setq org-catch-invisible-edits 'error)
 
   (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline my-inbox-org-file "INBOX")
+        '(("t" "todo" entry (file my-inbox-org-file "INBOX")
            "* TODO %?\n%U\n%a\n")
-          ("n" "Note" entry (file+headline my-inbox-org-file "NOTES")
+          ("n" "note" entry (file my-inbox-org-file "NOTES")
            "* %? :NOTE:\n%U\n%a\n")
-          ("m" "Meeting" entry (file my-inbox-org-file)
+          ("r" "respond" entry (file my-inbox-org-file "NOTES")
+           "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n")
+          ("m" "meeting" entry (file my-inbox-org-file)
            "* MEETING %? :MEETING:\n%U")
           ("j" "Journal" entry (file+datetree (concat org-directory "/journal.org"))
            "* %?\n%U\n")))
@@ -211,9 +304,16 @@ layers configuration."
 
   (setq org-agenda-compact-blocks t)
 
+  ;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+  (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                   (org-agenda-files :maxlevel . 9))))
+  ;; Use full outline paths for refile targets - we file directly with IDO
   (setq org-refile-use-outline-path t)
-  (setq org-refile-targets '((nil :maxlevel . 9)
-                             (org-agenda-files :maxlevel . 9)))
+  ;; Targets complete directly with IDO
+  (setq org-outline-path-complete-in-steps nil)
+  ;; Allow refile to create parent tasks with confirmation
+  (setq org-refile-allow-creating-parent-nodes (quote confirm))
+
   ; Exclude DONE state tasks from refile targets
   (defun my-verify-refile-target ()
     "Exclude todo keywords with a done state from refile targets"
@@ -270,6 +370,9 @@ layers configuration."
   ;; Display tags farther right
   (setq org-agenda-tags-column -102)
 
+  (setq org-remove-highlights-with-change nil)
+  (setq org-deadline-warning-days 30)
+  (defvar bh/hide-scheduled-and-waiting-next-tasks t)
   ;; agenda view
   ;; disable default org-mode agenda view for stuck projects
   (setq org-stuck-projects (quote ("" nil nil "")))
@@ -278,6 +381,10 @@ layers configuration."
 
   ;; Compact the block agenda view
   (setq org-agenda-compact-blocks t)
+  ;; removes the clutter of extra state change log details when multiple timestamps exist in a single entry
+  (setq org-agenda-skip-additional-timestamps-same-entry t)
+
+  (setq org-clone-delete-id t)
 
   ;; Sorting order for tasks on the agenda
   (setq org-agenda-sorting-strategy
@@ -355,6 +462,17 @@ layers configuration."
                          (org-agenda-skip-function 'bh/skip-non-archivable-tasks)
                          (org-tags-match-list-sublevels nil))))
                  nil))))
+
+  (defun bh/find-project-task ()
+    "Move point to the parent (project) task if any"
+    (save-restriction
+      (widen)
+      (let ((parent-task (save-excursion (org-back-to-heading 'invisible-ok) (point))))
+        (while (org-up-heading-safe)
+          (when (member (nth 2 (org-heading-components)) org-todo-keywords-1)
+            (setq parent-task (point))))
+        (goto-char parent-task)
+        parent-task)))
 
   (defun bh/is-project-p ()
   "Any task with a todo keyword subtask"
@@ -495,8 +613,6 @@ layers configuration."
       (cond
       ((bh/is-project-p)
           subtree-end)
-      ((org-is-habit-p)
-          subtree-end)
       (t
           nil)))))
 
@@ -506,8 +622,6 @@ layers configuration."
       (widen)
       (let ((next-headline (save-excursion (or (outline-next-heading) (point-max)))))
       (cond
-      ((org-is-habit-p)
-          next-headline)
       ((and bh/hide-scheduled-and-waiting-next-tasks
               (member "WAITING" (org-get-tags-at)))
           next-headline)
@@ -530,8 +644,6 @@ layers configuration."
       (cond
       ((bh/is-project-p)
           next-headline)
-      ((org-is-habit-p)
-          subtree-end)
       ((and (not limit-to-project)
               (bh/is-project-subtree-p))
           subtree-end)
@@ -551,8 +663,6 @@ layers configuration."
       (cond
       ((bh/is-project-p)
           subtree-end)
-      ((org-is-habit-p)
-          subtree-end)
       ((bh/is-project-subtree-p)
           subtree-end)
       (t
@@ -568,8 +678,6 @@ layers configuration."
       (cond
       ((bh/is-project-p)
           next-headline)
-      ((org-is-habit-p)
-          subtree-end)
       ((and (bh/is-project-subtree-p)
               (member (org-get-todo-state) (list "NEXT")))
           subtree-end)
@@ -585,8 +693,6 @@ layers configuration."
       (let ((subtree-end (save-excursion (org-end-of-subtree t))))
       (cond
       ((bh/is-project-p)
-          subtree-end)
-      ((org-is-habit-p)
           subtree-end)
       (t
           nil)))))
@@ -624,6 +730,21 @@ layers configuration."
               (or subtree-end (point-max)))
           next-headline))))
 
+  (defun bh/prepare-meeting-notes ()
+    "Prepare meeting notes for email
+   Take selected region and convert tabs to spaces, mark TODOs with leading >>>, and copy to kill ring for pasting"
+    (interactive)
+    (let (prefix)
+      (save-excursion
+        (save-restriction
+          (narrow-to-region (region-beginning) (region-end))
+          (untabify (point-min) (point-max))
+          (goto-char (point-min))
+          (while (re-search-forward "^\\( *-\\\) \\(TODO\\|DONE\\): " (point-max) t)
+            (replace-match (concat (make-string (length (match-string 1)) ?>) " " (match-string 2) ": ")))
+          (goto-char (point-min))
+          (kill-ring-save (point-min) (point-max))))))
+
   (defun bh/mark-next-parent-tasks-todo ()
   "Visit each parent task and change NEXT states to TODO"
   (let ((mystate (or (and (fboundp 'org-state)
@@ -639,3 +760,23 @@ layers configuration."
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(ahs-case-fold-search nil)
+ '(ahs-default-range (quote ahs-range-whole-buffer))
+ '(ahs-idle-interval 0.25)
+ '(ahs-idle-timer 0 t)
+ '(ahs-inhibit-face-list nil)
+ '(paradox-github-token t)
+ '(ring-bell-function (quote ignore) t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(default ((((class color) (min-colors 89)) (:foreground "#ffffff" :background "#263238"))))
+ '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
+ '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
