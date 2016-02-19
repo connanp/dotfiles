@@ -12,7 +12,7 @@
   dotspacemacs-distribution 'spacemacs
   ;; List of additional paths where to look for configuration layers.
   ;; Paths must have a trailing slash (ie. `~/.mycontribs/')
-  dotspacemacs-configuration-layer-path '()
+  dotspacemacs-configuration-layer-path '("~/.spacemacs-layers/")
   ;; List of configuration layers to load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
   dotspacemacs-configuration-layers '((auto-completion :variables
@@ -28,25 +28,23 @@
                                       (colors :variables
                                               colors-enable-nyan-cat-progress-bar t)
                                       dash
-                                      (perspectives :variables
-                                                    perspective-enable-persp-projectile t)
                                       python
                                       javascript
                                       ruby
-                                      (haskell :variables
-                                               haskell-enable-hindent-style "chris-done")
                                       html
                                       go
                                       c-c++
                                       syntax-checking
                                       evil-commentary
                                       evil-snipe
-                                      repl
                                       org
                                       markdown
                                       yaml
                                       restclient
-                                      prodigy)
+                                      ansible
+                                      better-defaults
+                                      unimpaired
+                                      w3m)
   ;; A list of packages and/or extensions that will not be install and loaded.
   dotspacemacs-excluded-packages '()
   ;; List of additional packages that will be installed without being
@@ -85,10 +83,7 @@ before layers configuration."
   ;; List of themes, the first of the list is loaded when spacemacs starts.
   ;; Press <SPC> T n to cycle to the next theme in the list (works great
   ;; with 2 themes variants, one dark and one light)
-  dotspacemacs-themes '(material
-                        material-light
-                        zenburn
-                        leuven)
+  dotspacemacs-themes '(material)
   ;; If non nil the cursor color matches the state color.
   dotspacemacs-colorize-cursor-according-to-state t
   ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
@@ -189,10 +184,14 @@ before layers configuration."
   ;; too annoying because new projects are never cached
   projectile-enable-caching nil))
 
-(defun dotspacemacs/config ()
+(defun dotspacemacs/user-config ()
   "Configuration function.
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
+  ;; disable warning
+  (setq exec-path-from-shell-check-startup-files nil)
+  (exec-path-from-shell-copy-envs '("PATH" "GOPATH"))
+
   ;; take care of shell escape codes in compilation-mode buffers.
   (ignore-errors
   (defun my-colorize-compilation-buffer ()
@@ -207,7 +206,63 @@ layers configuration."
       (nyan-mode)))
   (add-hook 'buffer-list-update-hook 'my-disable-nyan-cat-in-modes)
 
-  (exec-path-from-shell-copy-envs '("PATH" "GOPATH"))
+  (with-eval-after-load 'python
+    (modify-syntax-entry ?_ "w" python-mode-syntax-table))
+
+  ;; eshell
+  ;; find and chmod behave differently from Emacs than their Unix counterparts
+  (setq eshell-prefer-lisp-functions nil)
+  ;; aliases
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (eshell/alias "ll" "ls -AlohG")
+              ;; if defined as an alias it won't use the working dir
+              (defun eshell/gst (&rest args)
+                (magit-status (pop args) nil)
+                (eshell/echo))   ;; The echo command suppresses output
+              (defalias 'gd 'magit-diff-unstaged)
+              (defalias 'gds 'magit-diff-staged)
+              (defalias 'gl 'magit-log)))
+
+  ;; history
+  (setq eshell-cmpl-cycle-completions nil
+        eshell-save-history-on-exit t
+        eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
+
+  (setq helm-locate-command
+        (pcase system-type
+          (`gnu/linux "locate -i -r %s")
+          (`berkeley-unix "locate -i %s")
+          (`windows-nt "es %s")
+          (`darwin "mdfind -name %s %s | egrep -v '/Library/(Caches|Mail)/'")
+          (t "locate %s")))
+
+  ;; don't use recentf stuff in helm-ff
+  (setq helm-ff-file-name-history-use-recentf nil)
+
+  ;; Via: http://www.reddit.com/r/emacs/comments/3asbyn/new_and_very_useful_helm_feature_enter_search/
+  ;; (setq helm-echo-input-in-header-line t)
+  ;; (defun helm-hide-minibuffer-maybe ()
+  ;;   (when (with-helm-buffer helm-echo-input-in-header-line)
+  ;;     (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+  ;;       (overlay-put ov 'window (selected-window))
+  ;;       (overlay-put ov 'face (let ((bg-color (face-background 'default nil)))
+  ;;                               `(:background ,bg-color :foreground ,bg-color)))
+  ;;       (setq-local cursor-type nil))))
+  ;; (add-hook 'helm-minibuffer-set-up-hook 'helm-hide-minibuffer-maybe)
+
+  ;; W3M Home Page
+  ;; (setq w3m-home-page "http://www.google.com")
+  ;; ;; W3M default display images
+  ;; (setq w3m-default-display-inline-images t)
+  ;; (setq w3m-default-toggle-inline-images t)
+  ;; ;; W3M use cookies
+  ;; (setq w3m-command-arguments '("-cookie" "-F"))
+  ;; (setq w3m-use-cookies t)
+  ;; ;; Browse url function use w3m
+  ;; (setq browse-url-browser-function 'w3m-browse-url)
+  ;; ;; W3M view url new session in background
+  ;; (setq w3m-view-this-url-new-session-in-background t)
 
   ;; sync to mobile when idle
   (defvar my-org-mobile-sync-timer nil)
@@ -230,6 +285,8 @@ layers configuration."
     (cancel-timer my-org-mobile-sync-timer))
 
   (my-org-mobile-sync-start)
+  ;; sync when focus of emacs is lost
+  ;; (add-hook 'focus-out-hook 'my-org-mobile-sync-pull-and-push)
   ;; (setq my-site-config "~/.config/emacs.el")
   ;; (if (file-exists-p my-site-config)
   ;;     (load-file my-site-config))
@@ -294,13 +351,18 @@ layers configuration."
 
   (setq org-todo-keyword-faces
       '(("TODO" :foreground "red" :weight bold)
-        ("NEXT" :foreground "blue" :weight bold)
+        ("NEXT" :foreground "yellow" :weight bold)
         ("DONE" :foreground "forest green" :weight bold)
         ("WAITING" :foreground "orange" :weight bold)
         ("HOLD" :foreground "magenta" :weight bold)
         ("CANCELLED" :foreground "forest green" :weight bold)))
 
   (setq org-log-done t)
+  (setq org-log-into-drawer t)
+  ;; Separate drawers for clocking and logs
+  (setq org-drawers (quote ("PROPERTIES" "LOGBOOK")))
+  ;; Save clock data and state changes and notes in the LOGBOOK drawer
+  (setq org-clock-into-drawer t)
 
   (setq org-agenda-compact-blocks t)
 
