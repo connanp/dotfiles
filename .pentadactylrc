@@ -9,7 +9,7 @@ set visualbell
 
 set complete=bookmark,location,search
 " show up to 35 items in the completion list
-set maxitems=35
+set maxitems=20
 
 " only show the tab bar if there are more than 1 tabs
 set showtabline=multitab
@@ -115,6 +115,11 @@ au DOMLoad youtube.com js clean_yt(<doc>)
 
 command restoresession -js 'ss=Cc["@mozilla.org/browser/sessionstore;1"].getService(Ci.nsISessionStore); ss.restoreLastSession()'
 
+" sends to org-protocol, make sure to have the applescript or xdg setup
+" osx http://stackoverflow.com/questions/2418910/osx-defining-a-new-url-handler-that-points-straight-at-a-python-script
+" http://jcardente.blogspot.com/2010/09/saving-weblinks-to-org-mode-from-safari.html
+command ttsave open javascript:location.href='org-protocol://capture://tt/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(window.getSelection())
+command org open javascript:location.href='org-protocol://capture://l/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(window.getSelection())
 
 " Styles
 style mail.google.com,groups.google.com -name google-monospace * { font-family: 'Droid Sans Mono' !important }

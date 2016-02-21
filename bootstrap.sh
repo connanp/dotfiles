@@ -9,7 +9,7 @@ git submodule update --recursive
 
 function doIt() {
   rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
-    --exclude "README.md" -avh --no-perms . ~;
+    --exclude "README.md" --exclude "applescript/" -avh --no-perms . ~;
   ln -sf $HOME/.zprezto/runcoms/zlogin $HOME/.zlogin
   ln -sf $HOME/.zprezto/runcoms/zshenv $HOME/.zshenv
   ln -sf $HOME/.config/zprezto/prompt/* $HOME/.zprezto/modules/prompt/functions/
