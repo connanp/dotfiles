@@ -9,7 +9,6 @@ LC_ALL="en_US.UTF-8"
 LC_CTYPE="en_US.UTF-8"
 platform=$(uname)
 export TERM="xterm-256color"
-export EDITOR="vim"
 
 # pre-load before any of this for certain situations
 if [ -d $HOME/.config/site/preload ]; then
@@ -18,11 +17,7 @@ if [ -d $HOME/.config/site/preload ]; then
   done
 fi
 
-PATH="/usr/local/bin:${PATH}:$HOME/bin"
-typeset -U PATH  # remove dupes
-export PATH
-
-zstyle ':prezto:module:prompt' theme 'garrett'
+zstyle ':prezto:module:prompt' theme 'pure'
 
 zstyle ':prezto:module:editor' key-bindings 'vi'
 
@@ -56,6 +51,7 @@ zstyle ':prezto:load' pmodule \
   'fasd' \
   'python' \
   'rsync' \
+  'syntax-highlighting' \
   'history-substring-search' \
   'prompt'
 
@@ -85,16 +81,6 @@ zle -A .backward-kill-word vi-backward-kill-word
 zle -A .backward-delete-char vi-backward-delete-char
 
 setopt NUMERIC_GLOB_SORT
-
-if [[ "$platform" == "Darwin" ]]; then
-  source $HOME/.ssh/environment-$(hostname -s)
-fi
-
-if [ -d $HOME/.config/site ]; then
-  for f in $HOME/.config/site/*; do
-    source $f
-  done
-fi
 
 # must be the last thing executed, otherwise OS X fails to load the session
 pmodload ssh

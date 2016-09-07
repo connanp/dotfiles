@@ -15,25 +15,34 @@
   dotspacemacs-configuration-layer-path '("~/.spacemacs-layers/")
   ;; List of configuration layers to load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
-  dotspacemacs-configuration-layers '((auto-completion :variables
-                                                       auto-completion-use-tab-instead-of-enter t
-                                                       auto-completion-enable-sort-by-usage t)
+  dotspacemacs-configuration-layers '(better-defaults
+                                      (auto-completion :variables
+                                                      auto-completion-use-tab-instead-of-enter t
+                                                      auto-completion-enable-sort-by-usage t)
                                       osx
                                       git
                                       version-control
                                       fasd
                                       emacs-lisp
                                       (shell :variables
-                                              shell-default-shell 'eshell)
+                                             shell-default-term-shell "/bin/zsh"
+                                             shell-enable-smart-eshell t
+                                             shell-default-shell 'eshell)
                                       (colors :variables
                                               colors-enable-nyan-cat-progress-bar t)
                                       dash
-                                      python
+                                      (python :variables
+                                              python-test-runner 'pytest)
                                       javascript
-                                      ruby
+                                      (ruby :variables
+                                            ruby-version-manager 'rbenv
+                                            ruby-test-runner 'rspec)
+
                                       html
-                                      go
+                                      (go :variables
+                                          gofmt-command "goimports")
                                       c-c++
+                                      lua
                                       syntax-checking
                                       evil-commentary
                                       evil-snipe
@@ -42,11 +51,11 @@
                                       markdown
                                       yaml
                                       restclient
-                                      ansible
-                                      better-defaults
                                       unimpaired
-                                      my-wanderlust
-                                      w3m)
+                                      spell-checking
+                                      my-spelling
+                                      elasticsearch
+                                      terraform)
   ;; A list of packages and/or extensions that will not be install and loaded.
   dotspacemacs-excluded-packages '()
   ;; List of additional packages that will be installed without being
@@ -58,7 +67,9 @@
                                      epresent
                                      vlf
                                      mediawiki
-                                     ox-mediawiki)
+                                     ox-mediawiki
+                                     hcl-mode
+                                     terraform-mode)
   ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
   ;; are declared in a layer which is not a member of
   ;; the list `dotspacemacs-configuration-layers'
@@ -93,8 +104,8 @@ before layers configuration."
   dotspacemacs-colorize-cursor-according-to-state t
   ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
   ;; size to make separators look not too crappy.
-  dotspacemacs-default-font '("Source Code Pro"
-                              :size 13
+  dotspacemacs-default-font '("Hack"
+                              :size 12
                               :weight normal
                               :width normal
                               :powerline-scale 1.1)
@@ -208,7 +219,16 @@ layers configuration."
   ;; i only use git
   (setq vc-handled-backends '(git))
 
-  (defun byte-recompile-init-files ()
+  ;; (when (spacemacs/system-is-mac)
+  ;;   (defcustom auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo" "~/.authinfo.gpg" "~/.netrc" "~/.netrc.gpg")))
+
+  ;; TODO: delete me when https://github.com/syl20bnr/spacemacs/issues/5307 is in stable
+  (with-eval-after-load 'avy
+    (when (and (not (fboundp 'avy--with-avy-keys))
+               (fboundp 'avy-with))
+      (defalias 'avy--with-avy-keys 'avy-with)))
+
+  (defun byte-recompile-my-layers ()
     "Recompile all of the startup files"
     (interactive)
     (byte-recompile-directory "~/.spacemacs-layers/" 0))
@@ -305,6 +325,35 @@ re-indenting and un-tabification is done."
               ;; alias put curl -s -XPUT $*
               (setq eshell-visual-subcommands '(("git" "log" "diff" "show")))))
 
+  (defun eshell/.. (&optional level)
+    "Go up LEVEL directories"
+    (interactive)
+    (let ((level (or level 1)))
+      (eshell/cd (make-string (1+ level) ?.))
+      (eshell/ls)))
+
+  (defun eshell/unpack (file)
+    (let ((command (some (lambda (x)
+                           (if (string-match-p (car x) file)
+                               (cadr x)))
+                         '((".*\.tar.bz2" "tar xjf")
+                           (".*\.tar.gz" "tar xzf")
+                           (".*\.bz2" "bunzip2")
+                           (".*\.rar" "unrar x")
+                           (".*\.gz" "gunzip")
+                           (".*\.tar" "tar xf")
+                           (".*\.tbz2" "tar xjf")
+                           (".*\.tgz" "tar xzf")
+                           (".*\.zip" "unzip")
+                           (".*\.Z" "uncompress")
+                           (".*" "echo 'Could not unpack the file:'")))))
+      (eshell-command-result (concat command " " file))))
+
+  (defun eshell/x ()
+    (insert "exit")
+    (eshell-send-input)
+    (delete-window))
+
   ;; history
   (setq eshell-cmpl-cycle-completions nil
         eshell-save-history-on-exit t
@@ -320,6 +369,8 @@ re-indenting and un-tabification is done."
 
   (spacemacs/set-leader-keys
     "asd" 'my/create-or-switch-to-dev-buffer)
+
+  (editorconfig-mode 1)
 
   (use-package tramp
     :defer 5
@@ -343,6 +394,11 @@ re-indenting and un-tabification is done."
       :config
       (add-to-list 'tramp-remote-path "/usr/local/sbin")
       (add-to-list 'tramp-remote-path "~/bin")))
+
+  (spacemacs|define-custom-layout "email"
+    :binding "m"
+    :body
+    (wl))
 
   (setq helm-locate-command
         (pcase system-type
@@ -396,13 +452,16 @@ re-indenting and un-tabification is done."
    (quote
     (("Amazon" "https://w.amazon.com/" "" "" "Main Page"))))
  '(mediawiki-site-default "Amazon")
+ '(org-agenda-files
+   (quote
+    ("/Users/connanp/org/inbox.org" "/Users/connanp/org/todo.org" "/Users/connanp/org/amazon.org" "/Users/connanp/org/notes.org")))
  '(org-export-backends (quote (ascii html latex md)))
  '(org-modules
    (quote
     (org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-protocol org-rmail org-w3m)))
  '(package-selected-packages
    (quote
-    (vlf js2-mode haml-mode gitignore-mode git-gutter+ git-gutter flycheck company anaconda-mode package-build bind-key bind-map evil spacemacs-theme ace-jump-helm-line markdown-mode magit spinner yaml-mode xterm-color ws-butler window-numbering which-key web-mode web-beautify wanderlust volatile-highlights vi-tilde-fringe use-package toc-org tagedit spaceline smooth-scrolling smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restclient restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters quelpa pyvenv pytest pyenv-mode popwin pip-requirements persp-mode pcre2el pbcopy paradox page-break-lines ox-mediawiki osx-trash orgit org-repo-todo org-present org-pomodoro org-plus-contrib org-bullets open-junk-file neotree multi-term move-text mmm-mode mediawiki material-theme markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative leuven-theme less-css-mode launchctl json-mode js2-refactor js-doc jade-mode info+ indent-guide ido-vertical-mode hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation help-fns+ helm-w3m helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio go-eldoc gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md flycheck-pos-tip flx-ido fill-column-indicator fasd fancy-battery expand-region exec-path-from-shell evil-visualstar evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-jumper evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-commentary evil-args evil-anzu eval-sexp-fu eshell-prompt-extras esh-help epresent emmet-mode elisp-slime-nav editorconfig disaster diff-hl define-word dash-at-point cython-mode company-web company-tern company-statistics company-quickhelp company-go company-c-headers company-anaconda coffee-mode cmake-mode clean-aindent-mode clang-format chruby bundler buffer-move bracketed-paste auto-yasnippet auto-highlight-symbol auto-compile ansible-doc ansible aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
+    (apel alert log4e gntp json-snatcher json-reformat parent-mode request fringe-helper pkg-info epl flx grizzl iedit highlight spark dash-functional pos-tip py-yapf flim tern web-completion-data anzu popup git-commit s skewer-mode hydra f powerline pythonic auto-complete avy packed inf-ruby smartparens go-mode projectile helm helm-core yasnippet multiple-cursors magit-popup with-editor async dash semi lua-mode terraform-mode hcl-mode es-mode org-mobile-sync helm-flyspell auto-dictionary readline-complete vlf js2-mode haml-mode gitignore-mode git-gutter+ git-gutter flycheck company anaconda-mode package-build bind-key bind-map evil spacemacs-theme ace-jump-helm-line markdown-mode magit spinner yaml-mode xterm-color ws-butler window-numbering which-key web-mode web-beautify wanderlust volatile-highlights vi-tilde-fringe use-package toc-org tagedit spaceline smooth-scrolling smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restclient restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters quelpa pyvenv pytest pyenv-mode popwin pip-requirements persp-mode pcre2el pbcopy paradox page-break-lines ox-mediawiki osx-trash orgit org-repo-todo org-present org-pomodoro org-plus-contrib org-bullets open-junk-file neotree multi-term move-text mmm-mode mediawiki material-theme markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative leuven-theme less-css-mode launchctl json-mode js2-refactor js-doc jade-mode info+ indent-guide ido-vertical-mode hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation help-fns+ helm-w3m helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio go-eldoc gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md flycheck-pos-tip flx-ido fill-column-indicator fasd fancy-battery expand-region exec-path-from-shell evil-visualstar evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-jumper evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-commentary evil-args evil-anzu eval-sexp-fu eshell-prompt-extras esh-help epresent emmet-mode elisp-slime-nav editorconfig disaster diff-hl define-word dash-at-point cython-mode company-web company-tern company-statistics company-quickhelp company-go company-c-headers company-anaconda coffee-mode cmake-mode clean-aindent-mode clang-format chruby bundler buffer-move bracketed-paste auto-yasnippet auto-highlight-symbol auto-compile ansible-doc ansible aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
  '(paradox-github-token t)
  '(ring-bell-function (quote ignore)))
 (custom-set-faces

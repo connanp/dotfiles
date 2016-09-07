@@ -17,8 +17,8 @@ fi
 # Editors
 #
 
-export EDITOR='vim'
-export VISUAL='vim'
+export EDITOR='emacsclient -n'
+export VISUAL='emacsclient -n'
 export PAGER='less'
 
 #
@@ -33,19 +33,21 @@ fi
 # Paths
 #
 
-# Ensure path arrays do not contain duplicates.
-typeset -gU cdpath fpath mailpath path
+# Set the list of directories that Zsh searches for programs.
+path=(
+    $HOME/bin
+    /usr/local/{bin,sbin}
+    $HOME/.node/bin
+    $path
+)
 
 # Set the the list of directories that cd searches.
 # cdpath=(
 #   $cdpath
 # )
 
-# Set the list of directories that Zsh searches for programs.
-path=(
-  /usr/local/{bin,sbin}
-  $path
-)
+# Ensure path arrays do not contain duplicates.
+typeset -gU cdpath fpath mailpath path
 
 #
 # Less
@@ -76,4 +78,3 @@ TMPPREFIX="${TMPDIR%/}/zsh"
 if [[ ! -d "$TMPPREFIX" ]]; then
   mkdir -p "$TMPPREFIX"
 fi
-
