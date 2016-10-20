@@ -15,47 +15,59 @@
   dotspacemacs-configuration-layer-path '("~/.spacemacs-layers/")
   ;; List of configuration layers to load. If it is the symbol `all' instead
   ;; of a list then all discovered layers will be installed.
-  dotspacemacs-configuration-layers '(better-defaults
-                                      (auto-completion :variables
-                                                      auto-completion-use-tab-instead-of-enter t
-                                                      auto-completion-enable-sort-by-usage t)
-                                      osx
-                                      git
-                                      version-control
-                                      fasd
-                                      emacs-lisp
-                                      (shell :variables
-                                             shell-default-term-shell "/bin/zsh"
-                                             shell-enable-smart-eshell t
-                                             shell-default-shell 'eshell)
+  dotspacemacs-configuration-layers '((auto-completion :variables
+                                                       auto-completion-enable-snippets-in-popup t
+                                                       auto-completion-return-key-behavior nil
+                                                       auto-completion-tab-key-behavior 'cycle
+                                                       auto-completion-private-snippets-directory "~/.spacemacs.d/snippets/"
+                                                       auto-completion-enable-sort-by-usage t
+                                                       auto-completion-enable-help-tooltip 'manual
+                                                       :disabled-for org erc)
+                                      better-defaults
+                                      (c-c++ :variables
+                                             c-c++-enable-clang-support t)
                                       (colors :variables
                                               colors-enable-nyan-cat-progress-bar t)
+                                      csv
                                       dash
+                                      emacs-lisp
+                                      evil-commentary
+                                      (evil-snipe :variables
+                                                  evil-snipe-enable-alternate-f-and-t-behaviors t)
+                                      fasd
+                                      git
+                                      gtags
+                                      (go :variables
+                                          gofmt-command "goimports")
+                                      graphviz
+                                      html
+                                      javascript
+                                      lua
+                                      markdown
+                                      org
+                                      osx
+                                      pandoc
                                       (python :variables
                                               python-test-runner 'pytest)
-                                      javascript
+                                      restclient
                                       (ruby :variables
                                             ruby-version-manager 'rbenv
                                             ruby-test-runner 'rspec)
-
-                                      html
-                                      (go :variables
-                                          gofmt-command "goimports")
-                                      c-c++
-                                      lua
+                                      semantic
+                                      (shell :variables
+                                             shell-default-term-shell "/bin/zsh"
+                                             shell-default-shell 'eshell)
+                                      shell-scripts
+                                      (spell-checking :variables spell-checking-enable-by-default nil)
                                       syntax-checking
-                                      evil-commentary
-                                      evil-snipe
-                                      org
-                                      my-org
-                                      markdown
+                                      (version-control :variables
+                                                       version-control-diff-tool 'diff-hl)
                                       yaml
-                                      restclient
-                                      unimpaired
-                                      spell-checking
-                                      my-spelling
-                                      elasticsearch
-                                      terraform)
+
+                                      ;; personal layers
+                                      my-org
+                                      my-spelling)
+
   ;; A list of packages and/or extensions that will not be install and loaded.
   dotspacemacs-excluded-packages '()
   ;; List of additional packages that will be installed without being
@@ -63,25 +75,24 @@
   ;; packages then consider to create a layer, you can also put the
   ;; configuration in `dotspacemacs/config'.
   dotspacemacs-additional-packages '(material-theme
-                                     editorconfig
                                      epresent
                                      vlf
                                      mediawiki
-                                     ox-mediawiki
-                                     hcl-mode
-                                     terraform-mode)
+                                     ox-mediawiki)
   ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
   ;; are declared in a layer which is not a member of
   ;; the list `dotspacemacs-configuration-layers'
   dotspacemacs-delete-orphan-packages t))
 
-(defun dotspacemacs/init ()
+(defun dotspacemacs/user-init ()
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
 before layers configuration."
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
   (setq-default
+  ;; do not let custom variables pollute this file
+  custom-file (concat dotspacemacs-directory "custom.el")
   ;; Specify the startup banner. Default value is `official', it displays
   ;; the official spacemacs logo. An integer value is the index of text
   ;; banner, `random' chooses a random text banner in `core/banners'
@@ -92,23 +103,30 @@ before layers configuration."
   dotspacemacs-editing-style 'vim
   ;; If non nil output loading progress in `*Messages*' buffer. (default nil)
   dotspacemacs-verbose-loading nil
+  dotspacemacs-startup-buffer-responsive t
+  dotspacemacs-scratch-mode 'text-mode
   ;; List of items to show in the startup buffer. If nil it is disabled.
   ;; Possible values are: `recents' `bookmarks' `projects'.
   ;; (default '(recents projects))
-  dotspacemacs-startup-lists '(recents projects)
+  dotspacemacs-startup-lists '(bookmarks (recents . 10) projects)
   ;; List of themes, the first of the list is loaded when spacemacs starts.
   ;; Press <SPC> T n to cycle to the next theme in the list (works great
   ;; with 2 themes variants, one dark and one light)
-  dotspacemacs-themes '(material)
+  dotspacemacs-themes '(material monokai spacemacs-dark spacemacs-light)
   ;; If non nil the cursor color matches the state color.
   dotspacemacs-colorize-cursor-according-to-state t
   ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
   ;; size to make separators look not too crappy.
-  dotspacemacs-default-font '("Hack"
-                              :size 12
-                              :weight normal
-                              :width normal
-                              :powerline-scale 1.1)
+  dotspacemacs-default-font '(("Hack"
+                               :size 13
+                               :weight normal
+                               :width normal
+                               :powerline-scale 1.1)
+                              ("Source Code Pro"
+                               :size 13
+                               :weight normal
+                               :width normal
+                               :powerline-scale 1.1))
   ;; The leader key
   dotspacemacs-leader-key "SPC"
   ;; The leader key accessible in `emacs state' and `insert state'
@@ -124,7 +142,8 @@ before layers configuration."
   ;; Emacs commands (M-x).
   ;; By default the command key is `:' so ex-commands are executed like in Vim
   ;; with `:' and Emacs commands are executed with `<leader> :'.
-  dotspacemacs-command-key ":"
+  dotspacemacs-emacs-command-key "SPC"
+  dotspacemacs-ex-command-key ":"
   ;; If non nil `Y' is remapped to `y$'. (default t)
   dotspacemacs-remap-Y-to-y$ t
   ;; Location where to auto-save files. Possible values are `original' to
@@ -181,6 +200,13 @@ before layers configuration."
   dotspacemacs-smooth-scrolling t
   ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
   dotspacemacs-smartparens-strict-mode nil
+  dotspacemacs-smart-closing-parenthesis nil
+  ;; J K in visual move lines instead of joining them
+  dotspacemacs-visual-line-move-text t
+  dotspacemacs-retain-visual-state-on-shift t
+  dotspacemacs-folding-method 'origami
+  dotspacemacs-whitespace-cleanup 'changed
+  dotspacemacs-line-numbers nil
   ;; Select a scope to highlight delimiters. Possible values are `any',
   ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
   ;; emphasis the current one). (default 'all)
@@ -198,35 +224,53 @@ before layers configuration."
   ;; User initialization goes here
   evil-escape-key-sequence "jk"
   ;; too annoying because new projects are never cached
-  projectile-enable-caching nil))
+  projectile-enable-caching nil
+  ;; Emacs GC related
+  ;; Allow font-lock-mode to do background parsing
+  jit-lock-stealth-time 1
+  ;; jit-lock-stealth-load 200
+  jit-lock-chunk-size 1000
+  jit-lock-defer-time 0.05
+  ;; i only use git
+  vc-handled-backends '(git)
+  magit-popup-show-common-commands nil
+  magit-gh-pulls-pull-detail-limit 200
+  flycheck-check-syntax-automatically '(save mode-enabled)
+  helm-ff-file-name-history-use-recentf nil
+  helm-locate-command (pcase system-type
+                        (`gnu/linux "locate -i -r %s")
+                        (`berkeley-unix "locate -i %s")
+                        (`windows-nt "es %s")
+                        (`darwin "mdfind -name %s %s | egrep -v '/Library/(Caches|Mail)/'")
+                        (t "locate %s"))
+  ))
 
 (defun dotspacemacs/user-config ()
   "Configuration function.
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
-  ;; Emacs GC related
-  ;; Allow font-lock-mode to do background parsing
-  (setq jit-lock-stealth-time 1
-        ;; jit-lock-stealth-load 200
-        jit-lock-chunk-size 1000
-        jit-lock-defer-time 0.05)
-
   (use-package vlf-setup)
   (setq large-file-warning-threshold (* 25 1024 1024))
 
+  (setq exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-copy-envs '("PATH" "GOPATH"))
 
-  ;; i only use git
-  (setq vc-handled-backends '(git))
+  (add-hook 'text-mode-hook 'auto-fill-mode)
+  (add-hook 'makefile-mode-hook 'whitespace-mode)
+
+  (use-package warnings
+    :defer t
+    :config
+    (push '(undo discard-info) warning-suppress-types))
 
   ;; (when (spacemacs/system-is-mac)
   ;;   (defcustom auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo" "~/.authinfo.gpg" "~/.netrc" "~/.netrc.gpg")))
 
   ;; TODO: delete me when https://github.com/syl20bnr/spacemacs/issues/5307 is in stable
-  (with-eval-after-load 'avy
-    (when (and (not (fboundp 'avy--with-avy-keys))
-               (fboundp 'avy-with))
-      (defalias 'avy--with-avy-keys 'avy-with)))
+  ;; (with-eval-after-load 'avy
+  ;;   (when (and (not (fboundp 'avy--with-avy-keys))
+  ;;              (fboundp 'avy-with))
+  ;;     (defalias 'avy--with-avy-keys 'avy-with)))
 
   (defun byte-recompile-my-layers ()
     "Recompile all of the startup files"
@@ -298,6 +342,15 @@ re-indenting and un-tabification is done."
     (modify-syntax-entry ?_ "w" python-mode-syntax-table))
 
   ;; eshell
+
+  ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
+  (evil-define-key 'normal term-raw-map "p" 'term-paste)
+  (evil-define-key 'normal term-raw-map "j" 'term-send-down)
+  (evil-define-key 'normal term-raw-map "k" 'term-send-up)
+  (evil-define-key 'normal term-raw-map "/" 'term-send-reverse-search-history)
+  (evil-define-key 'normal term-raw-map (kbd "C-c") 'term-send-raw)
+  (evil-define-key 'insert term-raw-map (kbd "C-c") 'term-send-raw)
+
   ;; find and chmod behave differently from Emacs than their Unix counterparts
   (setq eshell-prefer-lisp-functions nil)
   ;; aliases
@@ -370,7 +423,7 @@ re-indenting and un-tabification is done."
   (spacemacs/set-leader-keys
     "asd" 'my/create-or-switch-to-dev-buffer)
 
-  (editorconfig-mode 1)
+  ;; (editorconfig-mode 1)
 
   (use-package tramp
     :defer 5
@@ -395,21 +448,6 @@ re-indenting and un-tabification is done."
       (add-to-list 'tramp-remote-path "/usr/local/sbin")
       (add-to-list 'tramp-remote-path "~/bin")))
 
-  (spacemacs|define-custom-layout "email"
-    :binding "m"
-    :body
-    (wl))
-
-  (setq helm-locate-command
-        (pcase system-type
-          (`gnu/linux "locate -i -r %s")
-          (`berkeley-unix "locate -i %s")
-          (`windows-nt "es %s")
-          (`darwin "mdfind -name %s %s | egrep -v '/Library/(Caches|Mail)/'")
-          (t "locate %s")))
-
-  ;; don't use recentf stuff in helm-ff
-  (setq helm-ff-file-name-history-use-recentf nil)
 
   ;; Via: http://www.reddit.com/r/emacs/comments/3asbyn/new_and_very_useful_helm_feature_enter_search/
   ;; (setq helm-echo-input-in-header-line t)
@@ -436,38 +474,5 @@ re-indenting and un-tabification is done."
   ;; (setq w3m-view-this-url-new-session-in-background t)
   )
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(ahs-case-fold-search nil)
- '(ahs-default-range (quote ahs-range-whole-buffer))
- '(ahs-idle-interval 0.25)
- '(ahs-idle-timer 0 t)
- '(ahs-inhibit-face-list nil)
- '(mediawiki-site-alist
-   (quote
-    (("Amazon" "https://w.amazon.com/" "" "" "Main Page"))))
- '(mediawiki-site-default "Amazon")
- '(org-agenda-files
-   (quote
-    ("/Users/connanp/org/inbox.org" "/Users/connanp/org/todo.org" "/Users/connanp/org/amazon.org" "/Users/connanp/org/notes.org")))
- '(org-export-backends (quote (ascii html latex md)))
- '(org-modules
-   (quote
-    (org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mhe org-protocol org-rmail org-w3m)))
- '(package-selected-packages
-   (quote
-    (apel alert log4e gntp json-snatcher json-reformat parent-mode request fringe-helper pkg-info epl flx grizzl iedit highlight spark dash-functional pos-tip py-yapf flim tern web-completion-data anzu popup git-commit s skewer-mode hydra f powerline pythonic auto-complete avy packed inf-ruby smartparens go-mode projectile helm helm-core yasnippet multiple-cursors magit-popup with-editor async dash semi lua-mode terraform-mode hcl-mode es-mode org-mobile-sync helm-flyspell auto-dictionary readline-complete vlf js2-mode haml-mode gitignore-mode git-gutter+ git-gutter flycheck company anaconda-mode package-build bind-key bind-map evil spacemacs-theme ace-jump-helm-line markdown-mode magit spinner yaml-mode xterm-color ws-butler window-numbering which-key web-mode web-beautify wanderlust volatile-highlights vi-tilde-fringe use-package toc-org tagedit spaceline smooth-scrolling smeargle slim-mode shell-pop scss-mode sass-mode rvm ruby-tools ruby-test-mode rubocop rspec-mode robe reveal-in-osx-finder restclient restart-emacs rbenv rainbow-mode rainbow-identifiers rainbow-delimiters quelpa pyvenv pytest pyenv-mode popwin pip-requirements persp-mode pcre2el pbcopy paradox page-break-lines ox-mediawiki osx-trash orgit org-repo-todo org-present org-pomodoro org-plus-contrib org-bullets open-junk-file neotree multi-term move-text mmm-mode mediawiki material-theme markdown-toc magit-gitflow macrostep lorem-ipsum linum-relative leuven-theme less-css-mode launchctl json-mode js2-refactor js-doc jade-mode info+ indent-guide ido-vertical-mode hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation help-fns+ helm-w3m helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-dash helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio go-eldoc gnuplot gitconfig-mode gitattributes-mode git-timemachine git-messenger git-gutter-fringe git-gutter-fringe+ gh-md flycheck-pos-tip flx-ido fill-column-indicator fasd fancy-battery expand-region exec-path-from-shell evil-visualstar evil-tutor evil-surround evil-snipe evil-search-highlight-persist evil-numbers evil-mc evil-matchit evil-magit evil-lisp-state evil-jumper evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-commentary evil-args evil-anzu eval-sexp-fu eshell-prompt-extras esh-help epresent emmet-mode elisp-slime-nav editorconfig disaster diff-hl define-word dash-at-point cython-mode company-web company-tern company-statistics company-quickhelp company-go company-c-headers company-anaconda coffee-mode cmake-mode clean-aindent-mode clang-format chruby bundler buffer-move bracketed-paste auto-yasnippet auto-highlight-symbol auto-compile ansible-doc ansible aggressive-indent adaptive-wrap ace-window ace-link ac-ispell)))
- '(paradox-github-token t)
- '(ring-bell-function (quote ignore)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(company-tooltip-common ((t (:inherit company-tooltip :weight bold :underline nil))))
- '(company-tooltip-common-selection ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))
+(when (file-exists-p "~/local.el")
+  (load "~/local.el"))
