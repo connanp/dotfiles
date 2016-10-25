@@ -20,25 +20,6 @@ fi
 
 if [[ -z ${INSIDE_EMACS+x} ]]; then
     zstyle ':prezto:module:editor' key-bindings 'vi'
-
-    # extra vi mode keys
-    bindkey '^P' up-history
-    bindkey '^N' down-history
-    bindkey '^?' backward-delete-char
-    bindkey '^h' backward-delete-char
-    bindkey '^w' backward-kill-word
-    bindkey '^r' history-incremental-search-backward
-    # save line to recall later after executing something else, like changing directory.
-    bindkey '^B' push-line-or-edit
-    bindkey -M vicmd "q" push-line-or-edit
-    # Search based on what you typed in already
-    bindkey -M vicmd "//" history-beginning-search-backward
-    bindkey -M vicmd "??" history-beginning-search-forward
-    export KEYTIMEOUT=1
-    # http://www.zsh.org/mla/users/2009/msg00813.html
-    # vi insert mode to respect backspace
-    zle -A .backward-kill-word vi-backward-kill-word
-    zle -A .backward-delete-char vi-backward-delete-char
 else
     zstyle ':prezto:module:editor' key-bindings 'emacs'
 fi
@@ -98,8 +79,28 @@ if (( $+commands[direnv] )); then
     eval "$(direnv hook zsh)"
 fi
 
+if [[ -z ${INSIDE_EMACS+x} ]]; then
+    # extra vi mode keys
+    bindkey '^P' up-history
+    bindkey '^N' down-history
+    bindkey '^?' backward-delete-char
+    bindkey '^h' backward-delete-char
+    bindkey '^w' backward-kill-word
+    bindkey '^r' history-incremental-search-backward
+    # save line to recall later after executing something else, like changing directory.
+    bindkey '^B' push-line-or-edit
+    bindkey -M vicmd "q" push-line-or-edit
+    # Search based on what you typed in already
+    bindkey -M vicmd "//" history-beginning-search-backward
+    bindkey -M vicmd "??" history-beginning-search-forward
+    export KEYTIMEOUT=1
+    # http://www.zsh.org/mla/users/2009/msg00813.html
+    # vi insert mode to respect backspace
+    zle -A .backward-kill-word vi-backward-kill-word
+    zle -A .backward-delete-char vi-backward-delete-char
+fi
+
 if [ -d $HOME/.config/site ]; then
-  # only regular files
   for f in $HOME/.config/site/*(.); do
     source $f
   done
