@@ -7,7 +7,7 @@ colorscheme molokai
 
 set visualbell
 
-set complete=bookmark,location,search
+set complete=lsb
 " show up to 35 items in the completion list
 set maxitems=20
 
@@ -118,8 +118,9 @@ command restoresession -js 'ss=Cc["@mozilla.org/browser/sessionstore;1"].getServ
 " sends to org-protocol, make sure to have the applescript or xdg setup
 " osx http://stackoverflow.com/questions/2418910/osx-defining-a-new-url-handler-that-points-straight-at-a-python-script
 " http://jcardente.blogspot.com/2010/09/saving-weblinks-to-org-mode-from-safari.html
-command ttsave open javascript:location.href='org-protocol://capture://tt/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(window.getSelection())
-command org open javascript:location.href='org-protocol://capture://l/'+encodeURIComponent(location.href)+'/'+encodeURIComponent(document.title)+'/'+encodeURIComponent(window.getSelection())
+map cc -javascript location.href='org-protocol://capture://l/'+encodeURIComponent(content.location.href)+'/'+encodeURIComponent(content.document.title)+'/'+encodeURIComponent(content.document.getSelection())
+map cl -javascript location.href='org-protocol://store-link://'+encodeURIComponent(content.location.href)+'/'+encodeURIComponent(content.document.title)
+map ct -javascript location.href='org-protocol://capture://tt/'+encodeURIComponent(content.location.href)+'/'+encodeURIComponent(content.document.title)+'/'+encodeURIComponent(content.document.getSelection())
 
 " Styles
 style mail.google.com,groups.google.com -name google-monospace * { font-family: 'Droid Sans Mono' !important }

@@ -12,7 +12,6 @@ export TERM="xterm-256color"
 
 # pre-load before any of this for certain situations
 if [ -d $HOME/.config/site/preload ]; then
-  # only regular files
   for f in $HOME/.config/site/preload/*(.); do
     source $f
   done
@@ -74,10 +73,6 @@ setopt NUMERIC_GLOB_SORT
 
 # must be the last thing executed, otherwise OS X fails to load the session
 pmodload ssh
-
-if (( $+commands[direnv] )); then
-    eval "$(direnv hook zsh)"
-fi
 
 if [[ -z ${INSIDE_EMACS+x} ]]; then
     # extra vi mode keys

@@ -26,8 +26,7 @@
                                       better-defaults
                                       (c-c++ :variables
                                              c-c++-enable-clang-support t)
-                                      (colors :variables
-                                              colors-enable-nyan-cat-progress-bar t)
+                                      colors
                                       csv
                                       dash
                                       emacs-lisp
@@ -38,11 +37,11 @@
                                       git
                                       gtags
                                       (go :variables
-                                          gofmt-command "goimports")
-                                      graphviz
+                                          go-use-gometalinter t
+                                          gofmt-command "goimports"
+                                          go-tab-width 4)
                                       html
                                       javascript
-                                      lua
                                       markdown
                                       org
                                       osx
@@ -53,9 +52,9 @@
                                       (ruby :variables
                                             ruby-version-manager 'rbenv
                                             ruby-test-runner 'rspec)
+                                      rust
                                       semantic
                                       (shell :variables
-                                             shell-default-term-shell "/bin/zsh"
                                              shell-default-shell 'eshell)
                                       shell-scripts
                                       (spell-checking :variables spell-checking-enable-by-default nil)
@@ -74,17 +73,22 @@
   ;; wrapped in a layer. If you need some configuration for these
   ;; packages then consider to create a layer, you can also put the
   ;; configuration in `dotspacemacs/config'.
-  dotspacemacs-additional-packages '(material-theme
+  dotspacemacs-additional-packages '(dash
                                      epresent
                                      vlf
                                      mediawiki
-                                     ox-mediawiki)
+                                     ox-mediawiki
+                                     go-projectile)
   ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
   ;; are declared in a layer which is not a member of
   ;; the list `dotspacemacs-configuration-layers'
-  dotspacemacs-delete-orphan-packages t))
+  dotspacemacs-delete-orphan-packages t)
+  (when (spacemacs/system-is-mac)
+    (setq colors-enable-nyan-cat-progress-bar t))
+  (when (spacemacs/system-is-linux)
+    (setq colors-enable-nyan-cat-progress-bar nil)))
 
-(defun dotspacemacs/user-init ()
+(defun dotspacemacs/init ()
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
 before layers configuration."
@@ -112,7 +116,7 @@ before layers configuration."
   ;; List of themes, the first of the list is loaded when spacemacs starts.
   ;; Press <SPC> T n to cycle to the next theme in the list (works great
   ;; with 2 themes variants, one dark and one light)
-  dotspacemacs-themes '(material monokai spacemacs-dark spacemacs-light)
+  dotspacemacs-themes '(default doom-one doom-dark spacemacs-light)
   ;; If non nil the cursor color matches the state color.
   dotspacemacs-colorize-cursor-according-to-state t
   ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
@@ -221,6 +225,8 @@ before layers configuration."
   ;; specified with an installed package.
   ;; Not used for now.
   dotspacemacs-default-package-repository nil
+  dotspacemacs-elpa-https nil
+  dotspacemacs-elpa-timeout 10
   ;; User initialization goes here
   evil-escape-key-sequence "jk"
   ;; too annoying because new projects are never cached
@@ -243,12 +249,14 @@ before layers configuration."
                         (`windows-nt "es %s")
                         (`darwin "mdfind -name %s %s | egrep -v '/Library/(Caches|Mail)/'")
                         (t "locate %s"))
+  shell-file-name "/bin/bash" ;; /bin/zsh is too slow
   ))
 
 (defun dotspacemacs/user-config ()
   "Configuration function.
  This function is called at the very end of Spacemacs initialization after
 layers configuration."
+  (spacemacs/load-theme 'doom-one)
   (use-package vlf-setup)
   (setq large-file-warning-threshold (* 25 1024 1024))
 
@@ -258,6 +266,9 @@ layers configuration."
   (add-hook 'text-mode-hook 'auto-fill-mode)
   (add-hook 'makefile-mode-hook 'whitespace-mode)
 
+  (require 'go-projectile)
+
+  (setq js-indent-level 2)
   (use-package warnings
     :defer t
     :config
@@ -265,12 +276,6 @@ layers configuration."
 
   ;; (when (spacemacs/system-is-mac)
   ;;   (defcustom auth-sources '(macos-keychain-internet macos-keychain-generic "~/.authinfo" "~/.authinfo.gpg" "~/.netrc" "~/.netrc.gpg")))
-
-  ;; TODO: delete me when https://github.com/syl20bnr/spacemacs/issues/5307 is in stable
-  ;; (with-eval-after-load 'avy
-  ;;   (when (and (not (fboundp 'avy--with-avy-keys))
-  ;;              (fboundp 'avy-with))
-  ;;     (defalias 'avy--with-avy-keys 'avy-with)))
 
   (defun byte-recompile-my-layers ()
     "Recompile all of the startup files"
@@ -331,12 +336,13 @@ re-indenting and un-tabification is done."
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
   (add-hook 'compilation-filter-hook 'my-colorize-compilation-buffer))
 
-  ;; nyan cat freezes eshell during scrolling (probably due to animation)
-  (defun my-disable-nyan-cat-in-modes ()
-    (if (eq major-mode 'eshell-mode)
-        (nyan-mode -1)
-      (nyan-mode)))
-  (add-hook 'buffer-list-update-hook 'my-disable-nyan-cat-in-modes)
+  (with-eval-after-load 'nyan-mode
+    ;; nyan cat freezes eshell during scrolling (probably due to animation)
+    (defun my-disable-nyan-cat-in-modes ()
+      (if (eq major-mode 'eshell-mode)
+          (nyan-mode -1)
+        (nyan-mode)))
+    (add-hook 'buffer-list-update-hook 'my-disable-nyan-cat-in-modes))
 
   (with-eval-after-load 'python
     (modify-syntax-entry ?_ "w" python-mode-syntax-table))
@@ -449,30 +455,7 @@ re-indenting and un-tabification is done."
       (add-to-list 'tramp-remote-path "~/bin")))
 
 
-  ;; Via: http://www.reddit.com/r/emacs/comments/3asbyn/new_and_very_useful_helm_feature_enter_search/
-  ;; (setq helm-echo-input-in-header-line t)
-  ;; (defun helm-hide-minibuffer-maybe ()
-  ;;   (when (with-helm-buffer helm-echo-input-in-header-line)
-  ;;     (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
-  ;;       (overlay-put ov 'window (selected-window))
-  ;;       (overlay-put ov 'face (let ((bg-color (face-background 'default nil)))
-  ;;                               `(:background ,bg-color :foreground ,bg-color)))
-  ;;       (setq-local cursor-type nil))))
-  ;; (add-hook 'helm-minibuffer-set-up-hook 'helm-hide-minibuffer-maybe)
-
-  ;; W3M Home Page
-  ;; (setq w3m-home-page "http://www.google.com")
-  ;; ;; W3M default display images
-  ;; (setq w3m-default-display-inline-images t)
-  ;; (setq w3m-default-toggle-inline-images t)
-  ;; ;; W3M use cookies
-  ;; (setq w3m-command-arguments '("-cookie" "-F"))
-  ;; (setq w3m-use-cookies t)
-  ;; ;; Browse url function use w3m
-  ;; (setq browse-url-browser-function 'w3m-browse-url)
-  ;; ;; W3M view url new session in background
-  ;; (setq w3m-view-this-url-new-session-in-background t)
+  (when (file-exists-p "~/local.el")
+    (load "~/local.el"))
   )
 
-(when (file-exists-p "~/local.el")
-  (load "~/local.el"))

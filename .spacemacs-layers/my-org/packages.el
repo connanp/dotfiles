@@ -31,7 +31,8 @@
 
 (defconst my-org-packages
   '(org
-    org-babel)
+    org-babel
+    org-mobile-sync)
   "The list of Lisp packages required by the my-org layer.
 
 Each entry is either:
@@ -63,31 +64,6 @@ Each entry is either:
   "Initialize my org settings"
   (use-package org
     :init
-    (progn
-      ;; sync to mobile when idle
-      (defvar my-org-mobile-sync-timer nil)
-      (defvar my-org-mobile-sync-secs (* 60 20))
-
-      (defun my-org-mobile-sync-pull-and-push ()
-        (org-mobile-pull)
-        (org-mobile-push))
-
-      (defun my-org-mobile-sync-start ()
-        "Start automated `org-mobile-push'"
-        (interactive)
-        (setq my-org-mobile-sync-timer
-              (run-with-idle-timer my-org-mobile-sync-secs t
-                                   'my-org-mobile-sync-pull-and-push)))
-
-      (defun my-org-mobile-sync-stop ()
-        "Stop automated `org-mobile-push'"
-        (interactive)
-        (cancel-timer my-org-mobile-sync-timer))
-
-      ;; sync when focus of emacs is lost
-      ;; (add-hook 'focus-out-hook 'my-org-mobile-sync-pull-and-push)
-      (add-hook 'org-mode (my-org-mobile-sync-start)))
-
     :config
     (progn
       (setq org-directory "~/org")
@@ -349,6 +325,12 @@ Each entry is either:
                   (or subtree-end (point-max)))
               next-headline))))
       )))
+
+(defun my-org/init-org-mobile-sync ()
+  (use-package org-mobile-sync
+    :init
+    (progn
+      (add-hook 'org-mode (lambda () (org-mobile-sync-mode 1))))))
 
 (defun my-org/post-init-org-babel ()
   :init

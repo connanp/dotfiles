@@ -60,10 +60,14 @@
 	# List contributors with number of commits
 	contributors = shortlog --summary --numbered
 
+	dag = log --graph --format='format:%C(yellow)%h%C(reset) %C(blue)\"%an\" <%ae>%C(reset) %C(magenta)%cr%C(reset)%C(auto)%d%C(reset)%n%s' --date-order
+
 [apply]
 
 	# Detect whitespace errors when applying a patch
 	whitespace = fix
+	pager = less -FMRiX
+  ignorecase = false
 
 [core]
 

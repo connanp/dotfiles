@@ -1,5 +1,10 @@
 # Compiled Python files
 *.pyc
+runpy
+build
+.python-version
+.ruby-version
+*.log
 
 # Folder view configuration files
 .DS_Store
@@ -10,3 +15,6 @@ Desktop.ini
 Thumbs.db
 
 *.swp
+
+.vscode/
+.envrc
