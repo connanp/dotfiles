@@ -26,6 +26,7 @@ fi
 
 # Emacs and other terms
 if [[ "$TERM" == "dumb" ]]; then
+    zstyle ':prezto:module:terminal' auto-title 'no'
     zstyle ':prezto:module:editor' key-bindings 'emacs'
     unsetopt zle
     unsetopt prompt_cr
@@ -34,7 +35,29 @@ if [[ "$TERM" == "dumb" ]]; then
     unfunction preexec
     PS1='$ '
 else
+    zstyle ':prezto:module:terminal' auto-title 'yes'
+    zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
+    zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
     zstyle ':prezto:module:editor' key-bindings 'vi'
+
+    # extra vi mode keys
+    bindkey '^P' up-history
+    bindkey '^N' down-history
+    bindkey '^?' backward-delete-char
+    bindkey '^h' backward-delete-char
+    bindkey '^w' backward-kill-word
+    bindkey '^r' history-incremental-search-backward
+    # save line to recall later after executing something else, like changing directory.
+    bindkey '^B' push-line-or-edit
+    bindkey -M vicmd "q" push-line-or-edit
+    # Search based on what you typed in already
+    bindkey -M vicmd "//" history-beginning-search-backward
+    bindkey -M vicmd "??" history-beginning-search-forward
+    export KEYTIMEOUT=1
+    # http://www.zsh.org/mla/users/2009/msg00813.html
+    # vi insert mode to respect backspace
+    zle -A .backward-kill-word vi-backward-kill-word
+    zle -A .backward-delete-char vi-backward-delete-char
 fi
 
 zstyle ':prezto:module:prompt' theme 'sorin'
@@ -43,14 +66,6 @@ zstyle ':prezto:module:history-substring-search' color 'yes'
 zstyle ':prezto:module:autosuggestions' color 'yes'
 
 zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'personal_rsa'
-
-if [[ "$TERM" == "dumb" ]]; then
-    zstyle ':prezto:module:terminal' auto-title 'no'
-else
-    zstyle ':prezto:module:terminal' auto-title 'yes'
-    zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
-    zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
-fi
 
 zstyle ':prezto:module:syntax-highlighting' highlighters \
   'main' \
@@ -89,27 +104,6 @@ setopt NUMERIC_GLOB_SORT
 
 # must be the last thing executed, otherwise OS X fails to load the session
 # pmodload ssh
-
-if [[ -z ${INSIDE_EMACS+x} ]]; then
-    # extra vi mode keys
-    bindkey '^P' up-history
-    bindkey '^N' down-history
-    bindkey '^?' backward-delete-char
-    bindkey '^h' backward-delete-char
-    bindkey '^w' backward-kill-word
-    bindkey '^r' history-incremental-search-backward
-    # save line to recall later after executing something else, like changing directory.
-    bindkey '^B' push-line-or-edit
-    bindkey -M vicmd "q" push-line-or-edit
-    # Search based on what you typed in already
-    bindkey -M vicmd "//" history-beginning-search-backward
-    bindkey -M vicmd "??" history-beginning-search-forward
-    export KEYTIMEOUT=1
-    # http://www.zsh.org/mla/users/2009/msg00813.html
-    # vi insert mode to respect backspace
-    zle -A .backward-kill-word vi-backward-kill-word
-    zle -A .backward-delete-char vi-backward-delete-char
-fi
 
 #if [ -d $HOME/.config/site ]; then
 #  for f in $HOME/.config/site/*(.); do
