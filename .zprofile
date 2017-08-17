@@ -33,6 +33,13 @@ fi
 # Paths
 #
 
+if [[ "$SHELL" == "/apollo/env/envImprovement/var/bin/zsh" ]]; then
+    module_path=(
+        /apollo/env/envImprovement/lib/zsh/${ZSH_VERSION}
+        ${module_path}
+    )
+fi
+
 # Set the list of directories that Zsh searches for programs.
 path=(
     $HOME/bin
@@ -44,10 +51,6 @@ if [ -d $HOME/.config/site ]; then
   for f in $HOME/.config/site/*(.); do
     source $f
   done
-fi
-
-if (( $+commands[rbenv] )); then
-    eval "$(command rbenv init - --no-rehash zsh)"
 fi
 
 # Set the the list of directories that cd searches.
