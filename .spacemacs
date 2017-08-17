@@ -106,7 +106,7 @@
   (when (spacemacs/system-is-linux)
     (setq colors-enable-nyan-cat-progress-bar nil)))
 
-(defun dotspacemacs/user-init ()
+(defun dotspacemacs/init ()
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
 before layers configuration."
