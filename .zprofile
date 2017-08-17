@@ -37,9 +37,18 @@ fi
 path=(
     $HOME/bin
     /usr/local/{bin,sbin}
-    $HOME/.node/bin
     $path
 )
+
+if [ -d $HOME/.config/site ]; then
+  for f in $HOME/.config/site/*(.); do
+    source $f
+  done
+fi
+
+if (( $+commands[rbenv] )); then
+    eval "$(command rbenv init - --no-rehash zsh)"
+fi
 
 # Set the the list of directories that cd searches.
 # cdpath=(

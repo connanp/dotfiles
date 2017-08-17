@@ -1,3 +1,10 @@
+PROFILE_STARTUP=false
+if [[ "$PROFILE_STARTUP" == true ]]; then
+    # http://zsh.sourceforge.net/Doc/Release/Prompt-Expansion.html
+    PS4=$'%D{%M%S%.} %N:%i> '
+    exec 3>&2 2>$HOME/tmp/startlog.$$
+    setopt xtrace prompt_subst
+fi
 # Source Prezto.
 if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
     source "${ZDOTDIR:-$HOME}/.zprezto/init.zsh"
@@ -17,24 +24,32 @@ if [ -d $HOME/.config/site/preload ]; then
   done
 fi
 
-if [[ -z ${INSIDE_EMACS+x} ]]; then
-    zstyle ':prezto:module:editor' key-bindings 'vi'
-else
+# Emacs and other terms
+if [[ "$TERM" == "dumb" ]]; then
     zstyle ':prezto:module:editor' key-bindings 'emacs'
+    unsetopt zle
+    unsetopt prompt_cr
+    unsetopt prompt_subst
+    unfunction precmd
+    unfunction preexec
+    PS1='$ '
+else
+    zstyle ':prezto:module:editor' key-bindings 'vi'
 fi
 
-zstyle ':prezto:module:prompt' theme 'pure'
+zstyle ':prezto:module:prompt' theme 'sorin'
 zstyle ':prezto:module:editor' dot-expansion 'yes'
 zstyle ':prezto:module:history-substring-search' color 'yes'
+zstyle ':prezto:module:autosuggestions' color 'yes'
 
 zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'personal_rsa'
 
-if [[ -z ${INSIDE_EMACS+x} ]]; then
+if [[ "$TERM" == "dumb" ]]; then
+    zstyle ':prezto:module:terminal' auto-title 'no'
+else
     zstyle ':prezto:module:terminal' auto-title 'yes'
     zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
     zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
-else
-    zstyle ':prezto:module:terminal' auto-title 'no'
 fi
 
 zstyle ':prezto:module:syntax-highlighting' highlighters \
@@ -58,21 +73,22 @@ zstyle ':prezto:load' pmodule \
   'git' \
   'fasd' \
   'python' \
+  'ruby' \
   'rsync' \
+  'ssh' \
   'syntax-highlighting' \
   'history-substring-search' \
+  'autosuggestions' \
   'prompt'
 
 source $HOME/.zprezto/runcoms/zshrc
-# vi mode text-objects, e.g.: ciw
-source $HOME/.config/opp.zsh/opp.zsh
-source $HOME/.config/opp.zsh/opp/*
 source $HOME/.aliases
+autoload -Uz zmv
 
 setopt NUMERIC_GLOB_SORT
 
 # must be the last thing executed, otherwise OS X fails to load the session
-pmodload ssh
+# pmodload ssh
 
 if [[ -z ${INSIDE_EMACS+x} ]]; then
     # extra vi mode keys
@@ -95,8 +111,13 @@ if [[ -z ${INSIDE_EMACS+x} ]]; then
     zle -A .backward-delete-char vi-backward-delete-char
 fi
 
-if [ -d $HOME/.config/site ]; then
-  for f in $HOME/.config/site/*(.); do
-    source $f
-  done
+#if [ -d $HOME/.config/site ]; then
+#  for f in $HOME/.config/site/*(.); do
+#    source $f
+#  done
+#fi
+
+if [[ "$PROFILE_STARTUP" == true ]]; then
+    unsetopt xtrace
+    exec 2>&3 3>&-
 fi

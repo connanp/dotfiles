@@ -15,17 +15,17 @@
    dotspacemacs-configuration-layer-path '("~/.spacemacs-layers/")
    ;; List of configuration layers to load. If it is the symbol `all' instead
    ;; of a list then all discovered layers will be installed.
-   dotspacemacs-configuration-layers '((
-                                        sql
-                                        sqlauto-completion :variables
-                                        auto-completion-enable-snippets-in-popup t
-                                        auto-completion-return-key-behavior nil
-                                        auto-completion-tab-key-behavior 'cycle
-                                        auto-completion-private-snippets-directory "~/.spacemacs.d/snippets/"
-                                        auto-completion-enable-sort-by-usage t
-                                        auto-completion-enable-help-tooltip 'manual
-                                        :disabled-for org erc)
+   dotspacemacs-configuration-layers '((auto-completion :variables
+                                                        auto-completion-return-key-behavior 'complete
+                                                        auto-completion-tab-key-behavior 'cycle
+                                                        auto-completion-private-snippets-directory "~/.spacemacs.d/snippets/"
+                                                        auto-completion-enable-sort-by-usage t
+                                                        auto-completion-enable-help-tooltip 'manual
+                                                        :disabled-for org erc)
                                        better-defaults
+                                       (ivy :variables
+                                            ivy-wrap t
+                                            ivy-extra-directories nil)
                                        (c-c++ :variables
                                               c-c++-enable-clang-support t)
                                        colors
@@ -46,19 +46,23 @@
                                        html
                                        javascript
                                        markdown
-                                       org
+                                       (org :variables
+                                            org-enable-github-support t
+                                            org-projectile-file "TODOs.org")
                                        ;; pgup/dn unbound https://github.com/syl20bnr/spacemacs/issues/9006
                                        (osx :variables
                                             osx-function-as nil)
                                        pandoc
                                        (python :variables
-                                               python-test-runner 'pytest)
+                                               python-test-runner 'pytest
+                                               python-fill-column 119)
                                        restclient
                                        (ruby :variables
                                              ruby-version-manager 'rbenv
-                                             ruby-test-runner 'rspec)
+                                             ruby-enable-enh-ruby-mode t
+                                             ruby-test-runner 'rspec
+                                             rbenv-installation-dir "/usr/local/Cellar/rbenv/1.1.1")
                                        rust
-                                       semantic
                                        (shell :variables
                                               shell-default-shell 'eshell)
                                        shell-scripts
@@ -66,6 +70,7 @@
                                        syntax-checking
                                        (version-control :variables
                                                         version-control-diff-tool 'diff-hl)
+                                       sql
                                        yaml
 
                                        pass
@@ -74,17 +79,17 @@
                                        java
                                        ;; personal layers
                                        ;; my-spelling
-                                       my-org
+                                       ;; my-org
                                        kotlin)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(editorconfig)
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages then consider to create a layer, you can also put the
    ;; configuration in `dotspacemacs/config'.
    dotspacemacs-additional-packages '(dash
-                                      gruvbox-theme
+                                      smart-dash
                                       doom-themes
                                       epresent
                                       vlf
@@ -101,13 +106,16 @@
   (when (spacemacs/system-is-linux)
     (setq colors-enable-nyan-cat-progress-bar nil)))
 
-(defun dotspacemacs/init ()
+(defun dotspacemacs/user-init ()
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
 before layers configuration."
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
   (setq-default
+   ;; may have to revert commit
+   ;; https://github.com/syl20bnr/spacemacs/issues/8939
+   ;; dotspacemacs-frame-title-format "Emacs"
    ;; do not let custom variables pollute this file
    custom-file (concat dotspacemacs-directory "custom.el")
    ;; Specify the startup banner. Default value is `official', it displays
@@ -129,7 +137,7 @@ before layers configuration."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(doom-one doom-molokai spacemacs-dark)
+   dotspacemacs-themes '(spacemacs-dark doom-molokai doom-one)
    ;; If non nil the cursor color matches the state color.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
@@ -210,7 +218,7 @@ before layers configuration."
    ;; Transparency can be toggled through `toggle-transparency'.
    dotspacemacs-inactive-transparency 90
    ;; If non nil unicode symbols are displayed in the mode line.
-   dotspacemacs-mode-line-unicode-symbols t
+   dotspacemacs-mode-line-unicode-symbols nil
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
    ;; scrolling overrides the default behavior of Emacs which recenters the
    ;; point when it reaches the top or bottom of the screen.
@@ -233,7 +241,7 @@ before layers configuration."
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `ag', `pt', `ack' and `grep'.
    ;; (default '("ag" "pt" "ack" "grep"))
-   dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
+   dotspacemacs-search-tools '("rg" "ag" "pt" "ack" "grep")
    ;; The default package repository used if no explicit repository has been
    ;; specified with an installed package.
    ;; Not used for now.
@@ -262,7 +270,7 @@ before layers configuration."
                          (`windows-nt "es %s")
                          (`darwin "mdfind -name %s %s | egrep -v '/Library/(Caches|Mail)/'")
                          (t "locate %s"))
-   shell-file-name "/bin/bash" ;; /bin/zsh is too slow
+   ;; shell-file-name "/bin/bash" ;; /bin/zsh is too slow
    ))
 
 (defun dotspacemacs/user-config ()
@@ -275,34 +283,45 @@ layers configuration."
   (when (and (eq system-type `darwin) (window-system))
     (mac-auto-operator-composition-mode))
 
-  ;; dired customizations to prevent buffer spam
-  (eval-after-load "dired"
-    '(defadvice dired-advertised-find-file (around dired-subst-directory activate)
-       "Replace current buffer if file is a directory."
-       (interactive)
-       (let ((orig (current-buffer))
-             (filename (dired-get-filename)))
-         ad-do-it
-         (when (and (file-directory-p filename)
-                    (not (eq (current-buffer) orig)))
-           (kill-buffer orig)))))
+  (use-package company
+    :config
+    (progn
+      (custom-set-faces
+       '(company-tooltip-common
+         ((t (:inherit company-tooltip :weight bold :underline nil))))
+       '(company-tooltip-common-selection
+         ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))))
 
-  (eval-after-load "dired"
-    ;; don't remove `other-window', the caller expects it to be there
-    '(defun dired-up-directory (&optional other-window)
-       "Run Dired on parent directory of current directory."
-       (interactive "P")
-       (let* ((dir (dired-current-directory))
-              (orig (current-buffer))
-              (up (file-name-directory (directory-file-name dir))))
-         (or (dired-goto-file (directory-file-name dir))
-             ;; Only try dired-goto-subdir if buffer has more than one dir.
-             (and (cdr dired-subdir-alist)
-                  (dired-goto-subdir up))
-             (progn
-               (kill-buffer orig)
-               (dired up)
-               (dired-goto-file dir))))))
+  (use-package counsel
+    :config
+    (progn
+      (if (executable-find "rg")
+          (setq counsel-grep-base-command
+                "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))))
+
+  (use-package helm
+    :config
+    (progn
+      (setq helm-split-window-in-side-p t ;; open helm buffer inside current window, not occupy whole other window
+
+            helm-echo-input-in-header-line t) ;; input close to where I type
+
+      (defun spacemacs//helm-hide-minibuffer-maybe ()
+        "Hide minibuffer in Helm session if we use the header line as input field."
+        (when (with-helm-buffer helm-echo-input-in-header-line)
+          (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+            (overlay-put ov 'window (selected-window))
+            (overlay-put ov 'face
+                         (let ((bg-color (face-background 'default nil)))
+                           `(:background ,bg-color :foreground ,bg-color)))
+            (setq-local cursor-type nil))))
+
+      (add-hook 'helm-minibuffer-set-up-hook
+                'spacemacs//helm-hide-minibuffer-maybe)
+
+      (setq helm-autoresize-max-height 0)
+      (setq helm-autoresize-min-height 20)
+      (helm-autoresize-mode 1)))
 
   (use-package vlf-setup
     :config
@@ -311,7 +330,92 @@ layers configuration."
   (use-package direnv
     :diminish direnv-mode
     :config
-    (direnv-mode))
+    (progn
+
+      ;; https://oremacs.com/2016/02/24/dired-rsync/
+      (defun ckp/dired-rsync (dest)
+        (interactive
+         (list
+          (expand-file-name
+           (read-file-name
+            "Rsync to:"
+            (dired-dwim-target-directory)))))
+        ;; store all selected files into "files" list
+        (let ((files (dired-get-marked-files
+                      nil current-prefix-arg))
+              ;; the rsync command
+              (tmtxt/rsync-command
+               "rsync -arvz --progress "))
+          ;; add all selected file names as arguments
+          ;; to the rsync command
+          (dolist (file files)
+            (setq tmtxt/rsync-command
+                  (concat tmtxt/rsync-command
+                          (shell-quote-argument file)
+                          " ")))
+          ;; append the destination
+          (setq tmtxt/rsync-command
+                (concat tmtxt/rsync-command
+                        (shell-quote-argument dest)))
+          ;; run the async shell command
+          (async-shell-command tmtxt/rsync-command "*rsync*")
+          ;; finally, switch to that window
+          (other-window 1)))
+
+      (define-key dired-mode-map "Y" 'ckp/dired-rsync)
+
+      ;; https://oremacs.com/2017/03/18/dired-ediff/
+      ;; -*- lexical-binding: t -*-
+      (defun ckp/ediff-files ()
+        (interactive)
+        (let ((files (dired-get-marked-files))
+              (wnd (current-window-configuration)))
+          (if (<= (length files) 2)
+              (let ((file1 (car files))
+                    (file2 (if (cdr files)
+                               (cadr files)
+                             (read-file-name
+                              "file: "
+                              (dired-dwim-target-directory)))))
+                (if (file-newer-than-file-p file1 file2)
+                    (ediff-files file2 file1)
+                  (ediff-files file1 file2))
+                (add-hook 'ediff-after-quit-hook-internal
+                          (lambda ()
+                            (setq ediff-after-quit-hook-internal nil)
+                            (set-window-configuration wnd))))
+            (error "no more than 2 files should be marked"))))
+
+      (define-key dired-mode-map (kbd "M-=") 'ckp/ediff-files)
+
+      ;; dired customizations to prevent buffer spam
+      (defadvice dired-advertised-find-file (around dired-subst-directory activate)
+        "Replace current buffer if file is a directory."
+        (interactive)
+        (let ((orig (current-buffer))
+              (filename (dired-get-filename)))
+          ad-do-it
+          (when (and (file-directory-p filename)
+                     (not (eq (current-buffer) orig)))
+            (kill-buffer orig))))
+
+      ;; don't remove `other-window', the caller expects it to be there
+      (defun dired-up-directory (&optional other-window)
+        "Run Dired on parent directory of current directory."
+        (interactive "P")
+        (let* ((dir (dired-current-directory))
+               (orig (current-buffer))
+               (up (file-name-directory (directory-file-name dir))))
+          (or (dired-goto-file (directory-file-name dir))
+              ;; Only try dired-goto-subdir if buffer has more than one dir.
+              (and (cdr dired-subdir-alist)
+                   (dired-goto-subdir up))
+              (progn
+                (kill-buffer orig)
+                (dired up)
+                (dired-goto-file dir)))))
+
+      (direnv-mode)))
 
   (setq exec-path-from-shell-check-startup-files nil)
 
@@ -322,10 +426,10 @@ layers configuration."
   ;; gpg2+ lets us query through the minibuffer
   (setq epa-pinentry-mode 'loopback)
 
-  (with-eval-after-load 'pass
-    (use-package auth-password-store
-      :init
-      (auth-pass-enable)))
+  (use-package auth-password-store
+    :after pass
+    :config
+    (auth-pass-enable))
 
   (add-hook 'text-mode-hook 'auto-fill-mode)
   (add-hook 'makefile-mode-hook 'whitespace-mode)
@@ -413,80 +517,84 @@ re-indenting and un-tabification is done."
     (modify-syntax-entry ?_ "w" python-mode-syntax-table))
 
   ;; eshell
+  (use-package eshell
+    :init
+    (progn
+      ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
+      (evil-define-key 'normal term-raw-map "p" 'term-paste)
+      (evil-define-key 'normal term-raw-map "j" 'term-send-down)
+      (evil-define-key 'normal term-raw-map "k" 'term-send-up)
+      (evil-define-key 'normal term-raw-map "/" 'term-send-reverse-search-history)
+      (evil-define-key 'normal term-raw-map (kbd "C-c") 'term-send-raw)
+      (evil-define-key 'insert term-raw-map (kbd "C-c") 'term-send-raw))
 
-  ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
-  (evil-define-key 'normal term-raw-map "p" 'term-paste)
-  (evil-define-key 'normal term-raw-map "j" 'term-send-down)
-  (evil-define-key 'normal term-raw-map "k" 'term-send-up)
-  (evil-define-key 'normal term-raw-map "/" 'term-send-reverse-search-history)
-  (evil-define-key 'normal term-raw-map (kbd "C-c") 'term-send-raw)
-  (evil-define-key 'insert term-raw-map (kbd "C-c") 'term-send-raw)
+    :config
+    (progn
+      ;; find and chmod behave differently from Emacs than their Unix counterparts
+      (setq eshell-prefer-lisp-functions nil)
+      ;; aliases
+      (add-hook 'eshell-mode-hook
+                (lambda ()
+                  ;; The 'ls' executable requires the Gnu version on the Mac
+                  (let ((ls (if (file-exists-p "/usr/local/bin/gls")
+                                "/usr/local/bin/gls"
+                              "/bin/ls")))
+                    (eshell/alias "ll"
+                                  (concat ls " -AlohG --color=always")))
+                  ;; if defined as an alias it won't use the working dir
+                  (defun eshell/gst ()
+                    ;; open in current dir
+                    (interactive)
+                    (magit-status default-directory)
+                    nil)
+                  (defalias 'gd 'magit-diff-unstaged)
+                  (defalias 'gds 'magit-diff-staged)
+                  (defalias 'gl 'magit-log)
+                  ;; paste these or put in ~/.emacs.d/.cache/eshell/alias
+                  ;; alias dt gdate "+%Y-%m-%dT%H:%M:%S.%3N%zZ"
+                  ;; alias epoch date +%s
+                  ;; alias get curl -s -XGET $*
+                  ;; alias post curl -s -XPOST $*
+                  ;; alias put curl -s -XPUT $*
+                  (setq eshell-visual-subcommands '(("git" "log" "diff" "show")))
 
-  ;; find and chmod behave differently from Emacs than their Unix counterparts
-  (setq eshell-prefer-lisp-functions nil)
-  ;; aliases
-  (add-hook 'eshell-mode-hook
-            (lambda ()
-              ;; The 'ls' executable requires the Gnu version on the Mac
-              (let ((ls (if (file-exists-p "/usr/local/bin/gls")
-                            "/usr/local/bin/gls"
-                          "/bin/ls")))
-                (eshell/alias "ll"
-                              (concat ls " -AlohG --color=always")))
-              ;; if defined as an alias it won't use the working dir
-              (defun eshell/gst ()
-                ;; open in current dir
-                (interactive)
-                (magit-status default-directory)
-                nil)
-              (defalias 'gd 'magit-diff-unstaged)
-              (defalias 'gds 'magit-diff-staged)
-              (defalias 'gl 'magit-log)
-              ;; paste these or put in ~/.emacs.d/.cache/eshell/alias
-              ;; alias dt gdate "+%Y-%m-%dT%H:%M:%S.%3N%zZ"
-              ;; alias epoch date +%s
-              ;; alias get curl -s -XGET $*
-              ;; alias post curl -s -XPOST $*
-              ;; alias put curl -s -XPUT $*
-              (setq eshell-visual-subcommands '(("git" "log" "diff" "show")))
+                  ;; To use eldoc in Eshell
+                  (setup-esh-help-eldoc)))
 
-              ;; To use eldoc in Eshell
-              (setup-esh-help-eldoc)
-              ))
+      (defun eshell/.. (&optional level)
+        "Go up LEVEL directories"
+        (interactive)
+        (let ((level (or level 1)))
+          (eshell/cd (make-string (1+ level) ?.))
+          (eshell/ls)))
 
-  (defun eshell/.. (&optional level)
-    "Go up LEVEL directories"
-    (interactive)
-    (let ((level (or level 1)))
-      (eshell/cd (make-string (1+ level) ?.))
-      (eshell/ls)))
+      (defun eshell/unpack (file)
+        (let ((command (some (lambda (x)
+                               (if (string-match-p (car x) file)
+                                   (cadr x)))
+                             '((".*\.tar.bz2" "tar xjf")
+                               (".*\.tar.gz" "tar xzf")
+                               (".*\.bz2" "bunzip2")
+                               (".*\.rar" "unrar x")
+                               (".*\.gz" "gunzip")
+                               (".*\.tar" "tar xf")
+                               (".*\.tbz2" "tar xjf")
+                               (".*\.tgz" "tar xzf")
+                               (".*\.zip" "unzip")
+                               (".*\.Z" "uncompress")
+                               (".*" "echo 'Could not unpack the file:'")))))
+          (eshell-command-result (concat command " " file))))
 
-  (defun eshell/unpack (file)
-    (let ((command (some (lambda (x)
-                           (if (string-match-p (car x) file)
-                               (cadr x)))
-                         '((".*\.tar.bz2" "tar xjf")
-                           (".*\.tar.gz" "tar xzf")
-                           (".*\.bz2" "bunzip2")
-                           (".*\.rar" "unrar x")
-                           (".*\.gz" "gunzip")
-                           (".*\.tar" "tar xf")
-                           (".*\.tbz2" "tar xjf")
-                           (".*\.tgz" "tar xzf")
-                           (".*\.zip" "unzip")
-                           (".*\.Z" "uncompress")
-                           (".*" "echo 'Could not unpack the file:'")))))
-      (eshell-command-result (concat command " " file))))
+      (defun eshell/x ()
+        (insert "exit")
+        (eshell-send-input)
+        (delete-window))
 
-  (defun eshell/x ()
-    (insert "exit")
-    (eshell-send-input)
-    (delete-window))
+      ;; history
+      (setq eshell-cmpl-cycle-completions t
+            eshell-save-history-on-exit t
+            eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")))
 
-  ;; history
-  (setq eshell-cmpl-cycle-completions nil
-        eshell-save-history-on-exit t
-        eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
 
   (defun my/create-or-switch-to-dev-buffer ()
     "Switch to the *eshell-dev* buffer, or create it"
@@ -499,7 +607,7 @@ re-indenting and un-tabification is done."
   (spacemacs/set-leader-keys
     "asd" 'my/create-or-switch-to-dev-buffer)
 
-  ;; (editorconfig-mode 1)
+  ;; (editorconfig-mode nil)
 
   (use-package tramp
     :defer 5
@@ -507,11 +615,15 @@ re-indenting and un-tabification is done."
     ;; Turn of auto-save for tramp files
     (defun tramp-set-auto-save ()
       (auto-save-mode -1))
-    (setq tramp-default-method "ssh"
+    (setq tramp-default-method "sshx"
           tramp-default-user-alist '(("\\`su\\(do\\)?\\'" nil "root"))
-          tramp-adb-program "adb"
+          vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)"
+                                       vc-ignore-dir-regexp
+                                       tramp-file-name-regexp)
           ;; use the settings in ~/.ssh/config instead of Tramp's
           tramp-use-ssh-controlmaster-options nil
+          ;; annoying when $HOME does not exist
+          tramp-histfile-override nil
           backup-enable-predicate
           (lambda (name)
             (and (normal-backup-enable-predicate name)
@@ -519,13 +631,82 @@ re-indenting and un-tabification is done."
                         (when (stringp method)
                           (member method '("su" "sudo"))))))))
 
-    (use-package tramp-sh
-      :config
-      (add-to-list 'tramp-remote-path "/usr/local/sbin")
-      (add-to-list 'tramp-remote-path "~/bin")))
+    (add-to-list 'tramp-remote-path "/usr/local/sbin")
+    (add-to-list 'tramp-remote-path "~/bin"))
 
+
+  ;; web browsing
+  (use-package eww
+    :commands eww eww-follow-link
+    :init
+    (setq browse-url-browser-function 'eww-browse-url)
+    (setq eww-search-prefix "http://www.duckduckgo.com/search?q=")
+
+    (defun eww-wiki (text)
+      "Function used to search wikipedia for the given text."
+      (interactive (list (read-string "Wiki for: ")))
+      (eww (format "https://en.m.wikipedia.org/wiki/Special:Search?search=%s"
+                   (url-encode-url text))))
+
+    :config
+    (add-hook 'eww-mode 'ace-link-mode))
+
+  (defun func-region (start end func)
+    "run a function over the region between START and END in current buffer."
+    (save-excursion
+      (let ((text (delete-and-extract-region start end)))
+        (insert (funcall func text)))))
+
+  (defun unhex-region (start end)
+    "de-urlencode the region between START and END in current buffer."
+    (interactive "r")
+    (func-region start end #'url-unhex-string))
+
+  ;; (use-package inf-ruby
+  ;;   :init
+  ;;   (progn
+  ;;     (defun rbenv-patch ()
+  ;;       (let ((irb) ((concat (rbenv--expand-path "shims" "irb") " --inf-ruby-mode -r irb/completion")))
+  ;;         (add-to-list 'inf-ruby-implementations (cons "ruby" irb)))
+  ;;       (inf-ruby-minor-mode t))
+  ;;     (add-hook 'inf-ruby-mode-hook 'rbenv-patch)
+  ;;     (add-hook 'after-init-hook 'inf-ruby-switch-setup)))
+
+  (defun ckp/edebug-remove-all-instrumentation ()
+    "Remove all edebug instrumentation by visiting each function
+definition and running `eval-defun`."
+    (interactive)
+    (mapatoms
+     (lambda (symbol)
+       (when-let (pos (car-safe (get symbol 'edebug)))
+         (with-current-buffer (marker-buffer pos)
+           (goto-char (marker-position pos))
+           (eval-defun nil))))))
+
+  ;; shell-mode echos every command and `stty -echo' doesn't change that fact
+  (setq comint-process-echoes t)
+
+  (spacemacs|use-package-add-hook projectile
+    :post-config
+    ;; messes with tramp, so much file check spam
+    (projectile-mode -1)
+
+    ;; https://github.com/bbatsov/projectile/issues/657
+    (add-hook 'find-file-hook
+              (lambda ()
+                (if (locate-dominating-file default-directory ".git")
+                    (projectile-mode 1))))
+
+    (setq projectile-file-exists-local-cache-expire (* 5 60))
+
+    (defvar-local ckp/projectile-project-name-cache nil
+      "Cached value of projectile-project-name")
+
+    (defadvice projectile-project-name (around ckp/projectile-project-name activate)
+      (if (not ckp/projectile-project-name-cache)
+          (setq ckp/projectile-project-name-cache ad-do-it))
+      (setq ad-return-value ckp/projectile-project-name-cache)))
 
   (when (file-exists-p "~/local.el")
     (load "~/local.el"))
   )
-
