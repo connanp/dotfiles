@@ -74,12 +74,12 @@
                                        yaml
 
                                        pass
-                                       parinfer
+                                       ;; parinfer  ;; parinfer is too annoying, maybe lispy would be better but requires yak shaving.
                                        prodigy
                                        java
                                        ;; personal layers
                                        ;; my-spelling
-                                       ;; my-org
+                                       my-org
                                        kotlin)
 
    ;; A list of packages and/or extensions that will not be install and loaded.
@@ -96,7 +96,9 @@
                                       mediawiki
                                       ox-mediawiki
                                       go-projectile
-                                      direnv)
+                                      direnv
+                                      request
+                                      graphql-mode)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'
