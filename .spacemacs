@@ -100,6 +100,7 @@
                                        ;; personal layers
                                        ;; my-spelling
                                        my-org
+                                       org-jira
                                        amazon
                                        kotlin)
 
@@ -526,12 +527,12 @@ layers configuration."
        '(company-tooltip-common-selection
          ((t (:inherit company-tooltip-selection :weight bold :underline nil)))))))
 
-  (use-package counsel
-    :config
-    (progn
-      (if (executable-find "rg")
-          (setq counsel-grep-base-command
-                "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))))
+  ;; (use-package counsel
+  ;;   :config
+  ;;   (progn
+  ;;     (if (executable-find "rg")
+  ;;         (setq counsel-grep-base-command
+  ;;               "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))))
 
   (use-package helm
     :config
@@ -753,31 +754,31 @@ re-indenting and un-tabification is done."
   (with-eval-after-load 'python
     (modify-syntax-entry ?_ "w" python-mode-syntax-table))
 
-  (use-package counsel
-    :config
-    (progn
+  ;; (use-package counsel
+  ;;   :config
+  ;;   (progn
 
-      (defun counsel-yank-zsh-history ()
-        "Yank the zsh history"
-        (interactive)
-        (let (hist-cmd collection val)
-          (shell-command "history -r") ; reload history
-          (setq collection
-                (nreverse
-                 (split-string (with-temp-buffer (insert-file-contents (file-truename "~/.zsh_history"))
-                                                 (buffer-string))
-                               "\n"
-                               t)))
+  ;;     (defun counsel-yank-zsh-history ()
+  ;;       "Yank the zsh history"
+  ;;       (interactive)
+  ;;       (let (hist-cmd collection val)
+  ;;         (shell-command "history -r") ; reload history
+  ;;         (setq collection
+  ;;               (nreverse
+  ;;                (split-string (with-temp-buffer (insert-file-contents (file-truename "~/.zsh_history"))
+  ;;                                                (buffer-string))
+  ;;                              "\n"
+  ;;                              t)))
 
-          (setq collection (mapcar (lambda (it) (replace-regexp-in-string ".*;" "" it)) collection)) ;; for zsh
+  ;;         (setq collection (mapcar (lambda (it) (replace-regexp-in-string ".*;" "" it)) collection)) ;; for zsh
 
-          (when (and collection (> (length collection) 0)
-                     (setq val (if (= 1 (length collection)) (car collection)
-                                 (ivy-read (format "Zsh history:") collection))))
-            ;; (setq val (replace-regexp-in-string "^:[^;]*;" "" val))
-            ;; (setq val (replace-regexp-in-string ".*;" "" val))
-            (kill-new val)
-            (message "%s => kill-ring" val))))))
+  ;;         (when (and collection (> (length collection) 0)
+  ;;                    (setq val (if (= 1 (length collection)) (car collection)
+  ;;                                (ivy-read (format "Zsh history:") collection))))
+  ;;           ;; (setq val (replace-regexp-in-string "^:[^;]*;" "" val))
+  ;;           ;; (setq val (replace-regexp-in-string ".*;" "" val))
+  ;;           (kill-new val)
+  ;;           (message "%s => kill-ring" val))))))
 
   ;; eshell
   (use-package eshell
