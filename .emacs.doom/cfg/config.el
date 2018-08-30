@@ -1,10 +1,37 @@
 ;;; private/cfg/config.el -*- lexical-binding: t; -*-
 
 (load! "+bindings")
+(load! "+so-long")
+
+(after! so-long
+  :config
+  (so-long-enable)
+  (setq so-long-minor-modes (append '(rainbow-delimiters-mode) so-long-minor-modes)))
+
+(setq doom-theme 'doom-outrun
+      doom-outrun-brighter-comments nil
+      doom-outrun-comment-bg nil
+      doom-themes-padded-modeline nil)
+
+(when IS-MAC
+  (setq mac-mouse-wheel-smooth-scroll t))
+
+(setq text-scale-mode-step 1.05
+      doom-variable-pitch-font (font-spec :family "Iosevka" :size 14 :weight 'medium)
+      doom-font (font-spec :family "Iosevka" :size 14 :weight 'medium)
+      doom-big-font (font-spec :family "Iosevka" :size 19 :weight 'light)
+      doom-themes-enable-bold t
+      doom-themes-enable-italic t
+      doom-treemacs-enable-variable-pitch t)
+
+(setq-default line-spacing 0.1)
+
+(after! magit
+  :config
+  (add-hook 'magit-revision-mode-hook (lambda () (setq line-spacing 0))))
 
 (when (member "Iosevka" (font-family-list))
-              (setq doom-font (font-spec :family "Iosevka" :size 12)))
-
+  (setq doom-font (font-spec :family "Iosevka" :size 14)))
 
 ;; emacs can already page.
 (setenv "PAGER" "cat")
@@ -27,16 +54,28 @@
 
 
 (after! ivy
-  (setq ivy-use-virtual-buffers t
-        ivy-count-format "(%d/%d) "))
+  :config
+  (setq ivy-count-format "(%d/%d) "))
 
 (after! avy
+  :config
   (setq avy-all-windows 'all-frames))
+
+(after! parinfer
+  :config
+  (setq parinfer-auto-switch-indent-mode t
+      parinfer-auto-switch-indent-mode-when-closing t)
+
+  (def-modeline-segment! +parinfer)
+  (if (bound-and-true-p parinfer-mode)
+      (if (eq parinfer--mode 'indent)
+          ">" ")")))
 
 ;; "do what i mean" will let dired work with multiple window panes to do copying/moving between them
 (setq dired-dwim-target t)
 
 (after! org-babel
+  :config
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
@@ -88,6 +127,7 @@
 (setq history-delete-duplicates t)
 
 (after! counsel
+  :config
   ;; (if (executable-find "rg")
   ;;     (setq counsel-grep-base-command
   ;;           "rg -i -M 120 --no-heading --line-number --color never %s"))
@@ -110,6 +150,7 @@
 (setq comint-process-echoes t)
 
 (after! projectile
+  :config
   ;; messes with tramp, so much file check spam
   (projectile-mode -1)
 
@@ -131,6 +172,18 @@
 
 
 (after! tramp
+  :config
+
+  (defun ckp/shell-set-hook ()
+    "Allows packages such as `projectile' to work when initializing/finding files."
+    (when (file-remote-p (buffer-file-name))
+      (let ((vec (tramp-dissect-file-name (buffer-file-name))))
+        ;; all remote hosts will default to /bin/bash because OSX we use homebrew.
+        (unless (string-match-p "localhost" (tramp-file-name-host vec))
+          (setq-local shell-file-name "/bin/bash")))))
+
+  (add-hook 'find-file-hook #'ckp/shell-set-hook)
+
   ;; Turn of auto-save for tramp files
   (defun tramp-set-auto-save ()
     (auto-save-mode -1))
@@ -168,6 +221,7 @@
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 (after! eshell
+  :config
   (when (< emacs-major-version 27)
     (load! "+patch-eshell-26"))
 
@@ -278,16 +332,19 @@
   (add-hook 'eshell-pre-command-hook 'ckp/eshell-status-record))
 
 (after! esh-module
+  :config
   ;; Don't print the banner.
   (delq 'eshell-banner eshell-modules-list)
   (push 'eshell-tramp eshell-modules-list))
 
 (after! em-term
+  :config
   (dolist (p '("watch"))
     (add-to-list 'eshell-visual-commands p))
   (setq eshell-visual-subcommands '(("git" "log" "diff" "show" "sudo" "vi" "visudo"))))
 
 (after! em-ls
+  :config
   (defun ted-eshell-ls-find-file-at-point (point)
     "RET on Eshell's `ls' output to open files."
     (interactive "d")
