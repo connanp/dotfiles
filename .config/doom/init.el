@@ -48,6 +48,7 @@
        window-select     ; visually switch windows
 
        :editor
+      ;(format +onsave)  ; automated prettiness
        multiple-cursors  ; editing in many places at once
        parinfer          ; turn lisp into python, sort of
        rotate-text       ; cycle region at point between text candidates
@@ -115,7 +116,6 @@
       ;plantuml          ; diagrams for confusing people more
       ;purescript        ; javascript, but functional
        (python
-        +ipython
         +pyenv
         +pyvenv)         ; beautiful is better than ugly
       ;qt                ; the 'cutest' gui framework ever

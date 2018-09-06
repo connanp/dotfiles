@@ -3,15 +3,20 @@
 (load! "+bindings")
 (load! "+so-long")
 
+(setq-default
+ user-full-name "Connan Pearson"
+ user-mail-address "connanp@gmail.com")
+
 (after! so-long
   :config
   (so-long-enable)
   (setq so-long-minor-modes (append '(rainbow-delimiters-mode) so-long-minor-modes)))
 
-(setq doom-theme 'doom-outrun
-      doom-outrun-brighter-comments nil
-      doom-outrun-comment-bg nil
-      doom-themes-padded-modeline nil)
+(setq doom-theme 'doom-dracula)
+;; (setq doom-theme 'doom-outrun
+;;       doom-outrun-brighter-comments nil
+;;       doom-outrun-comment-bg nil
+;;       doom-themes-padded-modeline nil)
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))
@@ -71,19 +76,25 @@
       (if (eq parinfer--mode 'indent)
           ">" ")")))
 
-;; "do what i mean" will let dired work with multiple window panes to do copying/moving between them
-(setq dired-dwim-target t)
+(load! "+dired")
 
-(after! org-babel
+(defun ckp/tangle-blocks-for-file ()
+  "Tangle blocks for the tangle file of the block at point."
+  (interactive)
+  (let ((current-prefix-arg 2))
+    (call-interactively 'org-babel-tangle)))
+
+(after! ob
   :config
+  (load! "+ob-eshell")
+
   (org-babel-do-load-languages
    'org-babel-load-languages
    '(
      (emacs-lisp . t)
      (ruby . t)
      (python . t)
-     (ipython . t)
-     (sh . t)
+     (eshell . t)
      (shell . t)))
 
   ;; Syntax highlight in #+BEGIN_SRC blocks
@@ -132,7 +143,27 @@
   ;;     (setq counsel-grep-base-command
   ;;           "rg -i -M 120 --no-heading --line-number --color never %s"))
   (setq counsel-rg-base-command
-        "rg -zS -M 120 --no-heading --line-number --color never %s ."))
+        "rg -zS -M 120 --no-heading --line-number --color never %s .")
+
+  (defun counsel-esh-directory-history ()
+    "Browse Eshell history."
+    (interactive)
+    (require 'em-dirs)
+    (ivy-read
+     "Directory History: "
+     (cl-loop for index from 0 for dir in (ring-elements eshell-last-dir-ring)
+              collect
+              (cons
+               (format "%-10s %-30s"
+                       (propertize (format "cd -%d" index) 'face 'font-lock-builtin-face)
+                       dir)
+               (format "-%d" index)))
+     :action
+     (lambda (arg)
+       (eshell/cd (cdr arg))
+       (when (featurep 'em-smart)
+         (eshell-smart-goto-end))))))
+
 
 (def-package! warnings
     :defer t
@@ -141,7 +172,8 @@
 
 (def-package! vlf
   :config
-  (setq large-file-warning-threshold (* 25 1024 1024)))
+  (setq large-file-warning-threshold (* 3 1024 1024))
+  (require 'vlf-setup))
 (def-package! s)
 (def-package! request)
 (def-package! request-deferred)
@@ -272,6 +304,9 @@
     (eshell-send-input)
     (delete-window))
 
+  (defalias 'eshell/dh 'counsel-esh-directory-history)
+  (defalias 'eshell/h 'counsel-esh-history)
+
   ;; history
   (setq eshell-cmpl-cycle-completions t
         eshell-history-size 1024
@@ -292,10 +327,9 @@
    "ee"    "find-file-other-window $1"
    "ff"    "find-file $1"
    "emacs" "find-file $1"
-   "l"     "ls -lhoG"
-   "ll"    "ls -lAhoG"
+   "l"     "ls --color=always -lhoG"
+   "ll"    "ls --color=always -lAhoG"
    "d"     "dired $1"
-   "j"     "cd ${bookmark-get-filename $1}"
    "gl"    "(call-interactively 'magit-log-current)"
    "gd"    "magit-diff-unstaged"
    "gds"   "magit-diff-staged"
@@ -303,6 +337,12 @@
    "dt"    "gdate \"+%Y-%m-%dT%H:%M:%S.%3N%zZ\""
    "epoch" "date +%s"
    "clear" "clear-scrollback") ; more sensible than default
+
+  (defun eshell/j (location)
+    (eshell/cd (bookmark-location location)))
+
+  (defun pcomplete/j ()
+    (while (pcomplete-here (bookmark-all-names) nil 'identity)))
 
   ;; used as an eshell/alias, the current directory isn't used, so it must be a function
   (defun eshell/gst (&rest args)
@@ -329,19 +369,27 @@
   (defun ckp/eshell-status-record ()
     (setq ckp/eshell-status--last-command-time (current-time)))
 
-  (add-hook 'eshell-pre-command-hook 'ckp/eshell-status-record))
+  (add-hook 'eshell-pre-command-hook 'ckp/eshell-status-record)
+  (add-hook 'eshell-post-command-hook 'ckp/eshell-status-display))
 
 (after! esh-module
   :config
   ;; Don't print the banner.
   (delq 'eshell-banner eshell-modules-list)
-  (push 'eshell-tramp eshell-modules-list))
+  (push 'eshell-tramp eshell-modules-list)
+  (push 'eshell-smart eshell-modules-list))
+
+(after! em-smart
+  (setq eshell-where-to-jump 'begin)
+  (setq eshell-review-quick-commands nil)
+  (setq eshell-smart-space-goes-to-end t))
 
 (after! em-term
   :config
   (dolist (p '("watch"))
     (add-to-list 'eshell-visual-commands p))
-  (setq eshell-visual-subcommands '(("git" "log" "diff" "show" "sudo" "vi" "visudo"))))
+  (setq eshell-visual-subcommands '(("git" "log" "diff" "show" "sudo" "vi" "visudo"))
+        eshell-visual-options '(("aws" "--help"))))
 
 (after! em-ls
   :config
@@ -386,6 +434,32 @@
       (let ((text (delete-and-extract-region start end)))
         (insert (funcall func text)))))
 
+(defun ckp/copy-buffer ()
+  "Copy entire buffer to kill ring."
+  (interactive)
+  (clipboard-kill-ring-save (point-min) (point-max)))
+
+;; taken from https://github.com/hlissner/doom-emacs-private/blob/master/config.el
+;; load heavy packages all sneaky breeky like
+(defun auto-require-packages (packages)
+  (let ((gc-cons-threshold doom-gc-cons-upper-limit)
+        file-name-handler-alist)
+    (let* ((reqs (cl-remove-if #'featurep packages))
+           (req (pop reqs)))
+      (when req
+        (require req)
+        (when reqs
+          (run-with-idle-timer 1 nil #'auto-require-packages reqs))))))
+
+(run-with-idle-timer 1 nil #'auto-require-packages
+                     '(calendar find-func format-spec org-macs org-compat
+                       org-faces org-entities org-list org-pcomplete org-src
+                       org-footnote org-macro ob org org-clock org-agenda
+                       org-capture with-editor git-commit package magit))
+
+(require 'bookmark)
+
 ;; site-local things
-(when (file-exists-p "~/local.el")
-  (load "~/local.el"))
+(load "~/local.el" 'noerror 'nomessage)
+
+;;; config.el ends here

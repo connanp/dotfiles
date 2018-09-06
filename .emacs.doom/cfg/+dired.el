@@ -1,7 +1,9 @@
 ;;; private/cfg/autoload/dired.el -*- lexical-binding: t; -*-
 
+;; "do what i mean" will let dired work with multiple window panes to do copying/moving between them
+(setq dired-dwim-target t)
+
 ;; https://oremacs.com/2016/02/24/dired-rsync/
-;;;###autoload
 (defun ckp/dired-rsync (dest)
   (interactive
    (list
@@ -31,10 +33,7 @@
     ;; finally, switch to that window
     (other-window 1)))
 
-(define-key dired-mode-map "Y" 'ckp/dired-rsync)
-
 ;; https://oremacs.com/2017/03/18/dired-ediff/
-;;;###autoload
 (defun ckp/ediff-files ()
   (interactive)
   (let ((files (dired-get-marked-files))
@@ -55,8 +54,6 @@
                       (set-window-configuration wnd))))
       (error "no more than 2 files should be marked"))))
 
-(define-key dired-mode-map (kbd "M-=") 'ckp/ediff-files)
-
 ;; dired customizations to prevent buffer spam
 (defadvice dired-advertised-find-file (around dired-subst-directory activate)
   "Replace current buffer if file is a directory."
@@ -69,7 +66,6 @@
       (kill-buffer orig))))
 
 ;; don't remove `other-window', the caller expects it to be there
-;;;###autoload
 (defun dired-up-directory (&optional other-window)
   "Run Dired on parent directory of current directory."
   (interactive "P")

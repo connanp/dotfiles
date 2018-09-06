@@ -14,3 +14,4 @@
 (package! request)
 (package! request-deferred)
 (package! org-jira)
+(package! em-smart)
