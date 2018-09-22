@@ -1,11 +1,21 @@
-;;; private/cfg/config.el -*- lexical-binding: t; -*-
+;;; private/cfg/config.el --- My configuration -*- lexical-binding: t; -*-
+;;; Commentary:
+;;; An ongoing work-in-progress of my Emacs configuration
+;;;
+;;; Code:
 
 (load! "+bindings")
 (load! "+so-long")
 
+(after! org
+  (load! "+org")
+  (load! "+org-time-tracking"))
+
 (setq-default
  user-full-name "Connan Pearson"
  user-mail-address "connanp@gmail.com")
+
+(setq-default global-visual-line-mode t)
 
 (after! so-long
   :config

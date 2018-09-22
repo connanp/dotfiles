@@ -74,6 +74,9 @@ zstyle ':prezto:module:syntax-highlighting' highlighters \
   'cursor' \
   'root'
 
+zstyle ':prezto:module:python' skip-virtualenvwrapper-init 'on'
+zstyle ':prezto:module:python:virtualenv' initialize 'no'
+
 zstyle ':prezto:load' pmodule \
   'environment' \
   'terminal' \
@@ -87,9 +90,9 @@ zstyle ':prezto:load' pmodule \
   'osx' \
   'git' \
   'fasd' \
-  'python' \
-  'ruby' \
   'rsync' \
+  'gpg' \
+  'python' \
   'ssh' \
   'syntax-highlighting' \
   'history-substring-search' \
@@ -115,3 +118,11 @@ if [[ "$PROFILE_STARTUP" == true ]]; then
     unsetopt xtrace
     exec 2>&3 3>&-
 fi
+
+PATH="/Users/connanp/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/Users/connanp/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/Users/connanp/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/Users/connanp/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/Users/connanp/perl5"; export PERL_MM_OPT;
+export PATH=$PATH:/usr/local/bin  # MIDWAY PATH: Path changed for ssh
+export PATH=$PATH:/usr/local/bin  # MIDWAY PATH: Path changed for ssh

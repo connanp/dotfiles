@@ -196,12 +196,12 @@ format."
     ;; enabled export backends
     (custom-set-variables '(org-export-backends '(ascii html latex md)))
 
-    (define-key org-mode-map [remap org-return] (lambda () (interactive)
-                                                  (if (org-in-src-block-p)
-                                                      (org-return)
-                                                    (org-return-indent))))
+    ;; (define-key org-mode-map [remap org-return] (lambda () (interactive)
+    ;;                                               (if (org-in-src-block-p)
+    ;;                                                   (org-return)
+    ;;                                                 (org-return-indent))))
 
-    (define-key org-mode-map (kbd "RET")  #'ha/org-return)
+    ;; (define-key org-mode-map (kbd "RET")  #'ha/org-return)
 
     ;; add or remove tags on state change
     (setq org-todo-state-tags-triggers

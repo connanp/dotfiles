@@ -1,17 +1,36 @@
 ;;; +bindings.el Keymap -*- lexical-binding: t; -*-
 
 (map!
- (:leader
-        (:prefix "b"
-          (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
+ :n "C-h" #'evil-window-left
+ :n "C-j" #'evil-window-down
+ :n "C-k" #'evil-window-up
+ :n "C-l" #'evil-window-right
+ :en "<f12>" #'org-agenda
+ :en "<f11>" #'org-clock-goto
+ :ein "C-<f11>" #'org-clock-in
+ :ein "<f5>" #'ckp/org-todo
+ :ein "<S-f5>" #'ckp/widen
 
-        (:desc "External" :prefix "a"
-          (:desc "Prodigy" :n "S" #'prodigy)))
+ (:leader
+   (:prefix "z"
+     :n "i" #'ckp/punch-in
+     :n "o" #'ckp/punch-out
+     :n "SPC" #'ckp/clock-in-last-task
+     :n "h" #'ckp/hide-other
+     :n "c" #'calendar
+     :n "t" #'ckp/insert-inactive-timestamp
+     :n "T" #'ckp/toggle-insert-inactive-timestamp))
+
+ (:leader
+   (:prefix "b"
+     (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
+   (:desc "External" :prefix "a"
+     (:desc "Prodigy" :n "S" #'prodigy)))
 
  (:after org
-        :map org-mode-map
-        :localleader
-        :n "e" #'ckp/tangle-blocks-for-file)
+   :map org-mode-map
+   :localleader
+   :n "e" #'ckp/tangle-blocks-for-file)
 
  (:after term
   ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
