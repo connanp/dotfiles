@@ -5,6 +5,8 @@
 (when IS-MAC
   (package! exec-path-from-shell :disable t))
 
+(when (featurep! :lang common-lisp)
+  (package! common-lisp-snippets))
 
 (package! ob-async)
 (package! dired-du)

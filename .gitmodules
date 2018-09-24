@@ -7,3 +7,6 @@
 [submodule ".zprezto"]
 	path = .zprezto
 	url = https://github.com/sorin-ionescu/prezto
+[submodule ".config/doom/snippets"]
+	path = .config/doom/snippets
+	url = https://github.com/hlissner/emacs-snippets
