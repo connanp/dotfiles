@@ -187,19 +187,20 @@
 (def-package! request)
 (def-package! request-deferred)
 
+;; TODO this is buffer-local and may not even be needed anymore.
 ;; shell-mode echos every command and `stty -echo' doesn't change that fact
-(setq comint-process-echoes t)
+;; (setq comint-process-echoes t)
 
 (after! projectile
   :config
   ;; messes with tramp, so much file check spam
-  (projectile-mode -1)
+  ;; (projectile-mode -1)
 
   ;; https://github.com/bbatsov/projectile/issues/657
-  (add-hook 'find-file-hook
-            (lambda ()
-              (if (locate-dominating-file default-directory ".git")
-                  (projectile-mode 1))))
+  ;; (add-hook 'find-file-hook
+  ;;           (lambda ()
+  ;;             (if (locate-dominating-file default-directory ".git")
+  ;;                 (projectile-mode 1))))
 
   (setq projectile-file-exists-local-cache-expire (* 5 60))
 
@@ -448,28 +449,19 @@
   (interactive)
   (clipboard-kill-ring-save (point-min) (point-max)))
 
-;; taken from https://github.com/hlissner/doom-emacs-private/blob/master/config.el
-;; load heavy packages all sneaky breeky like
-(defun auto-require-packages (packages)
-  (let ((gc-cons-threshold doom-gc-cons-upper-limit)
-        file-name-handler-alist)
-    (let* ((reqs (cl-remove-if #'featurep packages))
-           (req (pop reqs)))
-      (when req
-        (require req)
-        (when reqs
-          (run-with-idle-timer 1 nil #'auto-require-packages reqs))))))
-
-(run-with-idle-timer 1 nil #'auto-require-packages
-                     '(calendar find-func format-spec org-macs org-compat
-                       org-faces org-entities org-list org-pcomplete org-src
-                       org-footnote org-macro ob org org-clock org-agenda
-                       org-capture with-editor git-commit package magit))
-
 (require 'bookmark)
+
+;; (defun +ruby|correct-yasnippet-indent ()
+;;     (when (eq major-mode 'enh-ruby-mode)
+;;       (indent-region yas-snippet-beg yas-snippet-end)))
+;; (add-hook 'yas-after-exit-snippet-hook #'+ruby|correct-yasnippet-indent)
+;;
+(after! magit
+  ;; https://magit.vc/manual/magit/Performance.html
+  (setq auto-revert-buffer-list-filter
+      'magit-auto-revert-repository-buffers-p))
 
 ;; site-local things
 (load "~/local.el" 'noerror 'nomessage)
-
 
 ;;; config.el ends here

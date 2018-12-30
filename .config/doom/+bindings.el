@@ -12,6 +12,10 @@
  :ein "<S-f5>" #'ckp/widen
 
  (:leader
+   (:prefix "f"
+     (:desc "Find file in org dir" :n "o" #'ckp/org-find-file)))
+
+ (:leader
    (:prefix "z"
      :n "i" #'ckp/punch-in
      :n "o" #'ckp/punch-out

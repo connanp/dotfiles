@@ -5,10 +5,53 @@
 ;;;
 ;;; Code:
 
+(add-hook 'org-mode-hook (lambda () (set-fill-column 120)))
+
 (setq org-default-notes-file "~/org/refile.org")
-(setq org-agenda-files '("~/org"
-                         "~/org/amazon"
-                         "~/org/regions"))
+
+(def-package! ox-gfm
+  :when (featurep! :lang markdown +pandoc))
+
+(defun org-publish-org-to-gfm (plist filename pub-dir)
+ "Publish an org file to md using ox-gfm."
+ (org-publish-org-to 'gfm filename ".md" plist pub-dir))
+
+(setq org-publish-project-alist
+      '(("wiki"
+         :base-directory "~/org/amazon/wiki"
+         :publishing-directory "/-:dev-dsk:org-wiki/"
+         :publishing-function org-publish-org-to-gfm
+         :section-numbers nil
+         :with-toc t)))
+
+
+(defun org-global-props (&optional property buffer)
+  "Get the property lists of global org properties of current buffer."
+  (unless property (setq property "PROPERTY"))
+  (with-current-buffer (or buffer (current-buffer))
+    (org-element-map (org-element-parse-buffer) 'keyword (lambda (el) (when (string-match property (org-element-property :key el)) el)))))
+
+(defun org-global-prop-value (key)
+  "Get global org property KEY of current buffer."
+  (org-element-property :value (car (org-global-props key))))
+
+(defun ckp/org-agenda-files-from-dir (directory)
+  "Recursively list org files from a DIRECTORY."
+  (f-files directory
+           (lambda (f)
+             (s-equals? (f-ext f) "org"))
+           'recursive))
+
+(defun ckp/org-find-file ()
+  "Find files from `org-directory'"
+  (let ((default-directory "~/org"))
+    (call-interactively #'find-file)))
+
+(setq org-agenda-files (apply 'append
+                              '("~/org")
+                              (mapcar #'ckp/org-agenda-files-from-dir
+                               '("~/org/amazon"
+                                 "~/org/regions"))))
 
 (setq org-use-fast-todo-selection t)
 
@@ -36,21 +79,46 @@
 ;;
 ;; Capture templates for: TODO tasks, Notes, appointments, phone calls, meetings, and org-protocol
 (setq org-capture-templates '(("t" "todo" entry (file "~/org/refile.org")
-                               "* TODO %?\n%U\n%a\n" :clock-in t :clock-resume t)
+                               "* TODO %?
+:PROPERTIES:
+:Via:
+:END:
+:LOGBOOK:
+- State \"TODO\"       from \"\"           %U
+:END:
+%a"
+                               :clock-in t :clock-resume t :empty-lines 1)
                               ("r" "respond" entry (file "~/org/refile.org")
-                               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t)
+                               "* NEXT Respond to %:from on %:subject\nSCHEDULED: %t\n%U\n%a\n" :clock-in t :clock-resume t :immediate-finish t :empty-lines 1)
                               ("n" "note" entry (file "~/org/refile.org")
                                "* %? :NOTE:\n%U\n%a\n" :clock-in t :clock-resume t)
                               ("j" "Journal" entry (file+olp+datetree "~/org/diary.org")
-                               "* %?\n%U\n" :clock-in t :clock-resume t)
+                               "* %?\n%U\n" :clock-in t :clock-resume t :empty-lines 1)
                               ("w" "org-protocol" entry (file "~/org/refile.org")
-                               "* TODO Review %c\n%U\n" :immediate-finish t)
+                               "* TODO Review %c\n%U\n" :immediate-finish t :empty-lines 1)
                               ("m" "Meeting" entry (file "~/org/refile.org")
-                               "* MEETING with %? :MEETING:\n%U" :clock-in t :clock-resume t)
+                               "* MEETING %:description :MEETING:
+:PROPERTIES:
+:Via: %:annotation
+:END:
+:LOGBOOK:
+- State \"MEETING\"       from \"\"           %U
+:END:
+%^T"
+                               :clock-in t :clock-resume t :empty-lines 1)
                               ("p" "Phone call" entry (file "~/org/refile.org")
                                "* PHONE %? :PHONE:\n%U" :clock-in t :clock-resume t)
                               ("h" "Habit" entry (file "~/org/refile.org")
-                               "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n")))
+                               "* NEXT %?
+%a
+SCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")
+:PROPERTIES:
+:STYLE: habit
+:REPEAT_TO_STATE: NEXT
+:END:
+:LOGBOOK:
+- State \"NEXT\"       from \"\"           %U
+:END:\n" :empty-lines 1)))
 
 (setq org-tag-alist '((:startgroup)
                       ("@external" . ?e)
@@ -71,12 +139,12 @@
 ;; For tag searches ignore tasks with scheduled and deadline dates
 (setq org-agenda-tags-todo-honor-ignore-options t)
 
-;; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets '((nil :maxlevel . 9)
-                           (org-agenda-files :maxlevel . 9)))
+;; Targets include this file and any file contributing to the agenda
+(setq org-refile-targets '((nil :maxlevel . 4)
+                           (org-agenda-files :maxlevel . 4)))
 
 ;; Use full outline paths for refile targets
-(setq org-refile-use-outline-path t
+(setq org-refile-use-outline-path 'file
       ;; single step
       org-outline-path-complete-in-steps nil)
 

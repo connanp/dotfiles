@@ -25,14 +25,15 @@
         +fuzzy)          ; enable fuzzy search backend for ivy
 
        :ui
+       ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        doom-dashboard    ; a nifty splash screen for Emacs
-       doom-modeline     ; a snazzy Atom-inspired mode-line
+      ;doom-modeline     ; a snazzy Atom-inspired mode-line
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
        evil-goggles      ; display visual hints when editing in evil
        fci               ; a `fill-column' indicator
        hl-todo           ; highlight TODO/FIXME/NOTE tags
-      ;modeline          ; snazzy, Atom-inspired modeline, plus API
+       modeline          ; snazzy, Atom-inspired modeline, plus API
        nav-flash         ; blink the current line after jumping
       ;neotree           ; a project drawer, like NERDTree for vim
        treemacs          ; a project drawer, like neotree but cooler
@@ -65,6 +66,8 @@
        vc                ; version-control and Emacs, sitting in a tree
 
        :tools
+       ;;ansible
+       ;;docker
        editorconfig      ; let someone else argue about tabs vs spaces
       ;ein               ; tame Jupyter notebooks with emacs
       ;gist              ; interacting with github gists
@@ -84,6 +87,7 @@
        (cc +irony +rtags); C/C++/Obj-C madness
       ;clojure           ; java with a lisp
        common-lisp       ; if you've seen one lisp, you've seen them all
+      ;coq               ; proofs-as-programs
       ;crystal           ; ruby at the speed of c
       ;csharp            ; unity, .NET, and mono shenanigans
        data              ; config/data formats
@@ -95,6 +99,7 @@
        go                ; the hipster dialect
       ;(haskell +intero) ; a language that's lazier than I am
       ;hy                ; readability of scheme w/ speed of python
+      ;idris             ;
       ;(java +meghanada) ; the poster child for carpal tunnel syndrome
       ;javascript        ; all(hope(abandon(ye(who(enter(here))))))
       ;julia             ; a better, faster MATLAB
@@ -117,6 +122,7 @@
       ;plantuml          ; diagrams for confusing people more
       ;purescript        ; javascript, but functional
        (python
+        +ipython
         +pyenv
         +pyvenv)         ; beautiful is better than ugly
       ;qt                ; the 'cutest' gui framework ever

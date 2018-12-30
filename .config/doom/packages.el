@@ -8,6 +8,10 @@
 (when (featurep! :lang common-lisp)
   (package! common-lisp-snippets))
 
+(when (and (featurep! :lang org +export)
+           (featurep! :lang markdown +pandoc))
+  (package! ox-gfm))
+
 (package! ob-async)
 (package! dired-du)
 (package! default-text-scale)
@@ -17,3 +21,5 @@
 (package! request-deferred)
 (package! org-jira)
 (package! em-smart)
+(package! magithub :disable t)
+;; (package! ghub+ :recipe (:fetcher github :repo "vermiculus/ghub-plus" :commit "f36334b"))

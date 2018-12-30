@@ -3,6 +3,9 @@
 ;; "do what i mean" will let dired work with multiple window panes to do copying/moving between them
 (setq dired-dwim-target t)
 
+;; re-use dired buffers but does not affect '^' or mouse clicks
+(put 'dired-find-alternate-file 'disabled nil)
+
 ;; https://oremacs.com/2016/02/24/dired-rsync/
 (defun ckp/dired-rsync (dest)
   (interactive
@@ -64,19 +67,3 @@
     (when (and (file-directory-p filename)
                (not (eq (current-buffer) orig)))
       (kill-buffer orig))))
-
-;; don't remove `other-window', the caller expects it to be there
-(defun dired-up-directory (&optional other-window)
-  "Run Dired on parent directory of current directory."
-  (interactive "P")
-  (let* ((dir (dired-current-directory))
-         (orig (current-buffer))
-         (up (file-name-directory (directory-file-name dir))))
-    (or (dired-goto-file (directory-file-name dir))
-        ;; Only try dired-goto-subdir if buffer has more than one dir.
-        (and (cdr dired-subdir-alist)
-             (dired-goto-subdir up))
-        (progn
-          (kill-buffer orig)
-          (dired up)
-          (dired-goto-file dir)))))
