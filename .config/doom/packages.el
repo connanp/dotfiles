@@ -20,6 +20,4 @@
 (package! request)
 (package! request-deferred)
 (package! org-jira)
-(package! em-smart)
 (package! magithub :disable t)
-;; (package! ghub+ :recipe (:fetcher github :repo "vermiculus/ghub-plus" :commit "f36334b"))

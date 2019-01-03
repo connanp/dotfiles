@@ -15,7 +15,6 @@
 (setq-default global-visual-line-mode t)
 
 (after! so-long
-  :config
   (so-long-enable)
   (setq so-long-minor-modes (append '(rainbow-delimiters-mode) so-long-minor-modes)))
 
@@ -39,7 +38,6 @@
 (setq-default line-spacing 0.1)
 
 (after! magit
-  :config
   (add-hook 'magit-revision-mode-hook (lambda () (setq line-spacing 0))))
 
 (when (member "Iosevka" (font-family-list))
@@ -66,15 +64,12 @@
 
 
 (after! ivy
-  :config
   (setq ivy-count-format "(%d/%d) "))
 
 (after! avy
-  :config
   (setq avy-all-windows 'all-frames))
 
 (after! parinfer
-  :config
   (setq parinfer-auto-switch-indent-mode t
       parinfer-auto-switch-indent-mode-when-closing t)
 
@@ -94,7 +89,6 @@
     (call-interactively 'org-babel-tangle)))
 
 (after! ob
-  :config
   (load! "+ob-eshell")
 
   (org-babel-do-load-languages
@@ -147,7 +141,6 @@
 (setq history-delete-duplicates t)
 
 (after! counsel
-  :config
   ;; (if (executable-find "rg")
   ;;     (setq counsel-grep-base-command
   ;;           "rg -i -M 120 --no-heading --line-number --color never %s"))
@@ -176,11 +169,9 @@
 
 (def-package! warnings
     :defer t
-    :config
     (push '(undo discard-info) warning-suppress-types))
 
 (def-package! vlf
-  :config
   (setq large-file-warning-threshold (* 3 1024 1024))
   (require 'vlf-setup))
 (def-package! s)
@@ -192,7 +183,6 @@
 ;; (setq comint-process-echoes t)
 
 (after! projectile
-  :config
   ;; messes with tramp, so much file check spam
   ;; (projectile-mode -1)
 
@@ -214,7 +204,6 @@
 
 
 (after! tramp
-  :config
 
   (defun ckp/shell-set-hook ()
     "Allows packages such as `projectile' to work when initializing/finding files."
@@ -263,7 +252,7 @@
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 (after! eshell
-  :config
+  (require 'em-smart)
   (when (< emacs-major-version 27)
     (load! "+patch-eshell-26"))
 
@@ -383,7 +372,6 @@
   (add-hook 'eshell-post-command-hook 'ckp/eshell-status-display))
 
 (after! esh-module
-  :config
   ;; Don't print the banner.
   (delq 'eshell-banner eshell-modules-list)
   (push 'eshell-tramp eshell-modules-list)
@@ -395,14 +383,12 @@
   (setq eshell-smart-space-goes-to-end t))
 
 (after! em-term
-  :config
   (dolist (p '("watch"))
     (add-to-list 'eshell-visual-commands p))
   (setq eshell-visual-subcommands '(("git" "log" "diff" "show" "sudo" "vi" "visudo"))
         eshell-visual-options '(("aws" "--help"))))
 
 (after! em-ls
-  :config
   (defun ted-eshell-ls-find-file-at-point (point)
     "RET on Eshell's `ls' output to open files."
     (interactive "d")

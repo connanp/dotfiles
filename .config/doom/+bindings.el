@@ -51,11 +51,6 @@
      :n "=" #'ckp/ediff-files
      "M-=" #'ckp/ediff-files))
 
- (:after eshell
-   (:map* eshell-mode-map
-     :ni "M-j" #'eshell-previous-prompt
-     :ni "M-k" #'eshell-next-prompt))
-
  (:after prodigy
    (:map prodigy-mode-map
      :n "h" #'prodigy-first
@@ -74,7 +69,13 @@
      :n "gf" #'find-file-at-point
      :n "q"  #'quit-window)))
 
-
+(defun ckp/esh-init-keymap ()
+  "Setup eshell keybindings. This must be done in a hook because eshell-mode
+redefines its keys every time `eshell-mode' is enabled."
+  (map! :map eshell-mode-map
+     :ni "M-j" #'eshell-previous-prompt
+     :ni "M-k" #'eshell-next-prompt))
+(add-hook 'eshell-first-time-mode-hook #'ckp/esh-init-keymap)
 
 (provide '+bindings)
 ;;; +bindings.el ends here
