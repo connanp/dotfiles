@@ -167,11 +167,11 @@
          (eshell-smart-goto-end))))))
 
 
-(def-package! warnings
-    :defer t
+(after! warnings
     (push '(undo discard-info) warning-suppress-types))
 
 (def-package! vlf
+  :init
   (setq large-file-warning-threshold (* 3 1024 1024))
   (require 'vlf-setup))
 (def-package! s)

@@ -28,7 +28,7 @@
  (:leader
    (:prefix "b"
      (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
-   (:desc "External" :prefix "a"
+   (:prefix "a" :desc "External"
      (:desc "Prodigy" :n "S" #'prodigy)))
 
  (:after org

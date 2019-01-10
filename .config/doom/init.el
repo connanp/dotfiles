@@ -165,4 +165,5 @@
 
 
 (when (string-suffix-p ".amazon.com" (system-name))
-  (doom! :private amazon))
+  (doom! :private
+         amazon))
