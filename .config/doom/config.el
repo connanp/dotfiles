@@ -12,7 +12,8 @@
  user-full-name "Connan Pearson"
  user-mail-address "connanp@gmail.com")
 
-(setq-default global-visual-line-mode t)
+(setq-default global-visual-line-mode t
+              fill-column 120)
 
 (after! so-long
   (so-long-enable)
@@ -437,15 +438,21 @@
 
 (require 'bookmark)
 
-;; (defun +ruby|correct-yasnippet-indent ()
-;;     (when (eq major-mode 'enh-ruby-mode)
-;;       (indent-region yas-snippet-beg yas-snippet-end)))
-;; (add-hook 'yas-after-exit-snippet-hook #'+ruby|correct-yasnippet-indent)
-;;
 (after! magit
   ;; https://magit.vc/manual/magit/Performance.html
   (setq auto-revert-buffer-list-filter
       'magit-auto-revert-repository-buffers-p))
+
+(def-package! d-mode
+  :hook d-setup-cascaded-call-indentation
+  :config
+  (set-electric! 'd-mode :chars '(?\} ?\) ?\;)))
+
+(def-package! company-dcd
+  :init
+  (add-hook 'd-mode-hook #'company-dcd-mode)
+  :config
+  (set-company-backend! 'd-mode '(company-dcd company-yasnippet)))
 
 ;; site-local things
 (load "~/local.el" 'noerror 'nomessage)

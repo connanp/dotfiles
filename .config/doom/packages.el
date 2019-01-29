@@ -21,3 +21,5 @@
 (package! request-deferred)
 (package! org-jira)
 (package! magithub :disable t)
+(package! d-mode)
+(package! company-dcd)
