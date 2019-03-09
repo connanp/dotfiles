@@ -28,8 +28,9 @@
  (:leader
    (:prefix "b"
      (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
-   (:prefix "a" :desc "External"
-     (:desc "Prodigy" :n "S" #'prodigy)))
+   (:desc "apps" :prefix "a"
+     (:desc "Prodigy" :prefix "p"
+       :n "S" #'prodigy)))
 
  (:after org
    :map org-mode-map
