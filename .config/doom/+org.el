@@ -4,6 +4,7 @@
 ;;; This is taken from http://doc.norang.ca/org-mode.html
 ;;;
 ;;; Code:
+(require 'f)
 
 (add-hook 'org-mode-hook (lambda () (set-fill-column 120)))
 
