@@ -1,21 +1,7 @@
 ;;; init.el -*- lexical-binding: t; -*-
 ;; Copy me to ~/.doom.d/init.el or ~/.config/doom/init.el, then edit me!
 
-(doom! :feature
-      ;debugger          ; FIXME stepping through code, to help you add bugs
-       eval              ; run code, run (also, repls)
-       (evil +everywhere); come to the dark side, we have cookies
-       file-templates    ; auto-snippets for empty files
-       (lookup           ; helps you navigate your code and documentation
-        +devdocs         ; ...on devdocs.io online
-        +docsets)        ; ...or in Dash docsets locally
-       ;snippets          ; my elves. They type so I don't have to
-       spellcheck        ; tasing you for misspelling mispelling
-       (syntax-checker   ; tasing you for every semicolon you forget
-        +childframe)     ; use childframes for error popups (Emacs 26+ only)
-       workspaces        ; tab emulation, persistence & separate workspaces
-
-       :completion
+(doom! :completion
        company           ; the ultimate code completion backend
       ; +auto)           ; as-you-type code completion
       ;(helm             ; the *other* search engine for love and life
@@ -28,10 +14,9 @@
        ;;deft              ; notational velocity for Emacs
        doom              ; what makes DOOM look the way it does
        doom-dashboard    ; a nifty splash screen for Emacs
-      ;doom-modeline     ; a snazzy Atom-inspired mode-line
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
-       evil-goggles      ; display visual hints when editing in evil
-       fci               ; a `fill-column' indicator
+       ophints           ; display visual hints when editing in evil
+       fill-column       ; a `fill-column' indicator
        hl-todo           ; highlight TODO/FIXME/NOTE tags
        modeline          ; snazzy, Atom-inspired modeline, plus API
        nav-flash         ; blink the current line after jumping
@@ -47,9 +32,12 @@
        vc-gutter         ; vcs diff in the fringe
        vi-tilde-fringe   ; fringe tildes to mark beyond EOB
        window-select     ; visually switch windows
+       workspaces        ; tab emulation, persistence & separate workspaces
 
        :editor
+       (evil +everywhere); come to the dark side, we have cookies
       ;(format +onsave)  ; automated prettiness
+       file-templates    ; auto-snippets for empty files
        format
        fold              ; (nigh) universal code folding
        multiple-cursors  ; editing in many places at once
@@ -57,7 +45,9 @@
        rotate-text       ; cycle region at point between text candidates
 
        :emacs
-       dired             ; making dired pretty [functional]
+       (dired            ; making dired pretty [functional]
+        +ranger          ; bringing the goodness of ranger to dired
+        +icons)          ; colorful icons for dired-mode
        electric          ; smarter, keyword-based electric-indent
        eshell            ; a consistent, cross-platform shell (WIP)
        imenu             ; an imenu sidebar and searchable code index
@@ -66,10 +56,20 @@
 
        :tools
        ;;ansible
+       ;;debugger          ; FIXME stepping through code, to help you add bugs
+       ;;direnv
        ;;docker
        editorconfig      ; let someone else argue about tabs vs spaces
       ;ein               ; tame Jupyter notebooks with emacs
+       eval              ; run code, run (also, repls)
+       flyspell          ; tasing you for misspelling mispelling
+       (flycheck         ; tasing you for every semicolon you forget
+        +childframe)     ; use childframes for error popups (Emacs 26+ only)
       ;gist              ; interacting with github gists
+       (lookup           ; helps you navigate your code and documentation
+        +devdocs         ; ...on devdocs.io online
+        +docsets)        ; ...or in Dash docsets locally
+       ;;lsp
        macos             ; MacOS-specific commands
        make              ; run make tasks from Emacs
        magit             ;
@@ -115,7 +115,9 @@
         +babel           ; running code in org
         +capture         ; org-capture in and outside of Emacs
         +export          ; Exporting org to whatever you want
-        +present)        ; Emacs for presentations
+        +habit           ; Keep track of your habits
+        +present         ; Emacs for presentations
+        +protocol)       ; Support for org-protocol:// links
        perl              ; write code no one else can comprehend
       ;php               ; perl's insecure younger brother
       ;plantuml          ; diagrams for confusing people more
@@ -127,7 +129,8 @@
       ;qt                ; the 'cutest' gui framework ever
       ;racket            ; a DSL for DSLs
        rest              ; Emacs as a REST client
-       ruby              ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       (ruby
+        +rbenv)          ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
       ;rust              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
       ;scala             ; java, but good
        sh                ; she sells (ba|z)sh shells on the C xor

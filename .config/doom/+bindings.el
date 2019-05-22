@@ -6,7 +6,7 @@
  :n "C-k" #'evil-window-up
  :n "C-l" #'evil-window-right
  :en "<f12>" #'org-agenda
- :en "<f11>" #'org-clock-goto
+ :en "<S-f11>" #'org-clock-goto
  :ein "C-<f11>" #'org-clock-in
  :ein "<f5>" #'ckp/org-todo
  :ein "<S-f5>" #'ckp/widen
