@@ -12,6 +12,7 @@
            (featurep! :lang markdown +pandoc))
   (package! ox-gfm))
 
+(package! yasnippet-snippets)
 (package! circadian)
 (package! ob-async)
 (package! dired-du)
@@ -22,5 +23,7 @@
 (package! request-deferred)
 (package! org-jira)
 (package! magithub :disable t)
-(package! d-mode)
-(package! company-dcd)
+;; (package! d-mode)
+;; (package! company-dcd)
+
+(package! dap-mode)

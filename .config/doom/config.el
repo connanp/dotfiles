@@ -469,6 +469,10 @@
   :config
   (set-company-backend! 'd-mode '(company-dcd company-yasnippet)))
 
+(def-package! yasnippet-snippets)
+(def-package! dap-mode)
+;; (dap-mode 1)
+;; (dap-ui-mode 1)
 ;; site-local things
 (load "~/local.el" 'noerror 'nomessage)
 
