@@ -19,11 +19,23 @@
   (so-long-enable)
   (setq so-long-minor-modes (append '(rainbow-delimiters-mode) so-long-minor-modes)))
 
-(setq doom-theme 'doom-dracula)
+(setq doom-theme 'doom-one)
 ;; (setq doom-theme 'doom-outrun
 ;;       doom-outrun-brighter-comments nil
 ;;       doom-outrun-comment-bg nil
 ;;       doom-themes-padded-modeline nil)
+(def-package! circadian)
+(after! circadian
+  (setq calendar-latitude 47.603230)
+  (setq calendar-longitude -122.330276)
+  (setq circadian-themes '((:sunrise . doom-one)
+                           (:sunset  . doom-challenger-deep)))
+
+  (add-hook 'circadian-after-load-theme-hook
+            #'(lambda (theme)
+                (setq doom-theme theme)))
+
+  (circadian-setup))
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))

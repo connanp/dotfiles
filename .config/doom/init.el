@@ -15,12 +15,12 @@
        doom              ; what makes DOOM look the way it does
        doom-dashboard    ; a nifty splash screen for Emacs
        doom-quit         ; DOOM quit-message prompts when you quit Emacs
-       ophints           ; display visual hints when editing in evil
-       fill-column       ; a `fill-column' indicator
+       ;;fill-column       ; a `fill-column' indicator
        hl-todo           ; highlight TODO/FIXME/NOTE tags
        modeline          ; snazzy, Atom-inspired modeline, plus API
        nav-flash         ; blink the current line after jumping
        ;;neotree           ; a project drawer, like NERDTree for vim
+       ophints           ; display visual hints when editing in evil
        treemacs          ; a project drawer, like neotree but cooler
        (popup            ; tame sudden yet inevitable temporary windows
         +all             ; catch all popups that start with an asterix
@@ -40,7 +40,9 @@
        file-templates    ; auto-snippets for empty files
        format
        fold              ; (nigh) universal code folding
+       ;;lispy             ; vim for lisp, for people who dont like vim
        multiple-cursors  ; editing in many places at once
+       ;;objed             ; text object editing for the innocent
        parinfer          ; turn lisp into python, sort of
        rotate-text       ; cycle region at point between text candidates
 
@@ -48,7 +50,7 @@
        (dired            ; making dired pretty [functional]
         +ranger          ; bringing the goodness of ranger to dired
         +icons)          ; colorful icons for dired-mode
-       electric          ; smarter, keyword-based electric-indent
+       ;; electric          ; smarter, keyword-based electric-indent
        vc                ; version-control and Emacs, sitting in a tree
 
        :term
@@ -71,7 +73,7 @@
         +devdocs         ; ...on devdocs.io online
         +docsets)        ; ...or in Dash docsets locally
        ;;lsp
-       macos             ; MacOS-specific commands
+       ;;macos             ; MacOS-specific commands
        make              ; run make tasks from Emacs
        magit             ;
        pass              ; password manager for nerds
@@ -83,6 +85,7 @@
        ;;wakatime
 
        :lang
+       ;;agda              ; types of types of types of types...
        assembly          ; assembly for fun or debugging
        (cc +irony +rtags); C/C++/Obj-C madness
        ;;clojure           ; java with a lisp
@@ -96,6 +99,7 @@
        ;;elm               ; care for a cup of TEA?
        emacs-lisp        ; drown in parentheses
        ;;ess               ; emacs speaks statistics
+       ;;fsharp           ; ML stands for Microsoft's Language
        go                ; the hipster dialect
        ;;(haskell +intero) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
@@ -132,7 +136,7 @@
        rest              ; Emacs as a REST client
        (ruby
         +rbenv)          ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       ;;rust              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       rust              ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        sh                ; she sells (ba|z)sh shells on the C xor
        ;;solidity          ; do you need a blockchain? No.

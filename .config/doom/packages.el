@@ -12,6 +12,7 @@
            (featurep! :lang markdown +pandoc))
   (package! ox-gfm))
 
+(package! circadian)
 (package! ob-async)
 (package! dired-du)
 (package! default-text-scale)
