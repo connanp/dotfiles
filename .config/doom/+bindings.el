@@ -12,9 +12,27 @@
  :ein "<S-f5>" #'ckp/widen
  :ne "SPC / r" #'deadgrep
 
+ (:map minibuffer-local-map
+   "C-n" #'next-line-or-history-element
+   "C-p" #'previous-line-or-history-element)
+
+ (:map calendar-mode-map
+   :n "o" #'calendar-other-month)
+
+ (:map smartparens-mode-map
+   :n "M-o" #'sp-open-line-below-sexp-command)
+
  (:leader
    (:prefix "f"
-     (:desc "Find file in org dir" :n "o" #'ckp/org-find-file)))
+     (:desc "Find file in org dir" :n "o" #'ckp/org-find-file))
+   (:prefix "t"
+     :desc "Wrap lines to fit screen" :n "v" #'visual-line-mode)
+
+  (:after dap-mode
+    (:leader
+      ;; Open
+      (:prefix "o"
+        :desc "Dap Debugger" :n "D" #'+dap-hydra/body))))
 
  (:leader
    (:prefix "z"
