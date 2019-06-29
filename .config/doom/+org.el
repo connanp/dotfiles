@@ -13,6 +13,9 @@
 (def-package! ox-gfm
   :when (featurep! :lang markdown +pandoc))
 
+(def-package! ox-confluence
+  :when (featurep! :lang org +export))
+
 (defun org-publish-org-to-gfm (plist filename pub-dir)
  "Publish an org file to md using ox-gfm."
  (org-publish-org-to 'gfm filename ".md" plist pub-dir))
@@ -530,6 +533,9 @@ Skip project and sub-project tasks, habits, and loose non-project tasks."
                     (org-tags-match-list-sublevels nil))))
             nil)))
 
+
+(set-popup-rule! "^\\*Org Agenda" :side 'bottom :size 0.90 :select t :ttl nil)
+(set-popup-rule! "^CAPTURE.*\\.org$" :side 'bottom :size 0.90 :select t :ttl nil)
 
 (provide '+org)
 ;;; +org.el ends here

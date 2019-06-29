@@ -458,21 +458,28 @@
   (setq auto-revert-buffer-list-filter
       'magit-auto-revert-repository-buffers-p))
 
-(def-package! d-mode
-  :hook d-setup-cascaded-call-indentation
-  :config
-  (set-electric! 'd-mode :chars '(?\} ?\) ?\;)))
+;; (def-package! d-mode
+;;   :hook d-setup-cascaded-call-indentation
+;;   :config
+;;   (set-electric! 'd-mode :chars '(?\} ?\) ?\;)))
 
-(def-package! company-dcd
-  :init
-  (add-hook 'd-mode-hook #'company-dcd-mode)
-  :config
-  (set-company-backend! 'd-mode '(company-dcd company-yasnippet)))
+;; (def-package! company-dcd
+;;   :init
+;;   (add-hook 'd-mode-hook #'company-dcd-mode)
+;;   :config
+;;   (set-company-backend! 'd-mode '(company-dcd company-yasnippet)))
+
+(def-package! deadgrep)
 
 (def-package! yasnippet-snippets)
 (def-package! dap-mode)
 ;; (dap-mode 1)
 ;; (dap-ui-mode 1)
+(setq
+ js-indent-level 2
+ json-reformat:indent-width 2
+ prettier-js-args '("--single-quote")
+ projectile-project-search-path '("~/workspace/"))
 ;; site-local things
 (load "~/local.el" 'noerror 'nomessage)
 

@@ -12,6 +12,7 @@
            (featurep! :lang markdown +pandoc))
   (package! ox-gfm))
 
+(package! deadgrep)
 (package! yasnippet-snippets)
 (package! circadian)
 (package! ob-async)

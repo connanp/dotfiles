@@ -2,7 +2,9 @@
 ;; Copy me to ~/.doom.d/init.el or ~/.config/doom/init.el, then edit me!
 
 (doom! :completion
-       company           ; the ultimate code completion backend
+       (company           ; the ultimate code completion backend
+        +tng
+        +childframe)
        ;; +auto)           ; as-you-type code completion
        ;;(helm             ; the *other* search engine for love and life
        ;; +fuzzy)          ; enable fuzzy search backend for helm

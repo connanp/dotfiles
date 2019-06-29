@@ -10,6 +10,7 @@
  :ein "C-<f11>" #'org-clock-in
  :ein "<f5>" #'ckp/org-todo
  :ein "<S-f5>" #'ckp/widen
+ :ne "SPC / r" #'deadgrep
 
  (:leader
    (:prefix "f"
