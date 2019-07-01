@@ -179,27 +179,3 @@
 (when (string-suffix-p ".amazon.com" (system-name))
   (doom! :private
          amazon))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("d2e9c7e31e574bf38f4b0fb927aaff20c1e5f92f72001102758005e53d77b8c9" "49ec957b508c7d64708b40b0273697a84d3fee4f15dd9fc4a9588016adee3dad" "93a0885d5f46d2aeac12bf6be1754faa7d5e28b27926b8aa812840fe7d0b7983" "8aca557e9a17174d8f847fb02870cb2bb67f3b6e808e46c0e54a44e3e18e1020" "6b289bab28a7e511f9c54496be647dc60f5bd8f9917c9495978762b99d8c96a0" "d1b4990bd599f5e2186c3f75769a2c5334063e9e541e37514942c27975700370" "fd944f09d4d0c4d4a3c82bd7b3360f17e3ada8adf29f28199d09308ba01cc092" "a8c210aa94c4eae642a34aaf1c5c0552855dfca2153fa6dd23f3031ce19453d4" "151bde695af0b0e69c3846500f58d9a0ca8cb2d447da68d7fbf4154dcf818ebc" "9954ed41d89d2dcf601c8e7499b6bb2778180bfcaeb7cdfc648078b8e05348c6" "36a657fede3a814b86945cbc5a90c685e359b2c9563593c78d813eb6458d65c9" "6d589ac0e52375d311afaa745205abb6ccb3b21f6ba037104d71111e7e76a3fc" default))
- '(org-journal-dir "~/journal/"))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(rainbow-delimiters-base-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-1-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-2-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-3-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-4-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-5-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-6-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-7-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-8-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-depth-9-face ((t (:foreground "#cbe3e7"))))
- '(rainbow-delimiters-unmatched-face ((t (:foreground unspecified :inherit error)))))

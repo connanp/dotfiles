@@ -1,4 +1,5 @@
 ;;; config.el -*- lexical-binding: t; -*-
+(setq custom-file "~/.emacs-custom.el")
 
 (load! "+bindings")
 (load! "+dired")
@@ -332,7 +333,10 @@
   ;; (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   )
 
-(def-package! deadgrep)
+(def-package! deadgrep
+  :config
+  ;; does not work...
+  (set-popup-rule! "^\\*deadgrep capture" :size 0.5 :side 'bottom :select t :quit t :ttl 60))
 
 (def-package! yasnippet-snippets)
 
@@ -370,6 +374,7 @@
 (add-function :after after-focus-change-function #'save-all)
 
 ;; site-local things
+(load custom-file)
 (load "~/local.el" 'noerror 'nomessage)
 
 ;;; config.el ends here

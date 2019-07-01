@@ -10,7 +10,7 @@
  :ein "C-<f11>" #'org-clock-in
  :ein "<f5>" #'ckp/org-todo
  :ein "<S-f5>" #'ckp/widen
- :ne "SPC / r" #'deadgrep
+ :ne "SPC / /" #'deadgrep
 
  (:map minibuffer-local-map
    "C-n" #'next-line-or-history-element
