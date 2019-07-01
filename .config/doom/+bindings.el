@@ -28,11 +28,11 @@
    (:prefix "t"
      :desc "Wrap lines to fit screen" :n "v" #'visual-line-mode)
 
-  (:after dap-mode
-    (:leader
-      ;; Open
-      (:prefix "o"
-        :desc "Dap Debugger" :n "D" #'+dap-hydra/body))))
+   (:after dap-mode
+     (:leader
+       ;; Open
+       (:prefix "o"
+         :desc "Dap Debugger" :n "D" #'+dap-hydra/body))))
 
  (:leader
    (:prefix "z"
@@ -52,12 +52,14 @@
        :n "S" #'prodigy)))
 
  (:after org
-   :map org-mode-map
-   :localleader
-   :n "e" #'ckp/tangle-blocks-for-file)
+   (:map org-mode-map
+     (:localleader
+       :n "e" #'ckp/tangle-blocks-for-file
+       :n "r" #'hydra-org-refiler/body
+       :n "j" #'view-journal)))
 
  (:after term
-  ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
+   ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
    (:map term-raw-map
      :n "p" #'term-paste
      :n "j" #'term-send-down

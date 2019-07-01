@@ -43,38 +43,53 @@
             '((show-trailing-whitespace . nil)
               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-one)
-;; (setq doom-theme 'doom-outrun
-;;       doom-outrun-brighter-comments nil
-;;       doom-outrun-comment-bg nil
-;;       doom-themes-padded-modeline nil)
-(def-package! circadian)
-(after! circadian
+(setq doom-theme 'doom-tomorrow-day)
+(def-package! circadian
+  :config
   (setq calendar-latitude 47.603230)
   (setq calendar-longitude -122.330276)
-  (setq circadian-themes '((:sunrise . doom-one)
+  (setq circadian-themes '((:sunrise . doom-tomorrow-day)
+                           ("15:00" . doom-tomorrow-night)
                            (:sunset  . doom-challenger-deep)))
 
-  (add-hook 'circadian-after-load-theme-hook
-            #'(lambda (theme)
-                (setq doom-theme theme)))
+  (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
+  (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
 
   (circadian-setup))
+
+;; monochrome theme so that unbalanced parens are obvious.
+(doom-themes-set-faces nil
+  '(rainbow-delimiters-unmatched-face :foreground 'unspecified :inherit 'error)
+  '(rainbow-delimiters-base-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-1-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-2-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-3-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-4-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-5-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-6-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-7-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-8-face :foreground (doom-color 'fg-alt))
+  '(rainbow-delimiters-depth-9-face :foreground (doom-color 'fg-alt)))
+
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))
 
 (setq text-scale-mode-step 1.05
       doom-themes-enable-bold t
-      doom-themes-enable-italic t
-      doom-treemacs-enable-variable-pitch t)
+      doom-themes-enable-italic t)
 
 (setq-default line-spacing 0.1)
 
 (when (member "Iosevka" (font-family-list))
   (setq doom-font (font-spec :family "Iosevka" :size 14 :weight 'medium)
-        doom-variable-pitch-font (font-spec :family "Iosevka" :size 14 :weight 'medium)
         doom-big-font (font-spec :family "Iosevka" :size 19 :weight 'light)))
+
+(when (member "Libre Baskerville" (font-family-list))
+  (setq doom-variable-pitch-font (font-spec :family "Libre Baskerville" :size 16)))
+
+;; performance
+(setq flyspell-issue-message-flag nil)
 
 ;; emacs can already page.
 (setenv "PAGER" "cat")
@@ -313,7 +328,9 @@
         magit-module-sections-nested nil)
   (add-hook! magit-mode (setq magit-popup-show-common-commands nil
                               magit-gh-pulls-pull-detail-limit 200))
-  (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell))
+  ;; flyspell blocks too long when loading aspell.. otherwise i'd love to enable this.
+  ;; (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
+  )
 
 (def-package! deadgrep)
 
@@ -344,6 +361,13 @@
 
 
 (setq company-global-modes '(not erc-mode message-mode help-mode gud-mode))
+
+;; save buffers when losing focus
+(defun save-all ()
+  (when (frame-focus-state)
+    (save-some-buffers t)))
+
+(add-function :after after-focus-change-function #'save-all)
 
 ;; site-local things
 (load "~/local.el" 'noerror 'nomessage)

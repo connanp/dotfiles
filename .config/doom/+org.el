@@ -6,9 +6,14 @@
 ;;; Code:
 (require 'f)
 
-(add-hook 'org-mode-hook (lambda () (set-fill-column 120)))
+(add-hook! org-mode-hook (set-fill-column 120))
 
-(setq org-default-notes-file "~/org/refile.org")
+(defvar org-default-notes-file "~/org/notes.org" "Where I put my notes")
+(defvar org-default-projects-dir "~/org/projects" "Primary GTD")
+(defvar org-default-inbox-file "~/org/refile.org" "Incoming entries needing to be refiled")
+(defvar org-default-tasks-file "~/org/tasks.org" "Small things without projects")
+(defvar org-default-incubate-file "~/org/incubate.org" "Ideas for someday")
+(defvar org-default-completed-file nil "Archive")
 
 (def-package! ox-gfm
   :when (featurep! :lang markdown +pandoc))
@@ -16,9 +21,84 @@
 (def-package! ox-confluence
   :when (featurep! :lang org +export))
 
+(def-package! org-journal
+  :config
+  (defun my/org-journal-date-fmt (time)
+    "Custom function to insert journal date header,
+and some custom text on a newly created journal file."
+    (when (= (buffer-size) 0)
+      (insert
+       (pcase org-journal-file-type
+         (`daily "#+TITLE: Daily Journal")
+         (`weekly "#+TITLE: Weekly Journal")
+         (`monthly "#+TITLE: Monthly Journal")
+         (`yearly "#+TITLE: Yearly Journal"))))
+    (concat org-journal-date-prefix (format-time-string "%e %b %Y (%A)" time)))
+
+  (defun view-journal ()
+    "Open journal to latest entry."
+    (interactive)
+    (org-journal-new-entry t nil))
+
+  (defun org-journal-find-location ()
+    ;; Open today's journal, but specify a non-nil prefix argument in order to
+    ;; inhibit inserting the heading; org-capture will insert the heading.
+    (org-journal-new-entry t)
+    ;; Position point on the journal's top-level heading so that org-capture
+    ;; will add the new entry as a child entry.
+    (goto-char (point-min)))
+
+  (customize-save-variable 'org-journal-dir "~/journal/")
+  (setq org-journal-file-type 'weekly
+        org-journal-date-format #'my/org-journal-date-fmt
+        org-journal-time-format ""))
+
+
+(setq org-capture-templates (list))
+(setq org-capture-default-template "c")
+
+(add-to-list 'org-capture-templates
+              `("t" "Task Entry"        entry
+                (file ,org-default-inbox-file)
+                "* %?\n:PROPERTIES:\n:CREATED:%U\n:END:\n\n%i\n\nFrom: %a"
+                :empty-lines 1))
+
+(add-to-list 'org-capture-templates
+              `("c" "Item to Current Clocked Task" item
+                (clock)
+                "%i%?" :empty-lines 1))
+
+(add-to-list 'org-capture-templates
+              `("C" "Contents to Current Clocked Task" plain
+                (clock)
+                "%i" :immediate-finish t :empty-lines 1))
+
+(add-to-list 'org-capture-templates
+              `("f" "Code Reference with Comments to Current Task" plain
+                (clock)
+                "%(ha/org-capture-code-snippet \"%F\")\n\n   %?"
+                :empty-lines 1))
+
+(add-to-list 'org-capture-templates
+              `("F" "Code Reference to Current Task" plain
+                (clock)
+                "%(ha/org-capture-code-snippet \"%F\")"
+                :empty-lines 1 :immediate-finish t))
+
+(add-to-list 'org-capture-templates
+              '("n" "Thought or Note" entry
+                (file org-default-notes-file)
+                "* %?\n\n  %i\n\n  See: %a" :empty-lines 1))
+
+(add-to-list 'org-capture-templates
+              '("j" "Journal Note" entry
+                (function org-journal-find-location)
+                "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?\n\n  From: %a" :empty-lines 1))
+
+
 (defun org-publish-org-to-gfm (plist filename pub-dir)
- "Publish an org file to md using ox-gfm."
- (org-publish-org-to 'gfm filename ".md" plist pub-dir))
+  "Publish an org file to md using ox-gfm."
+  (org-publish-org-to 'gfm filename ".md" plist pub-dir))
 
 (setq org-publish-project-alist
       '(("wiki"
@@ -49,7 +129,7 @@
 (defun ckp/org-find-file ()
   "Find files from `org-directory'"
   (let ((default-directory "~/org"))
-    (call-interactively #'find-file)))
+    (ignore-errors (call-interactively #'find-file))))
 
 (setq org-agenda-files (apply 'append
                               '("~/org")
@@ -124,14 +204,13 @@
                       ("@external" . ?e)
                       ("@team" . ?t)
                       ("@oncall" . ?o)
+                      ("@design" . ?d)
+                      ("@meeting" . ?m)
                       (:endgroup)
-                      ("WAIT" . ?w)
-                      ("HOLD" . ?h)
-                      ("PERSONAL" . ?P)
-                      ("WORK" . ?W)
-                      ("NOTE" . ?n)
-                      ("CANCELLED" . ?c)
-                      ("FLAGGED" . ??)))
+                      (:startgroup)
+                      ("@house" . ?H)
+                      ("@maintenance" . ?M)
+                      (:endgroup)))
 
 ;; set without the menu
 (setq org-fast-tag-selection-single-key 'expert)
@@ -144,8 +223,8 @@
 (setq org-cycle-separator-lines 0)
 
 ;; Targets include this file and any file contributing to the agenda
-(setq org-refile-targets '((nil :maxlevel . 4)
-                           (org-agenda-files :maxlevel . 4)))
+(setq org-refile-targets '((nil :maxlevel . 0)
+                           (org-agenda-files :maxlevel . 1)))
 
 ;; Use full outline paths for refile targets
 (setq org-refile-use-outline-path 'file
@@ -163,17 +242,6 @@
   (not (member (nth 2 (org-heading-components)) org-done-keywords)))
 
 (setq org-refile-target-verify-function 'ckp/verify-refile-target)
-
-(setq org-clock-out-remove-zero-time-clocks t)
-
-;; Remove empty LOGBOOK drawers on clock out
-(defun ckp/remove-empty-drawer-on-clock-out ()
-  (interactive)
-  (save-excursion
-    (beginning-of-line 0)
-    (org-remove-empty-drawer-at "LOGBOOK" (point))))
-
-(add-hook 'org-clock-out-hook 'ckp/remove-empty-drawer-on-clock-out 'append)
 
 (defun ckp/org-auto-exclude-agenda (tag)
   "Automatic task exclusion in the agenda views with / RET."
@@ -207,13 +275,13 @@
     (lambda () (remove-text-properties
                (point-min) (point-max) '(mouse-face t))))
 
-(setq org-ellipsis " ▼")
+(setq org-ellipsis " ⁂")
 
 (add-hook! 'org-mode-hook
-  (push '("TODO"  . ?▲) prettify-symbols-alist)
-  (push '("DONE"  . ?✓) prettify-symbols-alist)
-  (push '("WAITING"  . ?…) prettify-symbols-alist)
-  (push '("CANCELLED"  . ?×) prettify-symbols-alist)
+  (push '("TODO"  . ?⚑) prettify-symbols-alist)
+  (push '("DONE"  . ?✔) prettify-symbols-alist)
+  (push '("WAIT"  . ?…) prettify-symbols-alist)
+  (push '("ABRT"  . ?✘) prettify-symbols-alist)
   (push '("SOMEDAY"  . ??) prettify-symbols-alist))
 
 ;; better timestamps in exporting
@@ -222,6 +290,225 @@
    (pcase back
      ((or `markdown `html)
       (replace-regexp-in-string "&[lg]t;" "" input))))
+
+(add-to-list 'org-export-filter-timestamp-functions
+             #'my/filter-timestamp)
+
+
+(defun org-subtree-region ()
+  "Return a list of the start and end of a subtree."
+  (save-excursion
+    (list (progn (org-back-to-heading) (point))
+          (progn (org-end-of-subtree)  (point)))))
+
+(defun org-refile-directly (file-dest)
+  "Move the current subtree to the end of FILE-DEST.
+If SHOW-AFTER is non-nil, show the destination window,
+otherwise, this destination buffer is not shown."
+  (interactive "fDestination: ")
+
+  (defun dump-it (file contents)
+    (find-file-other-window file-dest)
+    (goto-char (point-max))
+    (insert "\n" contents))
+
+  (save-excursion
+    (let* ((region (org-subtree-region))
+           (contents (buffer-substring (first region) (second region))))
+      (apply 'kill-region region)
+      (if org-refile-directly-show-after
+          (save-current-buffer (dump-it file-dest contents))
+        (save-window-excursion (dump-it file-dest contents))))))
+
+(defvar org-refile-directly-show-after nil
+  "When refiling directly (using the `org-refile-directly'
+function), show the destination buffer afterwards if this is set
+to `t', otherwise, just do everything in the background.")
+
+(defun org-refile-to-incubate ()
+  "Refile (move) the current Org subtree to `org-default-incubate-fire'."
+  (interactive)
+  (org-refile-directly org-default-incubate-file))
+
+(defun org-refile-to-task ()
+  "Refile (move) the current Org subtree to `org-default-tasks-file'."
+  (interactive)
+  (org-refile-directly org-default-tasks-file))
+
+(defun org-refile-to-personal-notes ()
+  "Refile (move) the current Org subtree to `org-default-notes-file'."
+  (interactive)
+  (org-refile-directly org-default-notes-file))
+
+(defun org-refile-to-completed ()
+  "Refile (move) the current Org subtree to `org-default-completed-file',
+unless it doesn't exist, in which case, refile to today's journal entry."
+  (interactive)
+  (if (and org-default-completed-file (file-exists-p org-default-completed-file))
+      (org-refile-directly org-default-completed-file)
+    (org-refile-directly (org-journal-get-entry-path))))
+
+(defun org-rename-header (label)
+  "Rename the current section's header to LABEL, and moves the
+point to the end of the line."
+  (interactive (list
+                (read-string "Header: "
+                             (substring-no-properties (org-get-heading t t t t)))))
+  (org-back-to-heading)
+  (search-forward (org-get-heading t t t t) nil t 1)
+  (replace-match label 'literal))
+
+(defun org-archive-subtree-as-completed ()
+  "Archives the current subtree to today's current journal entry."
+  (interactive)
+  (ignore-errors
+    ;; According to the docs for `org-archive-subtree', the state should be
+    ;; automatically marked as DONE, but I don't notice that:
+    (pcase (org-get-todo-state)
+      ("ABRT" "ABRT")
+      (_ (org-todo "DONE"))))
+
+  (let* ((org-archive-file (or org-default-completed-file
+                               (todays-journal-entry)))
+         (org-archive-location (format "%s::" org-archive-file)))
+     (org-archive-subtree)))
+
+;; from howardisms -- useful capturing commands
+
+(require 'which-func)
+
+(defun ha/org-capture-code-snippet (f)
+  "Given a file, F, this captures the currently selected text
+within an Org SRC block with a language based on the current mode
+and a backlink to the function and the file."
+  (with-current-buffer (find-buffer-visiting f)
+    (let ((org-src-mode (replace-regexp-in-string "-mode" "" (format "%s" major-mode)))
+          (func-name (which-function)))
+      (ha/org-capture-fileref-snippet f "SRC" org-src-mode func-name))))
+
+(defun ha/org-capture-clip-snippet (f)
+  "Given a file, F, this captures the currently selected text
+within an Org EXAMPLE block and a backlink to the file."
+  (with-current-buffer (find-buffer-visiting f)
+    (ha/org-capture-fileref-snippet f "EXAMPLE" "" nil)))
+
+(defun ha/org-capture-fileref-snippet (f type headers func-name)
+  (let* ((code-snippet
+          (buffer-substring-no-properties (mark) (- (point) 1)))
+         (file-name   (buffer-file-name))
+         (file-base   (file-name-nondirectory file-name))
+         (line-number (line-number-at-pos (region-beginning)))
+         (initial-txt (if (null func-name)
+                          (format "From [[file:%s::%s][%s]]:"
+                                  file-name line-number file-base)
+                        (format "From ~%s~ (in [[file:%s::%s][%s]]):"
+                                func-name file-name line-number
+                                file-base))))
+    (format "
+   %s
+
+   #+BEGIN_%s %s
+%s
+   #+END_%s" initial-txt type headers code-snippet type)))
+
+(defun ha/code-to-clock (&optional start end)
+  "Send the currently selected code to the currently clocked-in org-mode task."
+  (interactive)
+  (org-capture nil "F"))
+
+(defun ha/code-comment-to-clock (&optional start end)
+  "Send the currently selected code (with comments) to the
+currently clocked-in org-mode task."
+  (interactive)
+  (org-capture nil "f"))
+
+
+;; ----------------------------------------------------------------------
+;;  Functions to help convert content from the operating system's
+;;  clipboard into org-mode-compatible text.
+;; ----------------------------------------------------------------------
+
+(defun shell-command-with-exit-code (program &rest args)
+  "Run PROGRAM with ARGS and return the exit code and output in a list."
+  (with-temp-buffer
+    (list (apply 'call-process program nil (current-buffer) nil args)
+          (buffer-string))))
+
+(defun ha/get-clipboard ()
+  "Returns a list where the first entry is the content type,
+either :html or :text, and the second is the clipboard contents."
+  (if (eq system-type 'darwin)
+      (ha/get-mac-clipboard)
+    (ha/get-linux-clipboard)))
+
+(defun ha/get-linux-clipboard ()
+  "Return the clipbaard for a Unix-based system. See `ha/get-clipboard'."
+  (destructuring-bind (exit-code contents)
+      (shell-command-with-exit-code "xclip" "-o" "-t" "text/html")
+    (if (= 0 exit-code)
+        (list :html contents)
+      (list :text (shell-command-to-string "xclip -o")))))
+
+(defun ha/get-mac-clipboard ()
+  "Returns a list where the first entry is the content type,
+either :html or :text, and the second is the clipboard contents."
+  (destructuring-bind (exit-code contents)
+      (shell-command-with-exit-code "osascript" "-e" "the clipboard as \"HTML\"")
+    (if (= 0 exit-code)
+        (list :html (ha/convert-applescript-to-html contents))
+      (list :text (shell-command-to-string "osascript -e 'the clipboard'")))))
+
+(defun ha/convert-applescript-to-html (packed-contents)
+  "Applescript's clipboard returns the contents in a packed array.
+Convert and return this encoding into a UTF-8 string."
+  (cl-flet ((hex-pack-bytes (tuple) (string-to-number (apply 'string tuple) 16)))
+    (let* ((data (-> packed-contents
+                     (substring 10 -2) ; strips off the =«data RTF= and =»\= bits
+                     (string-to-list)))
+           (byte-seq (->> data
+                          (-partition 2)  ; group each two hex characters into tuple
+                          (mapcar #'hex-pack-bytes))))
+
+      (decode-coding-string
+       (mapconcat #'byte-to-string byte-seq "") 'utf-8))))
+
+(defhydra hydra-org-refiler (org-mode-map "C-c s" :hint nil)
+    "
+  ^Navigate^      ^Refile^       ^Move^           ^Update^        ^Go To^        ^Dired^
+  ^^^^^^^^^^---------------------------------------------------------------------------------------
+  _k_: ↑ previous _t_: tasks     _m X_: projects  _T_: todo task  _g t_: tasks    _g X_: projects
+  _j_: ↓ next     _i_: incubate  _m P_: personal  _S_: schedule   _g i_: incubate _g P_: personal
+  _c_: archive    _p_: personal                   _D_: deadline   _g x_: inbox    _g C_: completed
+  _d_: delete     _r_: refile                     _R_: rename     _g n_: notes
+  "
+    ("<up>" org-previous-visible-heading)
+    ("<down>" org-next-visible-heading)
+    ("k" org-previous-visible-heading)
+    ("j" org-next-visible-heading)
+    ("c" org-archive-subtree-as-completed)
+    ("d" org-cut-subtree)
+    ("t" org-refile-to-task)
+    ("i" org-refile-to-incubate)
+    ("p" org-refile-to-personal-notes)
+    ("r" org-refile)
+    ("m X" org-refile-to-projects-dir)
+    ("m P" org-refile-to-personal-dir)
+    ("T" org-todo)
+    ("S" org-schedule)
+    ("D" org-deadline)
+    ("R" org-rename-header)
+    ("g t" (find-file-other-window org-default-tasks-file))
+    ("g i" (find-file-other-window org-default-incubate-file))
+    ("g x" (find-file-other-window org-default-inbox-file))
+    ("g c" (find-file-other-window org-default-completed-file))
+    ("g n" (find-file-other-window org-default-notes-file))
+    ("g X" (deer org-default-projects-dir))
+    ("g P" (deer org-default-personal-dir))
+    ("g C" (deer org-default-completed-dir))
+    ("[\t]" (org-cycle))
+    ("s" (org-save-all-org-buffers) "save")
+    ("q" nil "quit"))
+
 
 (set-popup-rule! "^\\*Org Agenda.*\\*$" :size 0.5 :side 'right :vslot 1  :select t :quit t   :ttl nil :modeline nil :autosave t)
 (set-popup-rule! "^CAPTURE.*\\.org$" :size 0.4 :side 'bottom :select t :autosave t)

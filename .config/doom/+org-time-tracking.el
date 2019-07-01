@@ -30,6 +30,15 @@
       ;; Include current clocking task in clock reports
       org-clock-report-include-clocking-task t)
 
+;; Remove empty LOGBOOK drawers on clock out
+(defun ckp/remove-empty-drawer-on-clock-out ()
+  (interactive)
+  (save-excursion
+    (beginning-of-line 0)
+    (org-remove-empty-drawer-at "LOGBOOK" (point))))
+
+(add-hook 'org-clock-out-hook 'ckp/remove-empty-drawer-on-clock-out 'append)
+
 (setq ckp/keep-clock-running nil)
 
 (defun ckp/clock-in-to-next (kw)

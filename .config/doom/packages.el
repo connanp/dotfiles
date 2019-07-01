@@ -11,7 +11,7 @@
 (when (featurep! :lang markdown +pandoc)
   (package! ox-gfm))
 
-(package! lispy :ignore t)              ;; default configuration enables this + lispyville
+(package! org-journal)
 (package! esh-autosuggest)
 (package! deadgrep)
 (package! yasnippet-snippets)
