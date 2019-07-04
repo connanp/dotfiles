@@ -1,5 +1,7 @@
 ;;; config.el -*- lexical-binding: t; -*-
 (setq custom-file "~/.emacs-custom.el")
+;; site-local things
+(load custom-file)
 
 (load! "+bindings")
 (load! "+dired")
@@ -164,11 +166,7 @@
 (defcustom smart-to-ascii '(("\x201C" . "\"")
                             ("\x201D" . "\"")
                             ("\x2018" . "'")
-                            ("\x2019" . "'")
-                            ;; en-dash
-                            ("\x2013" . "-")
-                            ;; em-dash
-                            ("\x2014" . "-"))
+                            ("\x2019" . "'"))
   "Map of smart quotes to their replacements"
   :type '(repeat (cons (string :tag "Smart Character  ")
                        (string :tag "Ascii Replacement"))))
@@ -333,10 +331,7 @@
   ;; (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   )
 
-(def-package! deadgrep
-  :config
-  ;; does not work...
-  (set-popup-rule! "^\\*deadgrep capture" :size 0.5 :side 'bottom :select t :quit t :ttl 60))
+(def-package! deadgrep)
 
 (def-package! yasnippet-snippets)
 
@@ -346,10 +341,7 @@
 ;; flycheck isn't really useful in these modes
 (add-hook! '(text-mode-hook org-mode-hook) (flycheck-mode -1))
 
-(setq confirm-kill-emacs nil
-      js-indent-level 2
-      json-reformat:indent-width 2
-      prettier-js-args '("--single-quote"))
+(setq confirm-kill-emacs nil)
 
 (set-frame-parameter nil 'fullscreen 'maximized)
 
@@ -373,8 +365,6 @@
 
 (add-function :after after-focus-change-function #'save-all)
 
-;; site-local things
-(load custom-file)
 (load "~/local.el" 'noerror 'nomessage)
 
 ;;; config.el ends here

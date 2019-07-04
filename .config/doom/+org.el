@@ -29,7 +29,7 @@ and some custom text on a newly created journal file."
     (when (= (buffer-size) 0)
       (insert
        (pcase org-journal-file-type
-         (`daily "#+TITLE: Daily Journal")
+         (`daily "#+TITLE: Journal Entry")
          (`weekly "#+TITLE: Weekly Journal")
          (`monthly "#+TITLE: Monthly Journal")
          (`yearly "#+TITLE: Yearly Journal"))))
@@ -40,16 +40,8 @@ and some custom text on a newly created journal file."
     (interactive)
     (org-journal-new-entry t nil))
 
-  (defun org-journal-find-location ()
-    ;; Open today's journal, but specify a non-nil prefix argument in order to
-    ;; inhibit inserting the heading; org-capture will insert the heading.
-    (org-journal-new-entry t)
-    ;; Position point on the journal's top-level heading so that org-capture
-    ;; will add the new entry as a child entry.
-    (goto-char (point-min)))
-
   (customize-save-variable 'org-journal-dir "~/journal/")
-  (setq org-journal-file-type 'weekly
+  (setq org-journal-file-type 'daily
         org-journal-date-format #'my/org-journal-date-fmt
         org-journal-time-format ""))
 
@@ -92,9 +84,31 @@ and some custom text on a newly created journal file."
 
 (add-to-list 'org-capture-templates
               '("j" "Journal Note" entry
-                (function org-journal-find-location)
-                "* %(format-time-string org-journal-time-format)%^{Title}\n%i%?\n\n  From: %a" :empty-lines 1))
+                (file org-journal-get-entry-path)
+                "* %(format-time-string org-journal-time-format)%?\n%i\n\n  From: %a" :empty-lines 1))
 
+(add-to-list 'org-capture-templates
+             `("m" "Meeting Notes" entry
+               (file+headline org-default-notes-file "Meeting Notes")
+               "* %^{something} :MEETING:
+SCHEDULED: %<%Y-%m-%d %H:%M>
+
+*Attendees:*
+
+- [X] connanp@
+- [ ] %?
+
+
+*Agenda:*
+-
+-
+
+*Notes:*
+
+
+" :empty-lines 1))
+
+(add-hook! 'org-capture-before-finalize-hook #'org-align-all-tags)
 
 (defun org-publish-org-to-gfm (plist filename pub-dir)
   "Publish an org file to md using ox-gfm."
@@ -128,6 +142,7 @@ and some custom text on a newly created journal file."
 
 (defun ckp/org-find-file ()
   "Find files from `org-directory'"
+  (interactive)
   (let ((default-directory "~/org"))
     (ignore-errors (call-interactively #'find-file))))
 
@@ -141,14 +156,17 @@ and some custom text on a newly created journal file."
       org-insert-heading-respect-content nil
       org-reverse-note-order nil
       org-deadline-warning-days 1
+      org-clone-delete-id t
+      org-agenda-skip-additional-timestamps-same-entry t
+      org-id-link-to-org-use-id 'create-if-interactive-and-no-custom-id
       org-blank-before-new-entry (quote ((heading . t)
                                          (plain-list-item . nil))))
 
 ;; https://yiufung.net/post/org-mode-hidden-gems-pt4/
-(setq org-log-done (quote time)
+(setq org-log-done 'time
       org-log-into-drawer t
-      org-log-redeadline (quote note) ;; record when the deadline date of a tasks is modified
-      org-log-reschedule (quote time))
+      org-log-redeadline 'note ;; record when the deadline date of a tasks is modified
+      org-log-reschedule 'time)
 
 (setq org-log-note-headings '((done        . "CLOSING NOTE %t")
                               (state       . "State %-12s from %-12S %t")
@@ -166,7 +184,15 @@ and some custom text on a newly created journal file."
 (setq org-list-demote-modify-bullet '(("+" . "-")
                                       ("*" . "-")
                                       ("1." . "-")
-                                      ("1)" . "-")))
+                                      ("1)" . "-")
+                                      ("A)" . "-")
+                                      ("B)" . "-")
+                                      ("a)" . "-")
+                                      ("b)" . "-")
+                                      ("A." . "-")
+                                      ("B." . "-")
+                                      ("a." . "-")
+                                      ("b." . "-")))
 (setq split-width-threshold 9999) ;; Minimum width for splitting windows sensibly.
 (setq org-adapt-indentation nil) ;; do not indent drawers/body according to heading level
 (setq org-yank-adjusted-subtrees t)
@@ -189,7 +215,7 @@ and some custom text on a newly created journal file."
 (setq org-todo-keywords
    '((sequence "TODO(t)" "NEXT(n)" "|" "DONE(d)")
      (sequence "[ ](T)" "[-](P)" "[?](M)" "|" "[X](D)")
-     (sequence "NEXT(n)" "WAIT(w)" "HOLD(h)" "|" "ABRT(c)"))
+     (sequence "NEXT(n)" "WAIT(w@/!)" "HOLD(h@/!)" "|" "ABRT(c@/!)"))
    org-todo-keyword-faces
    '(("[-]" :inherit (font-lock-constant-face bold))
      ("[?]" :inherit (warning bold))
@@ -205,8 +231,10 @@ and some custom text on a newly created journal file."
                       ("@team" . ?t)
                       ("@oncall" . ?o)
                       ("@design" . ?d)
-                      ("@meeting" . ?m)
                       (:endgroup)
+                      ("MEETING" . ?m)
+                      ("ABRT" . ?a)
+                      ("FLAGGED" . ??)
                       (:startgroup)
                       ("@house" . ?H)
                       ("@maintenance" . ?M)
@@ -372,6 +400,34 @@ point to the end of the line."
                                (todays-journal-entry)))
          (org-archive-location (format "%s::" org-archive-file)))
      (org-archive-subtree)))
+
+
+(defun narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed, narrow-dwim otherwise.
+Dwim means: region, org-src-block, org-subtree, or
+defun, whichever applies first. Narrowing to
+org-src-block actually calls `org-edit-src-code'.
+
+With prefix P, don't widen, just narrow even if buffer
+is already narrowed."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+        ((region-active-p)
+         (narrow-to-region (region-beginning)
+                           (region-end)))
+        ((derived-mode-p 'org-mode)
+         ;; `org-edit-src-code' is not a real narrowing
+         ;; command. Remove this first conditional if
+         ;; you don't want it.
+         (cond ((ignore-errors (org-edit-src-code) t)
+                (delete-other-windows))
+               ((ignore-errors (org-narrow-to-block) t))
+               (t (org-narrow-to-subtree))))
+        ((derived-mode-p 'latex-mode)
+         (LaTeX-narrow-to-environment))
+        (t (narrow-to-defun))))
+
 
 ;; from howardisms -- useful capturing commands
 
