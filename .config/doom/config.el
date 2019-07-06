@@ -52,6 +52,7 @@
   (setq calendar-latitude 47.603230)
   (setq calendar-longitude -122.330276)
   (setq circadian-themes '((:sunrise . doom-tomorrow-day)
+                           ("11:00" . doom-solarized-light)
                            ("15:00" . doom-tomorrow-night)
                            (:sunset  . doom-challenger-deep)))
 
@@ -72,7 +73,9 @@
   '(rainbow-delimiters-depth-6-face :foreground (doom-color 'fg-alt))
   '(rainbow-delimiters-depth-7-face :foreground (doom-color 'fg-alt))
   '(rainbow-delimiters-depth-8-face :foreground (doom-color 'fg-alt))
-  '(rainbow-delimiters-depth-9-face :foreground (doom-color 'fg-alt)))
+  '(rainbow-delimiters-depth-9-face :foreground (doom-color 'fg-alt))
+  ;; org headlines inherit this value
+  '(outline-1 :background nil))
 
 
 (when IS-MAC
