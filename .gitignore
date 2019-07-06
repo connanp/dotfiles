@@ -18,3 +18,5 @@ Thumbs.db
 
 .vscode/
 .envrc
+
+flycheck_*.elc
