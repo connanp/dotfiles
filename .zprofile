@@ -17,8 +17,8 @@ fi
 # Editors
 #
 
-export EDITOR='emacsclient -n'
-export VISUAL='emacsclient -n'
+export EDITOR="emacsclient -n -s /tmp/emacs$UID/server"
+export VISUAL="emacsclient -n -s /tmp/emacs$UID/server"
 export PAGER='less'
 
 #
@@ -43,6 +43,7 @@ fi
 # Set the list of directories that Zsh searches for programs.
 path=(
     $HOME/bin
+    $HOME/.cargo/bin
     /usr/local/{bin,sbin}
     $path
 )
