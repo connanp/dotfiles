@@ -87,6 +87,7 @@
    "gd"    "magit-diff-unstaged"
    "gds"   "magit-diff-staged"
    "gc"    "magit-commit"
+   "gr"    "cd ${vc-git-root \\'git-root}"
    "gs"    "magit-status"
    "dt"    "gdate \"+%Y-%m-%dT%H:%M:%S.%3N%zZ\""
    "epoch" "date +%s"

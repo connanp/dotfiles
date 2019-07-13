@@ -27,13 +27,7 @@
    (:prefix "f"
      (:desc "Find file in org dir" :n "o" #'ckp/org-find-file))
    (:prefix "t"
-     :desc "Wrap lines to fit screen" :n "v" #'visual-line-mode)
-
-   (:after dap-mode
-     (:leader
-       ;; Open
-       (:prefix "o"
-         :desc "Dap Debugger" :n "D" #'+dap-hydra/body))))
+     :desc "Wrap lines to fit screen" :n "v" #'visual-line-mode))
 
  (:leader
    (:prefix "z"

@@ -14,7 +14,7 @@
 ;; org loading is sensitive.
 (load! "+functions")
 (load! "+lisp")
-(load! "+debug")
+;; (load! "+debug")
 
 (setq-default
  user-full-name "Connan Pearson"
@@ -367,6 +367,15 @@
     (save-some-buffers t)))
 
 (add-function :after after-focus-change-function #'save-all)
+
+(def-package! counsel-tramp
+  :config
+  (add-hook! 'counsel-tramp-pre-command-hook
+    (projectile-mode 0)
+    (editorconfig-mode 0))
+  (add-hook! 'counsel-tramp-quit-hook
+    (projectile-mode 1)
+    (editorconfig-mode 1)))
 
 (load "~/local.el" 'noerror 'nomessage)
 

@@ -174,8 +174,3 @@
        ;; and additional ex commands for evil-mode. Use it as a reference for
        ;; your own modules.
        (default +bindings +smartparens +evil-commands))
-
-
-(when (string-suffix-p ".amazon.com" (system-name))
-  (doom! :private
-         amazon))

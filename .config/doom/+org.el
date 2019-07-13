@@ -85,7 +85,7 @@ and some custom text on a newly created journal file."
 (add-to-list 'org-capture-templates
               '("j" "Journal Note" entry
                 (file org-journal-get-entry-path)
-                "* %(format-time-string org-journal-time-format)%?\n%i\n\n  From: %a" :empty-lines 1))
+                "* %?\n%i\n\n  From: %a" :empty-lines 1))
 
 (add-to-list 'org-capture-templates
              `("m" "Meeting Notes" entry
@@ -108,7 +108,21 @@ SCHEDULED: %<%Y-%m-%d %H:%M>
 
 " :empty-lines 1))
 
-(add-hook! 'org-capture-before-finalize-hook #'org-align-all-tags)
+(defun journal-file-insert ()
+  "Insert's the journal heading based on the file's name."
+  (interactive)
+  (let* ((year  (string-to-number (substring (buffer-name) 0 4)))
+         (month (string-to-number (substring (buffer-name) 4 6)))
+         (day   (string-to-number (substring (buffer-name) 6 8)))
+         (datim (encode-time 0 0 0 day month year)))
+
+      (insert (format-time-string org-journal-date-format datim))
+      (insert "\n\n  $0\n") ; Start with a blank separating line
+      ))
+
+(define-auto-insert "/[0-9]\\{8\\}$" [journal-file-insert])
+
+(add-hook! 'org-capture-before-finalize-hook (org-align-tags 'all))
 
 (defun org-publish-org-to-gfm (plist filename pub-dir)
   "Publish an org file to md using ox-gfm."
@@ -483,6 +497,21 @@ currently clocked-in org-mode task."
 ;;  Functions to help convert content from the operating system's
 ;;  clipboard into org-mode-compatible text.
 ;; ----------------------------------------------------------------------
+
+(defun ha/paste-html-to-org ()
+  "Assumes the contents of the system clip/paste-board to be
+HTML, this calls out to `pandoc' to convert it for the org-mode
+format."
+  (interactive)
+  (let* ((clip (if (eq system-type 'darwin)
+                   "pbpaste -Prefer rts"
+                 "xclip -out -selection 'clipboard' -t text/html"))
+         (format (if (eq mode-name "Org") "org" "markdown"))
+         (pandoc (concat "pandoc -f rts -t " format))
+         (cmd    (concat clip " | " pandoc))
+         (text   (shell-command-to-string cmd)))
+    (kill-new text)
+    (yank)))
 
 (defun shell-command-with-exit-code (program &rest args)
   "Run PROGRAM with ARGS and return the exit code and output in a list."

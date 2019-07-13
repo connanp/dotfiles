@@ -28,4 +28,5 @@
 ;; (package! d-mode)
 ;; (package! company-dcd)
 
-(package! dap-mode)
+(package! counsel-tramp)
+(package! docker-tramp)
