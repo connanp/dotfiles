@@ -30,3 +30,6 @@
 
 (package! counsel-tramp)
 (package! docker-tramp)
+
+(when (featurep! :lang go)
+  (package! go-impl))

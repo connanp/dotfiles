@@ -77,3 +77,12 @@
          (sp-open-below))
 
 
+(defun my/go-new-project (name)
+  "Creates new go project under my namespace."
+  (interactive "sProject Name: ")
+  (let* ((path (f-join (getenv "GOPATH") "src/github.com" (user-login-name) name))
+         (default-directory path))
+    (mkdir path 't)
+    (vc-create-repo 'git)
+    (projectile-add-known-project path)
+    (counsel-projectile-switch-project)))
