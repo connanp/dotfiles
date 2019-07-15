@@ -338,6 +338,13 @@
 
 (def-package! yasnippet-snippets)
 
+(defun my/yas-insert-go-tests ()
+  (interactive)
+  (yas-expand-snippet (yas-lookup-snippet "go_tests_file" 'go-mode)))
+
+(after! autoinsert
+  (add-to-list 'auto-insert-alist  '(".*_test\\.go$" . [my/yas-insert-go-tests])))
+
 ;; open all folds
 (add-hook 'ediff-prepare-buffer-hook #'outline-show-all)
 

@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: test helper func
+# key: tfunc
+# --
+
+func (t *testing.T$1) {
+	t.Helper()
+    $0
+}

@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: go_tests_file
+# key: gt_file
+# --
+package main
+
+import (
+	"testing"
+)
+
+$0
