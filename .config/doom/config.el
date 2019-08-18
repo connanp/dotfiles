@@ -23,6 +23,8 @@
 (setq-default global-visual-line-mode t
               fill-column 120)
 
+(add-to-list '+format-on-save-enabled-modes 'python-mode t)
+
 (when (<= emacs-major-version 26)
   (load! "+so-long-pre-27")
   (after! so-long
@@ -188,9 +190,6 @@
 (setq history-delete-duplicates t)
 
 (after! counsel
-  ;; (if (executable-find "rg")
-  ;;     (setq counsel-grep-base-command
-  ;;           "rg -i -M 120 --no-heading --line-number --color never %s"))
   (setq counsel-rg-base-command
         "rg -zS -M 120 --no-heading --line-number --color never %s .")
 

@@ -3,7 +3,6 @@
 
 (doom! :completion
        (company           ; the ultimate code completion backend
-        +tng
         +childframe)
        ;; +auto)           ; as-you-type code completion
        ;;(helm             ; the *other* search engine for love and life
@@ -38,7 +37,7 @@
 
        :editor
        (evil +everywhere); come to the dark side, we have cookies
-       ;;(format +onsave)  ; automated prettiness
+       (format +onsave)  ; automated prettiness
        file-templates    ; auto-snippets for empty files
        format
        fold              ; (nigh) universal code folding
@@ -61,7 +60,7 @@
        term              ; terminals in Emacs
 
        :tools
-       ;;ansible
+       ansible
        debugger          ; FIXME stepping through code, to help you add bugs
        ;;direnv
        ;;docker

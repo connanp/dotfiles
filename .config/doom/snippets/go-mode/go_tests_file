@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: go_tests_file
-# key: gt_file
+# key: go_tests_file
 # --
 package main
 
