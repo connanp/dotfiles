@@ -12,6 +12,7 @@
  (:desc "Quick Bookmark" :einv "<C-f6>" (lambda () (interactive) (bookmark-set "SAVED")))
  (:desc "Jump to Quick Bookmark" :einv "<f6>" (lambda () (interactive) (bookmark-jump "SAVED")))
  :nv "SPC / /" #'deadgrep
+ :ein "C-x C-d" #'bjm/ivy-dired-recent-dirs
 
  (:map minibuffer-local-map
    "C-n" #'next-line-or-history-element

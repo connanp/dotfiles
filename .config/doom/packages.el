@@ -11,7 +11,6 @@
 (when (featurep! :lang markdown +pandoc)
   (package! ox-gfm))
 
-(package! org-journal)
 (package! esh-autosuggest)
 (package! deadgrep)
 (package! yasnippet-snippets)

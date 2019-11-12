@@ -30,7 +30,7 @@
     "Go up LEVEL directories"
     (interactive)
     (let ((level (or level 1)))
-      (eshell/cd (make-string (1+ level) ?.))
+      (eshell/lcd (make-string (1+ level) ?.))
       (eshell/ls)))
 
   (defun eshell/unpack (file)
@@ -63,7 +63,6 @@
         eshell-history-size 1024
         eshell-hist-ignoredups t
         eshell-save-history-on-exit t
-        eshell-input-filter-initial-space t
         eshell-cmpl-dir-ignore "\\`\\(\\.\\.?\\|CVS\\|\\.svn\\|\\.git\\)/\\'")
 
   ;; aliases
@@ -90,8 +89,9 @@
    "gr"    "cd ${vc-git-root \\'git-root}"
    "gs"    "magit-status"
    "dt"    "gdate \"+%Y-%m-%dT%H:%M:%S.%3N%zZ\""
+   "bb"    "compile brazil-build"
    "epoch" "date +%s"
-   "clear" "clear-scrollback") ; more sensible than default
+   "clear" "clear-scrollback")          ; more sensible than default
 
   (defun eshell/j (location)
     (eshell/cd (bookmark-location location)))
@@ -102,9 +102,9 @@
   ;; used as an eshell/alias, the current directory isn't used, so it must be a function
   (defun eshell/gst (&rest args)
     (magit-status (pop args) nil)
-    (eshell/echo))   ;; The echo command suppresses output
+    (eshell/echo)) ;; The echo command suppresses output
 
-  ;;; Extra execution information
+;;; Extra execution information
   (defvar ckp/eshell-status-p t
     "If non-nil, display status before prompt.")
   (defvar ckp/eshell-status--last-command-time nil)
@@ -125,7 +125,15 @@
     (setq ckp/eshell-status--last-command-time (current-time)))
 
   (add-hook 'eshell-pre-command-hook 'ckp/eshell-status-record)
-  (add-hook 'eshell-post-command-hook 'ckp/eshell-status-display))
+  (add-hook 'eshell-post-command-hook 'ckp/eshell-status-display)
+
+  (defadvice! ckp/ignore-git-eshell-prompt (orig-fn &rest args)
+    "Dont let git run dir is a TRAMP"
+    :around '(+eshell--current-git-branch)
+    (if (file-remote-p default-directory)
+        ;; need to propertize a string
+        ""
+      (apply orig-fn args))))
 
 
 (after! esh-module
@@ -177,7 +185,7 @@
                          ad-return-value)
     ad-return-value))
 
-(def-package! esh-autosuggest
+(use-package! esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode)
   :config
   (setq esh-autosuggest-delay 0.5)

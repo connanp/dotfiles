@@ -33,36 +33,37 @@
     (mapc (apply-partially 'add-to-list 'so-long-minor-modes)
           '(rainbow-delimiters-mode diff-hl-mode diff-hl-amend-mode diff-hl-flydiff-mode))))
 
-(when (>= emacs-major-version 27)
-  ;; will be included in installation in 27.1
-  (when (< emacs-minor-version 1)
-    (load! "+so-long"))
-  (after! so-long
-      (global-so-long-mode 1)
+;; (when (>= emacs-major-version 27)
+;;   ;; will be included in installation in 27.1
+;;   (if (stringp (find-library-name "so-long"))
+;;       (require 'so-long)
+;;     (load! "+so-long"))
+;;   (after! so-long
+;;       (global-so-long-mode 1)
 
-      ;; Additional buffer-local minor modes to disable.
-      (mapc (apply-partially 'add-to-list 'so-long-minor-modes)
-            '(rainbow-delimiters-mode diff-hl-mode diff-hl-amend-mode diff-hl-flydiff-mode))
-      ;; Additional variables to override.
-      (mapc (apply-partially 'add-to-list 'so-long-variable-overrides)
-            '((show-trailing-whitespace . nil)
-              (truncate-lines . nil)))))
+;;       ;; Additional buffer-local minor modes to disable.
+;;       (mapc (apply-partially 'add-to-list 'so-long-minor-modes)
+;;             '(rainbow-delimiters-mode diff-hl-mode diff-hl-amend-mode diff-hl-flydiff-mode))
+;;       ;; Additional variables to override.
+;;       (mapc (apply-partially 'add-to-list 'so-long-variable-overrides)
+;;             '((show-trailing-whitespace . nil)
+;;               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-tomorrow-day)
-(def-package! circadian
+(setq doom-theme 'doom-laserwave)
+(use-package! circadian
   :config
   (setq calendar-latitude 47.603230)
   (setq calendar-longitude -122.330276)
-  (setq circadian-themes '((:sunrise . doom-tomorrow-day)
-                           ("11:00" . doom-solarized-light)
-                           ("15:00" . doom-tomorrow-night)
-                           (:sunset  . doom-challenger-deep)))
+  (setq circadian-themes '((:sunrise . doom-laserwave)
+                           ("15:00" . doom-outrun-electric)
+                           (:sunset  . doom-outrun-electric)))
 
   (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
   (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
 
   (circadian-setup))
 
+;; TODO replace with custom-theme-set-faces!
 ;; monochrome theme so that unbalanced parens are obvious.
 (doom-themes-set-faces nil
   '(rainbow-delimiters-unmatched-face :foreground 'unspecified :inherit 'error)
@@ -79,6 +80,12 @@
   ;; org headlines inherit this value
   '(outline-1 :background nil))
 
+;; emacs 27+ bug
+;; https://github.com/hlissner/doom-emacs/issues/1988
+(custom-set-faces!
+  '((hl-line solaire-hl-line-face org-indent
+     outline-1 outline-2 outline-3 outline-4 outline-5 outline-6 outline-7 outline-8)
+    :extend t))
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))
@@ -135,7 +142,7 @@
           ">" ")")))
 
 (when (featurep! :lang common-lisp)
-  (def-package! common-lisp-snippets))
+  (use-package! common-lisp-snippets))
 
 (defun ckp/tangle-blocks-for-file ()
   "Tangle blocks for the tangle file of the block at point."
@@ -216,13 +223,13 @@
 (after! warnings
     (push '(undo discard-info) warning-suppress-types))
 
-(def-package! vlf
+(use-package! vlf
   :init
   (setq large-file-warning-threshold (* 3 1024 1024))
   (require 'vlf-setup))
-(def-package! s)
-(def-package! request)
-(def-package! request-deferred)
+(use-package! s)
+(use-package! request)
+(use-package! request-deferred)
 
 ;; TODO this is buffer-local and may not even be needed anymore.
 ;; shell-mode echos every command and `stty -echo' doesn't change that fact
@@ -252,16 +259,19 @@
 
 (after! tramp
 
-  (defun ckp/shell-set-hook ()
-    "Allows packages such as `projectile' to work when initializing/finding files."
-    (when (file-remote-p (buffer-file-name))
-      (let ((vec (tramp-dissect-file-name (buffer-file-name))))
-        ;; all remote hosts will default to /bin/bash because OSX we use homebrew.
-        (unless (string-match-p "localhost" (tramp-file-name-host vec))
-          (setq-local shell-file-name "/bin/bash")))))
+  ;; (defun ckp/shell-set-hook ()
+  ;;   "Allows packages such as `projectile' to work when initializing/finding files."
+  ;;   (when (file-remote-p (buffer-file-name))
+  ;;     (let ((vec (tramp-dissect-file-name (buffer-file-name))))
+  ;;       ;; all remote hosts will default to /bin/bash because OSX we use homebrew.
+  ;;       (unless (string-match-p "localhost" (tramp-file-name-host vec))
+  ;;         (setq-local shell-file-name "/bin/bash")))))
 
-  (add-hook 'find-file-hook #'ckp/shell-set-hook)
-
+  ;; (add-hook 'find-file-hook #'ckp/shell-set-hook)
+  (add-hook 'find-file-hook
+            (lambda ()
+              (when (file-remote-p default-directory)
+                (setq-local projectile-mode-line "projectile"))))
   ;; Turn of auto-save for tramp files
   (defun tramp-set-auto-save ()
     (auto-save-mode -1))
@@ -271,12 +281,15 @@
         vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)"
                                      vc-ignore-dir-regexp
                                      tramp-file-name-regexp)
+        tramp-shell-prompt-pattern "\\(?:^\\|\n\\)\\[\\]\\|[^#$%>\n]*#?[#$%>].* *\\(\\[[0-9;]*[a-zA-Z] *\\)*"
         ;; use the settings in ~/.ssh/config instead of Tramp's
         tramp-use-ssh-controlmaster-options nil
         ;; annoying when $HOME does not exist
-        tramp-histfile-override nil
+        tramp-histfile-override "/tmp/.connanp_tramp_history"
         ;; remote files are not updated outside of tramp/emacs so this is more performant
         remote-file-name-inhibit-cache 90
+        ;; oob copy only
+        tramp-copy-size-limit nil
         ;; just read from the cache
         tramp-completion-reread-directory-timeout nil
         tramp-verbose 1
@@ -287,12 +300,14 @@
                       (when (stringp method)
                         (member method '("su" "sudo" "logbash"))))))))
 
-  (add-to-list 'tramp-remote-path "/apollo/env/envImprovement/bin")
+  (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/bin"))
+  (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/.local/bin"))
   (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/.toolbox/bin"))
-  (add-to-list 'tramp-remote-path 'tramp-own-remote-path)
-  ;; if you use `expand-file-name' on a mac and try for linux.. yeah.. won't work ;)
-  (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/bin")))
-;; (add-to-list 'tramp-remote-path "/usr/local/sbin")
+  (add-to-list 'tramp-remote-path "/apollo/env/envImprovement/bin")
+  (add-to-list 'tramp-remote-path "/apollo/env/ApolloCommandLine/bin")
+  (add-to-list 'tramp-remote-path "/apollo/env/OctaneBrazilTools/bin")
+  (add-to-list 'tramp-remote-path "/apollo/env/BrazilThirdPartyTool/bin")
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
@@ -333,9 +348,9 @@
   ;; (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   )
 
-(def-package! deadgrep)
+(use-package! deadgrep)
 
-(def-package! yasnippet-snippets)
+(use-package! yasnippet-snippets)
 
 (set-file-template! "/.*_test\\.go$" :mode 'go-mode :project t :trigger "go_tests_file")
 
@@ -369,7 +384,7 @@
 
 (add-function :after after-focus-change-function #'save-all)
 
-(def-package! counsel-tramp
+(use-package! counsel-tramp
   :config
   (add-hook! 'counsel-tramp-pre-command-hook
     (projectile-mode 0)
@@ -377,6 +392,11 @@
   (add-hook! 'counsel-tramp-quit-hook
     (projectile-mode 1)
     (editorconfig-mode 1)))
+
+(when (featurep! :app write +langtool)
+  (setq langtool-language-tool-jar (expand-file-name "~/.local/LanguageTool-4.6/languagetool-commandline.jar")))
+
+(add-hook! 'go-mode-hook indent-tabs-mode t)
 
 (load "~/local.el" 'noerror 'nomessage)
 

@@ -15,13 +15,13 @@
 (defvar org-default-incubate-file "~/org/incubate.org" "Ideas for someday")
 (defvar org-default-completed-file nil "Archive")
 
-(def-package! ox-gfm
+(use-package! ox-gfm
   :when (featurep! :lang markdown +pandoc))
 
-(def-package! ox-confluence
+(use-package! ox-confluence
   :when (featurep! :lang org +export))
 
-(def-package! org-journal
+(use-package! org-journal
   :config
   (defun my/org-journal-date-fmt (time)
     "Custom function to insert journal date header,

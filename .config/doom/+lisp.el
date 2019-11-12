@@ -4,7 +4,7 @@
   (sp-local-pair '(sly-mrepl-mode) "'" "'" :actions nil)
   (sp-local-pair '(sly-mrepl-mode) "`" "`" :actions nil))
 
-(def-package! sly
+(use-package! sly
   :config
   (setq sly-kill-without-query t
         sly-repl-history-remove-duplicates t
@@ -30,12 +30,12 @@
 ;;   (advice-add #'lispy-backward :around #'insert-literal-left-bracket)
 ;;   (advice-add #'lispy-forward :around #'insert-literal-right-bracket))
 
-;; (def-package! lispy
+;; (use-package! lispy
 ;;   :config
 ;;   ;; default includes special which has movement keys in insert mode
 ;;   (lispy-set-key-theme '(lispy c-digits)))
 
-(def-package! lispyville
+(use-package! lispyville
   :config
   (lispyville-set-key-theme
    '((operators normal)

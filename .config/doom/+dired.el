@@ -67,3 +67,24 @@
     (when (and (file-directory-p filename)
                (not (eq (current-buffer) orig)))
       (kill-buffer orig))))
+
+;; http://pragmaticemacs.com/emacs/open-a-recent-directory-in-dired-revisited/
+(defun bjm/ivy-dired-recent-dirs ()
+  "Present a list of recently used directories and open the selected one in dired"
+  (interactive)
+  (let ((recent-dirs
+         (delete-dups
+          (mapcar (lambda (file)
+                    ;; (if (file-directory-p file) file (file-name-directory file))
+                    (if (not (string-match "/\\(rsh\\|ssh\\|telnet\\|su\\|sudo\\|sshx\\|krlogin\\|ksu\\|rcp\\|scp\\|rsync\\|scpx\\|fcp\\|nc\\|ftp\\|smb\\|adb\\):" file))
+                        (if (file-directory-p file) file (file-name-directory file))
+                      (if (file-name-directory file) ;; return directory for tramp files
+                          (file-name-directory file))))
+                  recentf-list))))
+
+    (let ((dir (ivy-read "Directory: "
+                         recent-dirs
+                         :re-builder #'ivy--regex
+                         :sort nil
+                         :initial-input nil)))
+      (dired dir))))

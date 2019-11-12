@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: filecopy
+# key: fc
+# condition: (nxml-mode)
+# --
+{{ filecopy('../files/$1', '/$1', mode='${2:0644}') }}
