@@ -272,9 +272,6 @@
             (lambda ()
               (when (file-remote-p default-directory)
                 (setq-local projectile-mode-line "projectile"))))
-  ;; Turn of auto-save for tramp files
-  (defun tramp-set-auto-save ()
-    (auto-save-mode -1))
 
   (setq tramp-default-method "sshx"
         tramp-default-user-alist '(("\\`su\\(do\\)?\\'" nil "root"))
@@ -284,6 +281,7 @@
         tramp-shell-prompt-pattern "\\(?:^\\|\n\\)\\[\\]\\|[^#$%>\n]*#?[#$%>].* *\\(\\[[0-9;]*[a-zA-Z] *\\)*"
         ;; use the settings in ~/.ssh/config instead of Tramp's
         tramp-use-ssh-controlmaster-options nil
+        tramp-connection-timeout 5
         ;; annoying when $HOME does not exist
         tramp-histfile-override "/tmp/.connanp_tramp_history"
         ;; remote files are not updated outside of tramp/emacs so this is more performant
@@ -293,6 +291,7 @@
         ;; just read from the cache
         tramp-completion-reread-directory-timeout nil
         tramp-verbose 1
+        tramp-backup-directory-alist backup-directory-alist
         backup-enable-predicate
         (lambda (name)
           (and (normal-backup-enable-predicate name)
