@@ -29,6 +29,7 @@ fi
 
 # Emacs and other terms
 if [[ "$TERM" == "dumb" ]]; then
+    zstyle ':prezto:module:prompt' theme 'minimal'
     zstyle ':prezto:module:terminal' auto-title 'no'
     zstyle ':prezto:module:editor' key-bindings 'emacs'
     unsetopt zle
@@ -38,6 +39,7 @@ if [[ "$TERM" == "dumb" ]]; then
     unfunction preexec
     PS1='$ '
 else
+    zstyle ':prezto:module:prompt' theme 'powerlevel10k'
     zstyle ':prezto:module:terminal' auto-title 'yes'
     zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
     zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
