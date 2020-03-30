@@ -32,3 +32,8 @@
 
 (when (featurep! :lang go)
   (package! go-impl))
+
+(package! jq-mode
+  :recipe (:host github :repo "ljos/jq-mode"))
+(package! counsel-jq
+  :recipe (:host github :repo "200ok-ch/counsel-jq"))

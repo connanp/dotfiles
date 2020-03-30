@@ -1,5 +1,18 @@
 ;;; init.el -*- lexical-binding: t; -*-
-;; Copy me to ~/.doom.d/init.el or ~/.config/doom/init.el, then edit me!
+
+;; This file controls what Doom modules are enabled and what order they load in.
+;; Remember to run 'doom sync' after modifying it!
+
+;; NOTE Press 'SPC h d h' (or 'C-h d h' for non-vim users) to access Doom's
+;;      documentation. There you'll find information about all of Doom's modules
+;;      and what flags they support.
+
+;; NOTE Move your cursor over a module's name (or its flags) and press 'K' (or
+;;      'C-c g k' for non-vim users) to view its documentation. This works on
+;;      flags as well (those symbols that start with a plus).
+;;
+;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
+;;      directory (for easy access to its source code).
 
 (doom! :completion
        (company                         ; the ultimate code completion backend
@@ -23,13 +36,13 @@
        nav-flash                        ; blink the current line after jumping
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints                          ; display visual hints when editing in evil
-       treemacs                         ; a project drawer, like neotree but cooler
+       ;; treemacs                         ; a project drawer, like neotree but cooler
        (popup                           ; tame sudden yet inevitable temporary windows
         +all                            ; catch all popups that start with an asterix
         +defaults)                      ; default popup rules
        ;;(pretty-code      ; replace bits of code with pretty symbols
        ;; +iosevka)
-       ;;tabbar            ; FIXME an (incomplete) tab bar for Emacs
+       ;;tabs              ; an tab bar for Emacs
        ;;unicode           ; extended unicode support for various languages
        vc-gutter                        ; vcs diff in the fringe
        vi-tilde-fringe                  ; fringe tildes to mark beyond EOB
@@ -48,17 +61,27 @@
        ;; parinfer          ; turn lisp into python, sort of
        rotate-text                      ; cycle region at point between text candidates
        snippets
+       word-wrap         ; soft wrapping with language-aware indent
 
        :emacs
        (dired                           ; making dired pretty [functional]
         ;; +ranger          ; bringing the goodness of ranger to dired
         +icons)                         ; colorful icons for dired-mode
        ;; electric          ; smarter, keyword-based electric-indent
+       ;;ibuffer           ; interactive buffer management
        vc                               ; version-control and Emacs, sitting in a tree
 
        :term
        eshell                           ; a consistent, cross-platform shell (WIP)
        term                             ; terminals in Emacs
+       ;;shell             ; a terminal REPL for Emacs
+       ;;vterm             ; another terminals in Emacs
+
+       :checkers
+       (syntax                        ; tasing you for every semicolon you forget
+        +childframe)                    ; use childframes for error popups (Emacs 26+ only)
+       spell             ; tasing you for misspelling mispelling
+       ;;grammar           ; tasing grammar mistake every you make
 
        :tools
        ;;ansible
@@ -67,10 +90,7 @@
        ;;docker
        editorconfig                     ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
-       eval                             ; run code, run (also, repls)
-       flyspell                         ; tasing you for misspelling mispelling
-       (flycheck                        ; tasing you for every semicolon you forget
-        +childframe)                    ; use childframes for error popups (Emacs 26+ only)
+       (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
        (lookup                          ; helps you navigate your code and documentation
         +devdocs                        ; ...on devdocs.io online
@@ -80,7 +100,7 @@
        make                             ; run make tasks from Emacs
        magit                            ;
        pass                             ; password manager for nerds
-       ;;pdf               ; pdf enhancements
+       pdf               ; pdf enhancements
        prodigy                          ; FIXME managing external services & code builders
        rgb                              ; creating color strings
        ;;tmux              ; an API for interacting with tmux
@@ -91,7 +111,7 @@
        :lang
        ;;agda              ; types of types of types of types...
        assembly                         ; assembly for fun or debugging
-       (cc +irony +rtags)               ; C/C++/Obj-C madness
+       (cc +lsp)               ; C/C++/Obj-C madness
        ;;clojure           ; java with a lisp
        common-lisp                      ; if you've seen one lisp, you've seen them all
        ;;coq               ; proofs-as-programs
@@ -121,7 +141,7 @@
        ;;ocaml             ; an objective camel
        (org                             ; organize your plain life in plain text
         +dragndrop                      ; file drag & drop support
-        +ipython                        ; ipython support for babel
+        ;;+jupyter        ; ipython/jupyter support for babel
         +pandoc                         ; pandoc integration into org's exporter
         +present                        ; using Emacs for presentations
         +journal)
@@ -146,7 +166,7 @@
        web                              ; the tubes
 
        :email
-       ;;(mu4e +gmail)       ; WIP
+       (mu4e)       ; WIP
        ;;notmuch             ; WIP
        ;;(wanderlust +gmail) ; WIP
 
@@ -158,9 +178,6 @@
        ;; irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
-       (write                           ; emacs as a word processor (latex + org + markdown)
-        +wordnut                        ; wordnet (wn) search
-        +langtool)                      ; a proofreader (grammar/style check) for Emacs
 
        :collab
        ;;floobits          ; peer programming for a price

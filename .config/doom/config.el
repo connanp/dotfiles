@@ -49,12 +49,12 @@
 ;;             '((show-trailing-whitespace . nil)
 ;;               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-laserwave)
+(setq doom-theme 'doom-moonlight)
 (use-package! circadian
   :config
   (setq calendar-latitude 47.603230)
   (setq calendar-longitude -122.330276)
-  (setq circadian-themes '((:sunrise . doom-laserwave)
+  (setq circadian-themes '((:sunrise . doom-moonlight)
                            ("15:00" . doom-outrun-electric)
                            (:sunset  . doom-outrun-electric)))
 
@@ -82,10 +82,10 @@
 
 ;; emacs 27+ bug
 ;; https://github.com/hlissner/doom-emacs/issues/1988
-(custom-set-faces!
-  '((hl-line solaire-hl-line-face org-indent
-     outline-1 outline-2 outline-3 outline-4 outline-5 outline-6 outline-7 outline-8)
-    :extend t))
+;; (custom-set-faces!
+;;   '((hl-line solaire-hl-line-face org-indent
+;;      outline-1 outline-2 outline-3 outline-4 outline-5 outline-6 outline-7 outline-8)
+;;     :extend t))
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))
@@ -125,7 +125,6 @@
 (defalias 'sh 'shell)
 (defalias 'sl 'sort-lines)
 
-
 (after! ivy
   (setq ivy-count-format "(%d/%d) "))
 
@@ -153,21 +152,15 @@
 (after! ob
   (load! "+ob-eshell")
 
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '(
-     (emacs-lisp . t)
-     (ruby . t)
-     (python . t)
-     (eshell . t)
-     (shell . t)))
+  (mapc (apply-partially 'add-to-list '+org-babel-mode-alist)
+        '((dot . t)))
 
   ;; Syntax highlight in #+BEGIN_SRC blocks
   (setq org-src-fontify-natively t)
   ;; Don't prompt before running code in org
-  (setq org-confirm-babel-evaluate nil)
+  (setq org-confirm-babel-evaluate nil))
   ;; Fix an incompatibility between the ob-async and ob-ipython packages
-  (setq ob-async-no-async-languages-alist '("ipython")))
+  ;; (setq ob-async-no-async-languages-alist '("ipython")))
 
 
 
@@ -351,7 +344,11 @@
 
 (use-package! yasnippet-snippets)
 
+(add-to-list 'auto-mode-alist '("\\.\\(?:te\\|if\\)\\'" . m4-mode))
+
 (set-file-template! "/.*_test\\.go$" :mode 'go-mode :project t :trigger "go_tests_file")
+(set-file-template! "\\.te$" :mode 'm4-mode :project t :trigger "se_template_file")
+(set-file-template! "\\.if$" :mode 'm4-mode :project t :trigger "se_if_file")
 
 ;; open all folds
 (add-hook 'ediff-prepare-buffer-hook #'outline-show-all)
@@ -396,6 +393,17 @@
   (setq langtool-language-tool-jar (expand-file-name "~/.local/LanguageTool-4.6/languagetool-commandline.jar")))
 
 (add-hook! 'go-mode-hook indent-tabs-mode t)
+
+(add-hook! '(text-mode-hook markdown-mode-hook) #'+word-wrap-mode)
+
+(use-package! jq-mode
+  :init
+  (autoload 'jq-mode "jq-mode.el"
+    "Major mode for editing jq files" t)
+  (add-to-list 'auto-mode-alist '("\\.jq\\'" . jq-mode)))
+
+(when (featurep! :completion ivy)
+  (use-package! counsel-jq))
 
 (load "~/local.el" 'noerror 'nomessage)
 

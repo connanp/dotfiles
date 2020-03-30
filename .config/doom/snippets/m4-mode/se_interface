@@ -1,0 +1,24 @@
+# -*- mode: snippet -*-
+# name: se interface
+# key: seif
+# --
+##########################################
+## <summary>
+##    $1
+## </summary>
+## <desc>
+##   <p>
+##     $1
+##   </p>
+## </desc>
+## <param name="domain">
+##    <summary>
+##      Domain allowed access.
+##    </summary>
+## </param>
+#
+interface(\`$2',\`
+  gen_require(\`
+    $0
+  ')
+')

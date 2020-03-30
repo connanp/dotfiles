@@ -543,15 +543,125 @@ either :html or :text, and the second is the clipboard contents."
         (list :html (ha/convert-applescript-to-html contents))
       (list :text (shell-command-to-string "osascript -e 'the clipboard'")))))
 
+(defun ha/markdown-to-slack-buffer-block ()
+  "Assume the current paragraph is an indented source code block.
+This wraps it in the triple backticks needed for Slack."
+  (insert "```")
+  (while (re-search-forward "    " nil t)
+    (replace-match "")
+    (forward-line))
+  (end-of-line)
+  (insert "```"))
+
+(defun ha/slack-to-markdown-buffer ()
+  "Odd function that converts Slack’s version of Markdown (where
+code is delimited with triple backticks) into a more formal
+four-space indent markdown style."
+  (goto-char (point-min))
+  ;; Begin by converting all Carriage Returns to line feeds:
+  (while (re-search-forward "
+" nil t)
+    (replace-match "
+"))
+
+  (goto-char (point-min))
+  (while (re-search-forward "```" nil t)
+    (replace-match "
+
+    ")
+    (let ((starting-bounds (point)))
+      (if (re-search-forward "```[ \t]*" nil t)
+          (let ((ending-bounds (point)))
+            (replace-match "
+
+")
+            (goto-char starting-bounds)
+            (while (< (point) ending-bounds)
+              (next-line)
+              (beginning-of-line)
+              (insert "    ")))))))
+
+
+(defun ha/org-clipboard ()
+  "Return the contents of the clipboard in org-mode format."
+  (destructuring-bind (type contents) (ha/get-clipboard)
+    (with-temp-buffer
+      (insert contents)
+      (if (eq :html type)
+          (shell-command-on-region (point-min) (point-max) "pandoc -f html -t org" t t)
+        (ha/slack-to-markdown-buffer)
+        (shell-command-on-region (point-min) (point-max) "pandoc -f markdown -t org" t t))
+      (buffer-substring-no-properties (point-min) (point-max)))))
+
+(defun ha/org-yank-clipboard ()
+  "Yanks (pastes) the contents of the Apple Mac clipboard in an
+org-mode-compatible format."
+  (interactive)
+  (insert (ha/org-clipboard)))
+
+(defun ha/external-capture-to-org ()
+  "Calls `org-capture-string' on the contents of the Apple clipboard."
+  (interactive)
+  (org-capture-string (ha/org-clipboard) "C")
+  (ignore-errors
+    (delete-frame)))
+
+;; ------------------------------------------------------------
+;;   Export org content to HTML-formatted clipboards
+;; ------------------------------------------------------------
+
+(defun ha/command-html-to-clipboard (html-file)
+  "Return a command (suitable for `shell-command') to convert the
+contents of HTML-FILE to the operating system's clipboard."
+  (if (eq system-type 'darwin)
+      (concat "hex=`hexdump -ve '1/1 \"%.2x\"' < "
+              html-file
+              "` \n"
+              "osascript -e \"set the clipboard to «data HTML${hex}»\"")
+    ;; TODO Add a version to convert HTML to Linux clipboard
+    (concat "xclip -t text/html " html-file)))
+
+(defun ha/org-html-with-header-to-clipboard ()
+  "Converts region or subtree (with the section header) of the
+current org file into HTML and copies the contents as HTML into
+the operating system's clipboard."
+  (interactive)
+  (let ((html-file (org-html-export-to-html nil t t)))
+    (shell-command (ha/command-html-to-clipboard html-file))))
+
+(defun ha/org-html-to-clipboard ()
+   "Converts region or subtree of the current org file into HTML
+and copies the contents as HTML into the operating system's
+clipboard."
+   (interactive)
+   (let ((html-file (org-html-export-to-html nil t t t)))
+     (shell-command (ha/command-html-to-clipboard html-file))))
+
+(defun ha/command-file-to-clipboard (md-file)
+  "Return a command (suitable for `shell-command') to convert the
+contents of MD-FILE to the operating system's clipboard."
+  (if (eq system-type 'darwin)
+      (concat "pbcopy < " md-file)
+    (concat "xclip " md-file)))
+
+(defun ha/org-to-md-clipboard ()
+  "Converts region or subtree of the current org file into
+Markdown and copies the contents into the operating system's
+clipboard."
+  (interactive)
+  (let ((text-file (org-md-export-to-markdown nil t t)))
+    (shell-command (ha/command-file-to-clipboard text-file))))
+
+
 (defun ha/convert-applescript-to-html (packed-contents)
   "Applescript's clipboard returns the contents in a packed array.
 Convert and return this encoding into a UTF-8 string."
   (cl-flet ((hex-pack-bytes (tuple) (string-to-number (apply 'string tuple) 16)))
     (let* ((data (-> packed-contents
-                     (substring 10 -2) ; strips off the =«data RTF= and =»\= bits
+                     (substring 10 -2)  ; strips off the =«data RTF= and =»\= bits
                      (string-to-list)))
            (byte-seq (->> data
-                          (-partition 2)  ; group each two hex characters into tuple
+                          (-partition 2) ; group each two hex characters into tuple
                           (mapcar #'hex-pack-bytes))))
 
       (decode-coding-string

@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: se template
+# key: se_template_file
+# --
+policy_module(`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`, 0.1)
+gen_require(\`
+  $0
+')

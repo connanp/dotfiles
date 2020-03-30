@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: se_if_file
+# key: se_if_file
+# --
+## <summary>$0</summary>
+
+$1

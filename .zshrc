@@ -99,7 +99,6 @@ zstyle ':prezto:load' pmodule \
   'gpg' \
   'python' \
   'ruby' \
-  'ssh' \
   'syntax-highlighting' \
   'history-substring-search' \
   'autosuggestions' \
