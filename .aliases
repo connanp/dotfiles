@@ -1,4 +1,8 @@
+alias rpm-depends="rpm -qpR"
+
 alias ..="cd .."
+
+alias reset-sound="pulseaudio -k && sudo alsa force-reload"
 
 alias addtoken="ssh-add -s libeToken.so.8"
 
@@ -68,3 +72,4 @@ if [[ "$platform" == "Darwin" ]]; then
 fi
 
 h() { if [ -z "$*"  ]; then history 1; else history 1 | egrep "$@"; fi;  }
+
