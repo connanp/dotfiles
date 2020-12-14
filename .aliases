@@ -1,5 +1,7 @@
 alias rpm-depends="rpm -qpR"
 
+alias d.='df -h . |sed 1d'
+alias s.='du -sh .'
 alias ..="cd .."
 
 alias reset-sound="pulseaudio -k && sudo alsa force-reload"
@@ -43,6 +45,77 @@ alias week='date +%V'
 # URL-encode strings
 alias urlencode='python -c "import sys, urllib as ul; print ul.quote_plus(sys.argv[1]);"'
 
+# g -- call grep recursively with useful defaults
+# 02oct2011  +chris+
+# 10jan2012  +chris+  take an directory as possible last argument
+# 28nov2012  +chris+  use grep -r
+# 15dec2013  +chris+  use LC_ALL=C for speed and UTF-8 segfaults with -P
+# 13may2015  +chris+  use directory only when more than two arguments
+# 22feb2016  +chris+  line-buffered to quicker pipes
+# 14aug2016  +chris+  same for git-grep
+# 27sep2016  +chris+  '+ext' to expand to --include=*.ext
+rgrep() {
+  LC_ALL=C grep \
+    ${${(M)@:#+*}:s/+/--include=*./} \
+    --exclude "*~" --exclude "*.o" --exclude "tags" \
+    --exclude-dir .bzr --exclude-dir .git --exclude-dir .hg --exclude-dir .svn \
+    --exclude-dir CVS  --exclude-dir RCS --exclude-dir _darcs \
+    --exclude-dir _build \
+    --line-buffered -r -P ${${@:#+*}:?regexp missing}
+}
+
+# d -- use g to find a definition (start of line, Go, Ocaml, Ruby, Rust)
+# 07apr2014  +chris+
+# 13may2015  +chris+
+# 21jan2017  +leah+  ignore binary
+# 10feb2018  +leah+  fix #define, better output
+# 15aug2019  +leah+  revert output
+def() {
+  rgrep -IHn '(^|(#define|\b(func|let|let rec|class|module|def|fn))\s+)'"$@"
+}
+
+# hl -- highlight regexps
+# 06sep2012  +chris+
+hl() { egrep --color=always -e '' -e${^*} }
+
+# noq -- remove query string from filenames
+# 01dec2012  +chris+
+noq() { for f (${@:-*\?*}) mv -nv $f ${f%%\?*} }
+
+# jkill -- kill all jobs of the current shell
+# 23dec2012  +chris+
+jkill() { kill "$@" %${(k)^jobstates} }
+
+# k1 -- kill oldest job of the current shell
+# 15dec2013  +chris+
+k1() {
+  local pids=${(j:,:)${jobstates#*:*:}%=*}
+  kill "$@" ${(f)$(ps -o pid= --sort start -p $pids)[1]}
+}
+
+# jpid -- map job ids to pids
+# 23dec2012  +chris+
+jpid() {
+  local p
+  # $jobstates uses jobs.c:getjob() and can do %1 or %foo as well.
+  for id; p+=(${${${jobstates[$id]}#*:*:}%=*})
+  print $p
+}
+
+# bins -- list all executable files in $PATH as called by basename
+bins() {
+  rehash
+  whence -p ${(kon)commands}
+}
+
+# total [-F<sep>] [FIELDNUM] - sum up numbers in a column
+# 20jul2014  +chris+  zsh function
+total() {
+  local F
+  expr "$1" : -F >/dev/null && F=$1 && shift
+  awk $F -v f=${1:-1} '{s+=$f} END{print s}'
+}
+
 # fasd
 
 alias a='fasd -a'        # any
@@ -71,5 +144,39 @@ if [[ "$platform" == "Darwin" ]]; then
     alias hide="defaults write com.apple.finder AppleShowAllFiles -bool false && killall Finder"
 fi
 
-h() { if [ -z "$*"  ]; then history 1; else history 1 | egrep "$@"; fi;  }
+# h -- grep history
+# 08mar2011  +chris+
+# 14mar2011  +chris+
+# 08dec2011  +chris+
+# 19mar2014  +chris+  work without argument
+h() { fc -l 0 -1 | sed -n "/${1:-.}/s/^ */!/p" | tail -n ${2:-10} }
+alias h=' h'
 
+# hman - format manpage as monospace HTML
+# 10feb2018  +leah+
+hman() { man -T utf8 "$@" | ul | aha }
+
+# twoman - show inline "manpage"
+# 13feb2017  +leah+
+twoman() {
+  for cmd; do
+    sed -n '1{/^[^#][^!]/q;d};0,/^$\|^[^#]/s/^# //p' ${commands[$cmd]?not found}
+  done
+}
+
+# sslcat HOST:PORT - print SSL certificate and details
+sslcat() {
+  local cert="$(openssl s_client -connect $1 </dev/null | awk '/^--*BEGIN/,/^--*END/')"
+  printf '%s\n' "$cert" | openssl x509 -in /dev/stdin -text
+  printf '%s\n' "$cert" | openssl x509 -in /dev/stdin -noout -sha1 -fingerprint
+  printf '%s\n' "$cert" | openssl x509 -in /dev/stdin -noout -md5 -fingerprint
+}
+
+# spot - show changes compared to previous line
+# 03nov2017  +leah+
+spot() {
+  awk '{ for (i = 1; i <= length($0); i++)
+           printf("%c", ((l = substr($0, i, 1))!=" " && l!="\t" &&
+                          substr(p, i, 1)==l ? "." : l))
+         printf("\n"); p = $0; }'
+}

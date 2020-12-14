@@ -50,18 +50,20 @@
 ;;               (truncate-lines . nil)))))
 
 (setq doom-theme 'doom-moonlight)
-(use-package! circadian
-  :config
-  (setq calendar-latitude 47.603230)
-  (setq calendar-longitude -122.330276)
-  (setq circadian-themes '((:sunrise . doom-moonlight)
-                           ("15:00" . doom-outrun-electric)
-                           (:sunset  . doom-outrun-electric)))
-
-  (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
-  (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
-
-  (circadian-setup))
+;; FIXME: solar package compatibility issue? or something wrong with dev-dsk
+;; timezone stuff.
+;; (use-package! circadian
+;;   :config
+;;   (setq calendar-latitude 47.603230)
+;;   (setq calendar-longitude -122.330276)
+;;   (setq circadian-themes '((:sunrise . doom-moonlight)
+;;                            ("15:00" . doom-outrun-electric)
+;;                            (:sunset  . doom-outrun-electric)))
+;; 
+;;   (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
+;;   (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
+;; 
+;;   (circadian-setup))
 
 ;; TODO replace with custom-theme-set-faces!
 ;; monochrome theme so that unbalanced parens are obvious.
@@ -95,10 +97,12 @@
       doom-themes-enable-italic t)
 
 (setq-default line-spacing 0.1)
-
-(when (member "Iosevka" (font-family-list))
-  (setq doom-font (font-spec :family "Iosevka" :size 14 :weight 'medium)
-        doom-big-font (font-spec :family "Iosevka" :size 19 :weight 'light)))
+(setq doom-font (font-spec :family "fixed" :size 14 :weight 'medium)
+      doom-modeline-icon nil)
+(when (member "Fira Code" (font-family-list))
+  (setq doom-font (font-spec :family "Fira Code" :size 14 :weight 'medium)
+        doom-big-font (font-spec :family "Fira Code" :size 19 :weight 'light)
+        doom-modeline-icon t))
 
 (when (member "Libre Baskerville" (font-family-list))
   (setq doom-variable-pitch-font (font-spec :family "Libre Baskerville" :size 16)))
@@ -396,14 +400,10 @@
 
 (add-hook! '(text-mode-hook markdown-mode-hook) #'+word-wrap-mode)
 
-(use-package! jq-mode
-  :init
-  (autoload 'jq-mode "jq-mode.el"
-    "Major mode for editing jq files" t)
-  (add-to-list 'auto-mode-alist '("\\.jq\\'" . jq-mode)))
-
-(when (featurep! :completion ivy)
-  (use-package! counsel-jq))
+(setq ispell-dictionary "en")
+(after! spell-fu
+  (setq spell-fu-idle-delay 0.5)
+  (remove-hook! 'text-mode #'spell-fu-mode))  ; default is 0.25
 
 (load "~/local.el" 'noerror 'nomessage)
 

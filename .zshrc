@@ -123,11 +123,11 @@ if [[ "$TERM" != "dumb" ]]; then
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 fi
 
-#if [ -d $HOME/.config/site ]; then
-#  for f in $HOME/.config/site/*(.); do
-#    source $f
-#  done
-#fi
+if [ -d $HOME/.config/site ]; then
+ for f in $HOME/.config/site/*(.); do
+   source $f
+ done
+fi
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
         source /etc/profile.d/vte.sh

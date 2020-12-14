@@ -13,6 +13,7 @@
 ;;
 ;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
 ;;      directory (for easy access to its source code).
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.1:-VERS-TLS1.0")
 
 (doom! :completion
        (company                         ; the ultimate code completion backend
@@ -64,12 +65,13 @@
        word-wrap         ; soft wrapping with language-aware indent
 
        :emacs
-       (dired                           ; making dired pretty [functional]
-        ;; +ranger          ; bringing the goodness of ranger to dired
-        +icons)                         ; colorful icons for dired-mode
+       (dired)                           ; making dired pretty [functional]
+       ;; +ranger          ; bringing the goodness of ranger to dired
+       ;; +icons                         ; colorful icons for dired-mode
        ;; electric          ; smarter, keyword-based electric-indent
        ;;ibuffer           ; interactive buffer management
        vc                               ; version-control and Emacs, sitting in a tree
+       undo
 
        :term
        eshell                           ; a consistent, cross-platform shell (WIP)
@@ -80,7 +82,7 @@
        :checkers
        (syntax                        ; tasing you for every semicolon you forget
         +childframe)                    ; use childframes for error popups (Emacs 26+ only)
-       spell             ; tasing you for misspelling mispelling
+       ;; spell             ; tasing you for misspelling mispelling -- XXX broken with which-key--update when using z leader key
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
@@ -163,6 +165,7 @@
        sh                               ; she sells (ba|z)sh shells on the C xor
        ;;solidity          ; do you need a blockchain? No.
        ;;swift             ; who asked for emoji variables?
+       yaml
        web                              ; the tubes
 
        :email
