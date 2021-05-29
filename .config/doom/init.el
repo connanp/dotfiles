@@ -32,6 +32,7 @@
        doom                             ; what makes DOOM look the way it does
        doom-dashboard                   ; a nifty splash screen for Emacs
        doom-quit                        ; DOOM quit-message prompts when you quit Emacs
+       emoji
        ;;fill-column       ; a `fill-column' indicator
        ligatures
        hl-todo                          ; highlight TODO/FIXME/NOTE tags
@@ -103,7 +104,8 @@
        ;;macos             ; MacOS-specific commands
        make                             ; run make tasks from Emacs
        magit                            ;
-       pass                             ; password manager for nerds
+       (pass
+        +auth)                             ; password manager for nerds
        pdf               ; pdf enhancements
        prodigy                          ; FIXME managing external services & code builders
        rgb                              ; creating color strings
@@ -178,7 +180,7 @@
        ;; should be loaded late.
        :app
        calendar
-       ;; irc               ; how neckbeards socialize
+       irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
 

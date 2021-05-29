@@ -136,15 +136,6 @@
 (after! avy
   (setq avy-all-windows 'all-frames))
 
-(after! parinfer
-  (setq parinfer-auto-switch-indent-mode t
-      parinfer-auto-switch-indent-mode-when-closing t)
-
-  (def-modeline-segment! +parinfer)
-  (if (bound-and-true-p parinfer-mode)
-      (if (eq parinfer--mode 'indent)
-          ">" ")")))
-
 (when (featurep! :lang common-lisp)
   (use-package! common-lisp-snippets))
 
@@ -230,12 +221,11 @@
   ;;                 (projectile-mode 1))))
 
   (setq projectile-file-exists-local-cache-expire (* 5 60))
-  (defvar-local ckp/projectile-project-name-cache nil
-    "Cached value of projectile-project-name")
+  (defvar ckp/projectile-project-name-cache nil)
 
   (defadvice projectile-project-name (around ckp/projectile-project-name activate)
     (if (not ckp/projectile-project-name-cache)
-        (setq ckp/projectile-project-name-cache ad-do-it))
+        (set (make-local-variable 'ckp/projectile-project-name-cache) ad-do-it))
     (setq ad-return-value ckp/projectile-project-name-cache)))
 
 
@@ -388,7 +378,7 @@
    deft-directory (expand-file-name "~/notes")
    deft-default-extension "md"))
 
-(after! vterm
+(after! (:and vterm evil-collection)
   (setq vterm-shell "/usr/bin/zsh"
         vterm-max-scrollback 10000)
   (evil-collection-vterm-setup)
@@ -404,7 +394,35 @@
 
   (add-hook! 'vterm-mode-hook
     (setq-local evil-insert-state-cursor 'box)
-    (evil-insert-state)))
+    (evil-insert-state))
+
+  ;; yank-pop in libvterm uses separate kill-ring and the buffer is marked read-only
+  ;; using vterm-insert will correctly paste.
+  (define-advice counsel-yank-pop (:around (fun &rest args))
+  (if (equal major-mode 'vterm-mode)
+      (let ((counsel-yank-pop-action-fun (symbol-function
+                                          'counsel-yank-pop-action))
+            (last-command-yank-p (eq last-command 'yank)))
+        (cl-letf (((symbol-function 'counsel-yank-pop-action)
+                   (lambda (s)
+                     (let ((inhibit-read-only t)
+                           (last-command (if (memq last-command
+                                                   '(counsel-yank-pop
+                                                     ivy-previous-line
+                                                     ivy-next-line))
+                                             'yank
+                                           last-command))
+                           (yank-undo-function (when last-command-yank-p
+                                                 (lambda (_start _end)
+                                                   (vterm-undo)))))
+                       (cl-letf (((symbol-function 'insert-for-yank)
+                                  'vterm-insert))
+                         (funcall counsel-yank-pop-action-fun s))))))
+          (apply fun args)))
+    (apply fun args))))
+
+;; slack api is fast moving and package needs maintenance
+;; (load! "+slack.el")
 
 (load "~/local.el" 'noerror 'nomessage)
 

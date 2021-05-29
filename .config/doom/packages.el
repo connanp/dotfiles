@@ -31,6 +31,11 @@
 (when (featurep! :lang go)
   (package! go-impl))
 
+(when (featurep! :ui emoji)
+  (package! emoji-cheat-sheet-plus))
+(package! alert)
+(package! slack)
+
 ;; https://github.com/hlissner/doom-emacs/issues/4498
 (package! benchmark-init)
 
