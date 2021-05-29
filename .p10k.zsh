@@ -26,6 +26,14 @@
 [[ ! -o 'no_brace_expand' ]] || p10k_config_opts+=('no_brace_expand')
 'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
 
+function prompt_exit_code() {
+    p10k segment -f red -t '%(?.. %??)'
+}
+
+function prompt_num_jobs() {
+    p10k segment -f cyan -t '%(1j. %j&.)'
+}
+
 () {
   emulate -L zsh
   setopt no_unset
@@ -38,9 +46,10 @@
       dir                       # current directory
       vcs                       # git status
       context                   # user@host
+      exit_code
       command_execution_time    # previous command duration
+      num_jobs
       newline                   # \n
-      virtualenv                # python virtual environment
       prompt_char               # prompt symbol
   )
 

@@ -1,14 +1,18 @@
 ;;; ~/.dotfiles/.config/doom/+eshell.el -*- lexical-binding: t; -*-
 
 (after! eshell
-  (require 'em-smart)
+  ;; (require 'em-smart)
   (when (< emacs-major-version 27)
     (load! "+patch-eshell-26"))
+
+  ;; args out of range
+  ;; (remove-hook! 'eshell-first-time-mode-hook #'eshell-did-you-mean--get-all-commands)
 
   ;; support mwinit prompts
   (setq eshell-password-prompt-regexp "\\(\\(?:PIN for \\|adgangskode\\|contrase\\(?:\\(?:ny\\|ñ\\)a\\)\\|geslo\\|h\\(?:\\(?:asł\\|esl\\)o\\)\\|iphasiwedi\\|jelszó\\|l\\(?:ozinka\\|ösenord\\)\\|m\\(?:ot de passe\\|ật khẩu\\)\\|pa\\(?:rola\\|s\\(?:ahitza\\|s\\(?: phrase\\|code\\|ord\\|phrase\\|wor[dt]\\)\\|vorto\\)\\)\\|s\\(?:alasana\\|enha\\|laptažodis\\)\\|wachtwoord\\|лозинка\\|пароль\\|ססמה\\|كلمة السر\\|गुप्तशब्द\\|शब्दकूट\\|গুপ্তশব্দ\\|পাসওয়ার্ড\\|ਪਾਸਵਰਡ\\|પાસવર્ડ\\|ପ୍ରବେଶ ସଙ୍କେତ\\|கடவுச்சொல்\\|సంకేతపదము\\|ಗುಪ್ತಪದ\\|അടയാളവാക്ക്\\|රහස්පදය\\|ពាក្យសម្ងាត់\\|パスワード\\|密[码碼]\\|암호\\)\\).*:\\s *\\'")
 
-  (set-company-backend! 'eshell-mode 'company-capf)
+  (set-company-backend! 'eshell-mode 'company-capf 'esh-autosuggest)
+
   ;; find and chmod behave differently from Emacs than their Unix counterparts
   (setq eshell-prefer-lisp-functions nil)
 
@@ -33,7 +37,7 @@
       (eshell/lcd (make-string (1+ level) ?.))
       (eshell/ls)))
 
-  (defun eshell/unpack (file)
+  (defun eshell/unarchive (file)
     (let ((command (some (lambda (x)
                            (if (string-match-p (car x) file)
                                (cadr x)))
@@ -135,6 +139,8 @@
         ""
       (apply orig-fn args))))
 
+(use-package! em-tramp
+  :defer t)
 
 (after! esh-module
   ;; Don't print the banner.
@@ -144,6 +150,7 @@
 
 
 (after! em-smart
+  (add-to-list 'eshell-smart-display-navigate-list #'counsel-esh-history)
   (setq eshell-where-to-jump 'begin)
   (setq eshell-review-quick-commands nil)
   (setq eshell-smart-space-goes-to-end t))
@@ -188,7 +195,8 @@
 (use-package! esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode)
   :config
-  (setq esh-autosuggest-delay 0.5)
+  ;; non-nil makes it unbearable on tramp
+  (setq esh-autosuggest-delay nil)
 
   (when (featurep! :completion helm)
     (defun setup-eshell-helm-completion ()

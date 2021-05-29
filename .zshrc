@@ -18,7 +18,6 @@ LANGUAGE="en_US:"
 LC_ALL="en_US.UTF-8"
 LC_CTYPE="en_US.UTF-8"
 platform=$(uname)
-export TERM="xterm-256color"
 
 # pre-load before any of this for certain situations
 if [ -d $HOME/.config/site/preload ]; then
@@ -55,15 +54,22 @@ else
     # save line to recall later after executing something else, like changing directory.
     bindkey '^B' push-line-or-edit
     bindkey -M vicmd "q" push-line-or-edit
-    # Search based on what you typed in already
-    bindkey -M vicmd "//" history-beginning-search-backward
-    bindkey -M vicmd "??" history-beginning-search-forward
+    # Search backwards and forwards with a pattern
+    bindkey -M vicmd '/' history-incremental-pattern-search-backward
+    bindkey -M vicmd '?' history-incremental-pattern-search-forward
+
+    # set up for insert mode too
+    bindkey -M viins '^R' history-incremental-pattern-search-backward
+    bindkey -M viins '^F' history-incremental-pattern-search-forward
     export KEYTIMEOUT=1
     # http://www.zsh.org/mla/users/2009/msg00813.html
     # vi insert mode to respect backspace
     zle -A .backward-kill-word vi-backward-kill-word
     zle -A .backward-delete-char vi-backward-delete-char
 fi
+
+zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*' special-dirs ..
 
 zstyle ':prezto:module:prompt' theme 'powerlevel10k'
 zstyle ':prezto:module:editor' dot-expansion 'yes'
@@ -82,6 +88,7 @@ zstyle ':prezto:module:syntax-highlighting' highlighters \
 zstyle ':prezto:module:python' skip-virtualenvwrapper-init 'on'
 zstyle ':prezto:module:python:virtualenv' initialize 'no'
 
+zstyle ':prezto:load' pmodule-dirs $HOME/.zprezto-contrib
 zstyle ':prezto:load' pmodule \
   'environment' \
   'terminal' \
@@ -90,6 +97,7 @@ zstyle ':prezto:load' pmodule \
   'directory' \
   'spectrum' \
   'utility' \
+  'asdf' \
   'completion' \
   'archive' \
   'osx' \
@@ -130,7 +138,7 @@ if [ -d $HOME/.config/site ]; then
 fi
 
 if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
-        source /etc/profile.d/vte.sh
+        source /etc/profile.d/vte-2.91.sh
 fi
 
 if [[ "$PROFILE_STARTUP" == true ]]; then

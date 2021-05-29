@@ -1,3 +1,6 @@
+set bell-style none
+
+set editing-mode vi
 # Make Tab autocomplete regardless of filename case
 set completion-ignore-case on
 
@@ -31,10 +34,37 @@ set visible-stats on
 # Readline used by Bash 4.)
 set skip-completed-text on
 
+# on menu-complete, first display the common prefix, then cycle through the
+# options when hitting TAB
+set menu-complete-display-prefix on
+
 # Allow UTF-8 input and output, instead of showing stuff like $'\0123\0456'
 set input-meta on
 set output-meta on
 set convert-meta off
 
-# Use Alt/Meta + Delete to delete the preceding word
-"\e[3;3~": kill-word
+$if mode=vi
+# Insert mode settings
+set keymap vi-insert
+
+"\C-p": history-search-backward
+"\C-n": history-search-forward
+"\C-l": clear-screen
+
+# Disable left and right cursor movement
+"\e[C": redraw-current-line
+"\e[D": redraw-current-line
+
+# Command mode settings
+set keymap vi-command
+
+# Insert the arguments from the last command
+"^[p": "i !!*\r"
+
+"gg": beginning-of-history
+"G": end-of-history
+
+# Disable left and right cursor movement
+"\e[C": redraw-current-line
+"\e[D": redraw-current-line
+$endif

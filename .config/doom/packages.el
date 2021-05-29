@@ -12,20 +12,18 @@
   (package! ox-gfm))
 
 (package! esh-autosuggest)
-(package! deadgrep)
-(package! yasnippet-snippets)
 (package! circadian)
-(package! ob-async)
+;; (package! ob-async)
 (package! dired-du)
 (package! default-text-scale)
 (package! vlf)
 (package! s)
 (package! request)
 (package! request-deferred)
-(package! org-jira)
+;; (package! org-jira)
 (package! magithub :disable t)
-;; (package! d-mode)
-;; (package! company-dcd)
+(package! magit-todos :disable t)
+(package! eshell-did-you-mean :disable t)
 
 (package! counsel-tramp)
 (package! docker-tramp)
@@ -33,3 +31,8 @@
 (when (featurep! :lang go)
   (package! go-impl))
 
+;; https://github.com/hlissner/doom-emacs/issues/4498
+(package! benchmark-init)
+
+(if (file-exists-p (expand-file-name "~/local-pkgs.el"))
+    (load! (expand-file-name "~/local-pkgs.el")))

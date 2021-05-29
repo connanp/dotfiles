@@ -4,9 +4,9 @@
 ;;; This is taken from http://doc.norang.ca/org-mode.html
 ;;;
 ;;; Code:
-(require 'f)
+(use-package! f)
 
-(add-hook! org-mode-hook (set-fill-column 120))
+(add-hook! org-mode-hook (set-fill-column 120) (flycheck-mode -1))
 
 (defvar org-default-notes-file "~/org/notes.org" "Where I put my notes")
 (defvar org-default-projects-dir "~/org/projects" "Primary GTD")
@@ -442,10 +442,13 @@ is already narrowed."
          (LaTeX-narrow-to-environment))
         (t (narrow-to-defun))))
 
+(defun ckp/tangle-blocks-for-file ()
+  "Tangle blocks for the tangle file of the block at point."
+  (interactive)
+  (let ((current-prefix-arg 2))
+    (call-interactively 'org-babel-tangle)))
 
 ;; from howardisms -- useful capturing commands
-
-(require 'which-func)
 
 (defun ha/org-capture-code-snippet (f)
   "Given a file, F, this captures the currently selected text
@@ -667,8 +670,61 @@ Convert and return this encoding into a UTF-8 string."
       (decode-coding-string
        (mapconcat #'byte-to-string byte-seq "") 'utf-8))))
 
+
+(after! ob
+  (load! "+ob-eshell")
+
+  (defun my/org-babel-previous-session ()
+    "Find the previous src code block which contains the session argument and
+  return it together with the language"
+    (interactive)
+    (save-excursion
+      (let ((session nil)
+            (language nil))
+        (while (and (re-search-backward org-babel-src-block-regexp nil t) (not session))
+          (goto-char (match-beginning 0))
+          (let* ((block-info (org-babel-get-src-block-info)))
+            (block-lang (nth 0 block-info))
+            (block-params (nth 2 block-info))
+            (block-session (cdr (assoc :session block-params)))
+            (when (not (string= "none" block-session))
+              (setq session block-session)
+              (setq language block-lang))))
+        (format "%s :session %s" language session))))
+
+  (mapc (apply-partially 'add-to-list '+org-babel-mode-alist)
+        '((dot . t)))
+
+  ;; Syntax highlight in #+BEGIN_SRC blocks
+  (setq org-src-fontify-natively t)
+  ;; Don't prompt before running code in org
+  (setq org-confirm-babel-evaluate nil))
+;; Fix an incompatibility between the ob-async and ob-ipython packages
+;; (setq ob-async-no-async-languages-alist '("ipython")))
+
+(after! org-jira
+  (defun my/init-jira-cookie ()
+    (let* ((token nil))
+          (id nil)
+          (header (prin1-to-string "Content-Type: application/json"))
+          (name (prin1-to-string (shell-command-to-string "printf %s \"$(pass show jira/login | sed -n 2p | awk '{print $2}')\"")))
+          (passwd (prin1-to-string (shell-command-to-string "printf %s \"$(pass show jira/login | sed -n 1p)\"")))
+
+      (with-temp-buffer (shell-command (concat (format "curl -s -H %s " header)
+                                              (format "-c - ")
+                                              (format "-d \'{\"username\":%s, \"password\":%s}\' " name passwd)
+                                              (format "-X POST %s/rest/auth/latest/session" jiralib-url)) t)
+                        (goto-char (point-min))
+                        (search-forward-regexp (regexp-quote "atlassian.xsrf.token"))
+                        (setq token (car (last (split-string (string-trim (thing-at-point 'line))))))
+                        (forward-line 1)
+                        (setq id (car (last (split-string (string-trim (thing-at-point 'line))))))
+                        (format "atlasian.xsrf.token=%s;JSESSIONID=%s" token id)))))
+
+
+
 (defhydra hydra-org-refiler (org-mode-map "C-c s" :hint nil)
-    "
+  "
   ^Navigate^      ^Refile^       ^Move^           ^Update^        ^Go To^        ^Dired^
   ^^^^^^^^^^---------------------------------------------------------------------------------------
   _k_: ↑ previous _t_: tasks     _m X_: projects  _T_: todo task  _g t_: tasks    _g X_: projects
@@ -676,33 +732,33 @@ Convert and return this encoding into a UTF-8 string."
   _c_: archive    _p_: personal                   _D_: deadline   _g x_: inbox    _g C_: completed
   _d_: delete     _r_: refile                     _R_: rename     _g n_: notes
   "
-    ("<up>" org-previous-visible-heading)
-    ("<down>" org-next-visible-heading)
-    ("k" org-previous-visible-heading)
-    ("j" org-next-visible-heading)
-    ("c" org-archive-subtree-as-completed)
-    ("d" org-cut-subtree)
-    ("t" org-refile-to-task)
-    ("i" org-refile-to-incubate)
-    ("p" org-refile-to-personal-notes)
-    ("r" org-refile)
-    ("m X" org-refile-to-projects-dir)
-    ("m P" org-refile-to-personal-dir)
-    ("T" org-todo)
-    ("S" org-schedule)
-    ("D" org-deadline)
-    ("R" org-rename-header)
-    ("g t" (find-file-other-window org-default-tasks-file))
-    ("g i" (find-file-other-window org-default-incubate-file))
-    ("g x" (find-file-other-window org-default-inbox-file))
-    ("g c" (find-file-other-window org-default-completed-file))
-    ("g n" (find-file-other-window org-default-notes-file))
-    ("g X" (deer org-default-projects-dir))
-    ("g P" (deer org-default-personal-dir))
-    ("g C" (deer org-default-completed-dir))
-    ("[\t]" (org-cycle))
-    ("s" (org-save-all-org-buffers) "save")
-    ("q" nil "quit"))
+  ("<up>" org-previous-visible-heading)
+  ("<down>" org-next-visible-heading)
+  ("k" org-previous-visible-heading)
+  ("j" org-next-visible-heading)
+  ("c" org-archive-subtree-as-completed)
+  ("d" org-cut-subtree)
+  ("t" org-refile-to-task)
+  ("i" org-refile-to-incubate)
+  ("p" org-refile-to-personal-notes)
+  ("r" org-refile)
+  ("m X" org-refile-to-projects-dir)
+  ("m P" org-refile-to-personal-dir)
+  ("T" org-todo)
+  ("S" org-schedule)
+  ("D" org-deadline)
+  ("R" org-rename-header)
+  ("g t" (find-file-other-window org-default-tasks-file))
+  ("g i" (find-file-other-window org-default-incubate-file))
+  ("g x" (find-file-other-window org-default-inbox-file))
+  ("g c" (find-file-other-window org-default-completed-file))
+  ("g n" (find-file-other-window org-default-notes-file))
+  ("g X" (deer org-default-projects-dir))
+  ("g P" (deer org-default-personal-dir))
+  ("g C" (deer org-default-completed-dir))
+  ("[\t]" (org-cycle))
+  ("s" (org-save-all-org-buffers) "save")
+  ("q" nil "quit"))
 
 
 (set-popup-rule! "^\\*Org Agenda.*\\*$" :size 0.5 :side 'right :vslot 1  :select t :quit t   :ttl nil :modeline nil :autosave t)

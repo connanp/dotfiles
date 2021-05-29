@@ -15,6 +15,7 @@
 ;;      directory (for easy access to its source code).
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.1:-VERS-TLS1.0")
 
+
 (doom! :completion
        (company                         ; the ultimate code completion backend
         ;;+tng
@@ -27,11 +28,12 @@
         +fuzzy)                         ; enable fuzzy search backend for ivy
 
        :ui
-       ;;deft              ; notational velocity for Emacs
+       deft              ; notational velocity for Emacs
        doom                             ; what makes DOOM look the way it does
        doom-dashboard                   ; a nifty splash screen for Emacs
        doom-quit                        ; DOOM quit-message prompts when you quit Emacs
        ;;fill-column       ; a `fill-column' indicator
+       ligatures
        hl-todo                          ; highlight TODO/FIXME/NOTE tags
        modeline                         ; snazzy, Atom-inspired modeline, plus API
        nav-flash                        ; blink the current line after jumping
@@ -77,7 +79,7 @@
        eshell                           ; a consistent, cross-platform shell (WIP)
        term                             ; terminals in Emacs
        ;;shell             ; a terminal REPL for Emacs
-       ;;vterm             ; another terminals in Emacs
+       vterm             ; another terminals in Emacs
 
        :checkers
        (syntax                        ; tasing you for every semicolon you forget
@@ -89,7 +91,7 @@
        ;;ansible
        debugger                         ; FIXME stepping through code, to help you add bugs
        ;;direnv
-       ;;docker
+       docker
        editorconfig                     ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
@@ -106,7 +108,7 @@
        prodigy                          ; FIXME managing external services & code builders
        rgb                              ; creating color strings
        ;;tmux              ; an API for interacting with tmux
-       terraform
+       ;; terraform
        ;;upload            ; map local to remote projects via ssh/ftp
        ;;wakatime
 
@@ -132,6 +134,7 @@
        ;;idris             ;
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
        ;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
+       json
        ;;julia             ; a better, faster MATLAB
        ;;latex             ; writing papers in Emacs has never been so fun
        ;;ledger            ; an accounting system in Emacs
@@ -141,26 +144,23 @@
        ;;nim               ; python + lisp at the speed of c
        ;;nix               ; I hereby declare "nix geht mehr!"
        ;;ocaml             ; an objective camel
-       (org                             ; organize your plain life in plain text
-        +dragndrop                      ; file drag & drop support
-        ;;+jupyter        ; ipython/jupyter support for babel
-        +pandoc                         ; pandoc integration into org's exporter
-        +present                        ; using Emacs for presentations
-        +journal)
+       ;; (org                             ; organize your plain life in plain text
+       ;;  +dragndrop                      ; file drag & drop support
+       ;;  ;;+jupyter        ; ipython/jupyter support for babel
+       ;;  +pandoc                         ; pandoc integration into org's exporter
+       ;;  +present                        ; using Emacs for presentations
+       ;;  +journal)
        perl                             ; write code no one else can comprehend
        ;;php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        (python
-        +ipython
-        +pyenv
-        +pyvenv)                        ; beautiful is better than ugly
+        +ipython)                        ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
        rest                             ; Emacs as a REST client
-       (ruby
-        +rbenv)                         ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
-       rust                             ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
+       (ruby)                         ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       ;; rust                             ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        sh                               ; she sells (ba|z)sh shells on the C xor
        ;;solidity          ; do you need a blockchain? No.
@@ -196,3 +196,19 @@
        ;; and additional ex commands for evil-mode. Use it as a reference for
        ;; your own modules.
        (default +bindings +smartparens +evil-commands))
+
+
+;; https://github.com/hlissner/doom-emacs/issues/4498
+;; emacs --debug-init
+;; benchmark-init/show-durations-tabuled
+;; benchmark-init/show-durations-tree
+(when doom-debug-p
+  (define-advice define-obsolete-function-alias (:filter-args (ll) fix-obsolete)
+  (let ((obsolete-name (pop ll))
+        (current-name (pop ll))
+        (when (if ll (pop ll) "1"))
+        (docstring (if ll (pop ll) nil)))
+    (list obsolete-name current-name when docstring)))
+
+  (require 'benchmark-init)
+  (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))

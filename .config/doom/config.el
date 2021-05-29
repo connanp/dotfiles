@@ -5,16 +5,13 @@
 
 (load! "+bindings")
 (load! "+dired")
-(load! "+eshell")
+(when (featurep! :term eshell)
+  (load! "+eshell"))
 
-(after! org
-  (load! "+org")
-  (load! "+org-time-tracking"))
-
-;; org loading is sensitive.
 (load! "+functions")
 (load! "+lisp")
-;; (load! "+debug")
+(when (featurep! :tools debugger)
+  (load! "+debug"))
 
 (setq-default
  user-full-name "Connan Pearson"
@@ -23,7 +20,9 @@
 (setq-default global-visual-line-mode t
               fill-column 120)
 
-(add-to-list '+format-on-save-enabled-modes 'python-mode t)
+(after! company
+  ;; never auto-suggest to prevent typing delays
+  (setq company-idle-delay nil))
 
 (when (<= emacs-major-version 26)
   (load! "+so-long-pre-27")
@@ -49,21 +48,23 @@
 ;;             '((show-trailing-whitespace . nil)
 ;;               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-moonlight)
-;; FIXME: solar package compatibility issue? or something wrong with dev-dsk
-;; timezone stuff.
-;; (use-package! circadian
-;;   :config
-;;   (setq calendar-latitude 47.603230)
-;;   (setq calendar-longitude -122.330276)
-;;   (setq circadian-themes '((:sunrise . doom-moonlight)
-;;                            ("15:00" . doom-outrun-electric)
-;;                            (:sunset  . doom-outrun-electric)))
-;; 
-;;   (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
-;;   (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
-;; 
-;;   (circadian-setup))
+(setq doom-theme 'doom-plain-dark)
+(use-package! circadian
+  :config
+  (setq calendar-latitude 47.603230)
+  (setq calendar-longitude -122.330276)
+  (setq circadian-themes '((:sunrise . doom-gruvbox-light)
+                           ("12:00" . doom-opera-light)
+                           ("15:00" . doom-nord-light)
+                           ("19:00" . doom-outrun-electric)
+                           ("20:00" . doom-palenight)
+                           (:sunset  . doom-city-lights)
+                           ("22:00" . doom-plain-dark)))
+
+  (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
+  (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
+
+  (circadian-setup))
 
 ;; TODO replace with custom-theme-set-faces!
 ;; monochrome theme so that unbalanced parens are obvious.
@@ -147,26 +148,10 @@
 (when (featurep! :lang common-lisp)
   (use-package! common-lisp-snippets))
 
-(defun ckp/tangle-blocks-for-file ()
-  "Tangle blocks for the tangle file of the block at point."
-  (interactive)
-  (let ((current-prefix-arg 2))
-    (call-interactively 'org-babel-tangle)))
-
-(after! ob
-  (load! "+ob-eshell")
-
-  (mapc (apply-partially 'add-to-list '+org-babel-mode-alist)
-        '((dot . t)))
-
-  ;; Syntax highlight in #+BEGIN_SRC blocks
-  (setq org-src-fontify-natively t)
-  ;; Don't prompt before running code in org
-  (setq org-confirm-babel-evaluate nil))
-  ;; Fix an incompatibility between the ob-async and ob-ipython packages
-  ;; (setq ob-async-no-async-languages-alist '("ipython")))
-
-
+(when (featurep! :lang org)
+  (after! org
+    (load! "+org")
+    (load! "+org-time-tracking")))
 
 (defvar bad-cleanup-modes '(python-mode yaml-mode)
   "List of modes where `cleanup-buffer' should not be used")
@@ -282,11 +267,9 @@
         ;; annoying when $HOME does not exist
         tramp-histfile-override "/tmp/.connanp_tramp_history"
         ;; remote files are not updated outside of tramp/emacs so this is more performant
-        remote-file-name-inhibit-cache 90
+        remote-file-name-inhibit-cache (* 5 60)
         ;; oob copy only
         tramp-copy-size-limit nil
-        ;; just read from the cache
-        tramp-completion-reread-directory-timeout nil
         tramp-verbose 1
         tramp-backup-directory-alist backup-directory-alist
         backup-enable-predicate
@@ -301,7 +284,6 @@
   (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/.toolbox/bin"))
   (add-to-list 'tramp-remote-path "/apollo/env/envImprovement/bin")
   (add-to-list 'tramp-remote-path "/apollo/env/ApolloCommandLine/bin")
-  (add-to-list 'tramp-remote-path "/apollo/env/OctaneBrazilTools/bin")
   (add-to-list 'tramp-remote-path "/apollo/env/BrazilThirdPartyTool/bin")
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
@@ -344,10 +326,6 @@
   ;; (add-hook! 'git-commit-setup-hook 'git-commit-turn-on-flyspell)
   )
 
-(use-package! deadgrep)
-
-(use-package! yasnippet-snippets)
-
 (add-to-list 'auto-mode-alist '("\\.\\(?:te\\|if\\)\\'" . m4-mode))
 
 (set-file-template! "/.*_test\\.go$" :mode 'go-mode :project t :trigger "go_tests_file")
@@ -358,7 +336,7 @@
 (add-hook 'ediff-prepare-buffer-hook #'outline-show-all)
 
 ;; flycheck isn't really useful in these modes
-(add-hook! '(text-mode-hook org-mode-hook) (flycheck-mode -1))
+(add-hook! '(text-mode-hook) (flycheck-mode -1))
 
 (setq confirm-kill-emacs nil)
 
@@ -404,6 +382,29 @@
 (after! spell-fu
   (setq spell-fu-idle-delay 0.5)
   (remove-hook! 'text-mode #'spell-fu-mode))  ; default is 0.25
+
+(after! deft
+  (setq
+   deft-directory (expand-file-name "~/notes")
+   deft-default-extension "md"))
+
+(after! vterm
+  (setq vterm-shell "/usr/bin/zsh"
+        vterm-max-scrollback 10000)
+  (evil-collection-vterm-setup)
+  (general-def 'insert vterm-mode-map "C-<escape>" #'vterm-send-escape)
+
+  (push (list "find-file-below"
+              (lambda (path)
+                (if-let* ((buf (find-file-noselect path))
+                          (window (display-buffer-below-selected buf nil)))
+                    (select-window window)
+                  (message "Failed to open file: %s" path))))
+        vterm-eval-cmds)
+
+  (add-hook! 'vterm-mode-hook
+    (setq-local evil-insert-state-cursor 'box)
+    (evil-insert-state)))
 
 (load "~/local.el" 'noerror 'nomessage)
 

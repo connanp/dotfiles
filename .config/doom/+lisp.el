@@ -1,16 +1,17 @@
 ;;; +lisp.el -*- lexical-binding: t; -*-
 
-(after! smartparens
-  (sp-local-pair '(sly-mrepl-mode) "'" "'" :actions nil)
-  (sp-local-pair '(sly-mrepl-mode) "`" "`" :actions nil))
-
 (use-package! sly
+  :defer-incrementally t
+  :after lispyville
   :config
   (setq sly-kill-without-query t
         sly-repl-history-remove-duplicates t
         sly-repl-history-trim-whitespaces t
         sly-complete-symbol-function 'sly-flex-completions
-        sly-net-coding-system 'utf-8-unix))
+        sly-net-coding-system 'utf-8-unix)
+
+  (sp-local-pair '(sly-mrepl-mode) "'" "'" :actions nil)
+  (sp-local-pair '(sly-mrepl-mode) "`" "`" :actions nil))
 
 ;; (defun insert-literal-left-bracket (fun arg)
 ;;   "Advice for inserting `[` instead of the movement when inside a string."
@@ -36,6 +37,8 @@
 ;;   (lispy-set-key-theme '(lispy c-digits)))
 
 (use-package! lispyville
+  :after-call after-find-file
+  :defer-incrementally t
   :config
   (lispyville-set-key-theme
    '((operators normal)

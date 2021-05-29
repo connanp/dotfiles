@@ -5,13 +5,9 @@
  :n "C-j" #'evil-window-down
  :n "C-k" #'evil-window-up
  :n "C-l" #'evil-window-right
- :en "<f12>" #'org-agenda
- :en "<S-f12>" #'org-clock-goto
- :ein "C-<f12>" #'org-clock-in
  :vn "] n" #'narrow-or-widen-dwim
  (:desc "Quick Bookmark" :einv "<C-f6>" (lambda () (interactive) (bookmark-set "SAVED")))
  (:desc "Jump to Quick Bookmark" :einv "<f6>" (lambda () (interactive) (bookmark-jump "SAVED")))
- :nv "SPC / /" #'deadgrep
  :ein "C-x C-d" #'bjm/ivy-dired-recent-dirs
 
  (:map minibuffer-local-map
@@ -46,13 +42,6 @@
    (:desc "apps" :prefix "a"
      (:desc "Prodigy" :prefix "p"
        :n "S" #'prodigy)))
-
- (:after org
-   (:map org-mode-map
-     (:localleader
-       :n "e" #'ckp/tangle-blocks-for-file
-       :n "r" #'hydra-org-refiler/body
-       :n "j" #'view-journal)))
 
  (:after term
    ;; similar to setting bindkey -v in shell, but shell must use bindkey -e
