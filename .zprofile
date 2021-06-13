@@ -17,8 +17,8 @@ fi
 # Editors
 #
 
-export EDITOR="emacsclient -n -s /tmp/emacs$UID/server"
-export VISUAL="emacsclient -n -s /tmp/emacs$UID/server"
+export EDITOR="emacsclient -n -s /run/user/$UID/emacs/server"
+export VISUAL="emacsclient -n -s /run/user/$UID/emacs/server"
 export PAGER='less'
 
 #

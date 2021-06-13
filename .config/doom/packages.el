@@ -36,6 +36,8 @@
 (package! alert)
 (package! slack)
 
+(package! string-inflection)
+
 ;; https://github.com/hlissner/doom-emacs/issues/4498
 (package! benchmark-init)
 

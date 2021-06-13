@@ -48,7 +48,7 @@
 ;;             '((show-trailing-whitespace . nil)
 ;;               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-plain-dark)
+(setq doom-theme 'doom-homage-black)
 (use-package! circadian
   :config
   (setq calendar-latitude 47.603230)
@@ -59,7 +59,7 @@
                            ("19:00" . doom-outrun-electric)
                            ("20:00" . doom-palenight)
                            (:sunset  . doom-city-lights)
-                           ("22:00" . doom-plain-dark)))
+                           ("22:00" . doom-homage-black)))
 
   (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
   (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
@@ -423,6 +423,8 @@
 
 ;; slack api is fast moving and package needs maintenance
 ;; (load! "+slack.el")
+
+(use-package! string-inflection)
 
 (load "~/local.el" 'noerror 'nomessage)
 
