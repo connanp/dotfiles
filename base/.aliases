@@ -228,3 +228,6 @@ mount_docs() {
     --no-modtime \
     --transfers 2  # default 4 parallel file xfers
 }
+
+alias vpnup='nmcli conn up vpn.mapsonline.net'
+alias vpndown='nmcli conn down vpn.mapsonline.net'
