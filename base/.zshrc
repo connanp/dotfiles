@@ -69,10 +69,10 @@ else
 fi
 
 zstyle ':completion:*' squeeze-slashes true
-zstyle ':completion:*' special-dirs ..
+zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(|.|..) ]] && reply=(..)'
 
 zstyle ':prezto:module:prompt' theme 'powerlevel10k'
-zstyle ':prezto:module:editor' dot-expansion 'yes'
+zstyle ':prezto:module:editor' dot-expansion 'no'
 zstyle ':prezto:module:history-substring-search' color 'yes'
 zstyle ':prezto:module:autosuggestions' color 'yes'
 
@@ -129,6 +129,16 @@ if [[ "$TERM" != "dumb" ]]; then
 
     # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+    if [[ -f ~/.bash-my-aws/aliases ]]; then
+      export PATH="$PATH:$HOME/.bash-my-aws/bin"
+      source ~/.bash-my-aws/aliases
+
+      # For ZSH users, uncomment the following two lines:
+      autoload -U +X compinit && compinit
+      autoload -U +X bashcompinit && bashcompinit
+
+      source ~/.bash-my-aws/bash_completion.sh
+    fi
 fi
 
 if [ -d $HOME/.config/site ]; then

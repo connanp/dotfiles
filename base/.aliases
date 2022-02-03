@@ -7,11 +7,6 @@ alias ..="cd .."
 
 alias reset-sound="pulseaudio -k && sudo alsa force-reload"
 
-alias addtoken="ssh-add -s libeToken.so.8"
-
-alias digint="dig @10.4.4.10 $@"
-alias digext="dig @8.8.8.8 $@"
-
 alias rsyncnogit="rsync -av --filter=':- .gitignore' --exclude .git"
 
 alias g="git"
@@ -214,4 +209,22 @@ say() {
 
 find_file_below() {
     vterm_cmd find-file-below "$(realpath "${@:-.}")"
+}
+
+aws_profile() {
+    . <(aws-vault exec ${1:-$USER} -- bash -c 'declare -p | grep AWS')
+}
+
+clear_aws() {
+    . <(env | grep -oP 'AWS_[^=]+' | sed -e 's/^/unset /')
+}
+
+mount_docs() {
+    mkdir -p ~/Documents/work-docs || :
+    rclone mount peoplegis:PeopleGIS\ Documentation ~/Documents/work-docs \
+    --daemon \
+    --vfs-cache-mode full \
+    --vfs-read-chunk-size-limit 512M \
+    --no-modtime \
+    --transfers 2  # default 4 parallel file xfers
 }

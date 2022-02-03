@@ -100,9 +100,9 @@
 (setq-default line-spacing 0.1)
 (setq doom-font (font-spec :family "fixed" :size 14 :weight 'medium)
       doom-modeline-icon nil)
-(when (member "Fira Code" (font-family-list))
-  (setq doom-font (font-spec :family "Fira Code" :size 14 :weight 'medium)
-        doom-big-font (font-spec :family "Fira Code" :size 19 :weight 'light)
+(when (member "FiraCode Nerd Font" (font-family-list))
+  (setq doom-font (font-spec :family "FiraCode Nerd Font" :size 14 :weight 'medium)
+        doom-big-font (font-spec :family "FiraCode Nerd Font" :size 19 :weight 'light)
         doom-modeline-icon t))
 
 (when (member "Libre Baskerville" (font-family-list))
@@ -212,7 +212,7 @@
   ;; messes with tramp, so much file check spam
   ;; (projectile-mode -1)
 
-  (setq projectile-project-search-path '("~/workspace/"))
+  (setq projectile-project-search-path '("~/Development" "~/repos"))
 
   ;; https://github.com/bbatsov/projectile/issues/657
   ;; (add-hook 'find-file-hook

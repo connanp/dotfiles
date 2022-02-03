@@ -2,7 +2,7 @@
 
 (use-package! sly
   :defer-incrementally t
-  :after lispyville
+  ;; :after lispyville
   :config
   (setq sly-kill-without-query t
         sly-repl-history-remove-duplicates t
@@ -36,24 +36,24 @@
 ;;   ;; default includes special which has movement keys in insert mode
 ;;   (lispy-set-key-theme '(lispy c-digits)))
 
-(use-package! lispyville
-  :after-call after-find-file
-  :defer-incrementally t
-  :config
-  (lispyville-set-key-theme
-   '((operators normal)
-     c-w
-     (prettify insert)
-     (atom-movement normal visual)
-     slurp/barf-lispy
-     (wrap normal insert)
-     additional
-     additional-insert
-     (additional-movement visual motion)
-     (additional-wrap normal insert)
-     (escape insert)))
-  ;; use evil visual mode
-  (lispyville-enter-visual-when-marking))
+;; (use-package! lispyville
+;;   :after-call after-find-file
+;;   :defer-incrementally t
+;;   :config
+;;   (lispyville-set-key-theme
+;;    '((operators normal)
+;;      c-w
+;;      (prettify insert)
+;;      (atom-movement normal visual)
+;;      slurp/barf-lispy
+;;      (wrap normal insert)
+;;      additional
+;;      additional-insert
+;;      (additional-movement visual motion)
+;;      (additional-wrap normal insert)
+;;      (escape insert)))
+;;   ;; use evil visual mode
+;;   (lispyville-enter-visual-when-marking))
 
 (provide '+lisp)
 

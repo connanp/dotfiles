@@ -39,9 +39,7 @@
  (:leader
    (:prefix "b"
      (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
-   (:desc "apps" :prefix "a"
-     (:desc "Prodigy" :prefix "p"
-       :n "S" #'prodigy)))
+   )
 
  (:after term
    ;; similar to setting bindkey -v in shell, but shell must use bindkey -e

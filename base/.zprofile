@@ -91,3 +91,4 @@ TMPPREFIX="${TMPDIR%/}/zsh"
 if [[ ! -d "$TMPPREFIX" ]]; then
   mkdir -p "$TMPPREFIX"
 fi
+_byobu_sourced=1 . /usr/bin/byobu-launch 2>/dev/null || true

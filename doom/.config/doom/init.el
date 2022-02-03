@@ -24,8 +24,9 @@
        ;;(helm             ; the *other* search engine for love and life
        ;; +fuzzy)          ; enable fuzzy search backend for helm
        ;;ido               ; the other *other* search engine...
-       (ivy                             ; a search engine for love and life
-        +fuzzy)                         ; enable fuzzy search backend for ivy
+       ;; (ivy                             ; a search engine for love and life
+       ;;  +fuzzy)                         ; enable fuzzy search backend for ivy
+       vertico           ; the search engine of the future
 
        :ui
        deft              ; notational velocity for Emacs
@@ -37,6 +38,7 @@
        ligatures
        hl-todo                          ; highlight TODO/FIXME/NOTE tags
        modeline                         ; snazzy, Atom-inspired modeline, plus API
+       ;;minimap           ; show a map of the code on the side
        nav-flash                        ; blink the current line after jumping
        ;;neotree           ; a project drawer, like NERDTree for vim
        ophints                          ; display visual hints when editing in evil
@@ -52,14 +54,16 @@
        vi-tilde-fringe                  ; fringe tildes to mark beyond EOB
        window-select                    ; visually switch windows
        workspaces                       ; tab emulation, persistence & separate workspaces
+       ;;zen               ; distraction-free coding or writing
 
        :editor
        (evil +everywhere)               ; come to the dark side, we have cookies
        ;;(format +onsave)  ; automated prettiness
        file-templates                   ; auto-snippets for empty files
        format
+       ;;god               ; run Emacs commands without modifier keys
        fold                             ; (nigh) universal code folding
-       lispy                            ; vim for lisp, for people who dont like vim
+       ;; lispy                            ; vim for lisp, for people who dont like vim
        multiple-cursors                 ; editing in many places at once
        ;;objed             ; text object editing for the innocent
        ;; parinfer          ; turn lisp into python, sort of
@@ -71,29 +75,30 @@
        (dired)                           ; making dired pretty [functional]
        ;; +ranger          ; bringing the goodness of ranger to dired
        ;; +icons                         ; colorful icons for dired-mode
-       ;; electric          ; smarter, keyword-based electric-indent
+       electric          ; smarter, keyword-based electric-indent
        ;;ibuffer           ; interactive buffer management
        vc                               ; version-control and Emacs, sitting in a tree
        undo
 
        :term
        eshell                           ; a consistent, cross-platform shell (WIP)
-       term                             ; terminals in Emacs
+       ;; term                             ; terminals in Emacs
        ;;shell             ; a terminal REPL for Emacs
        vterm             ; another terminals in Emacs
 
        :checkers
        (syntax                        ; tasing you for every semicolon you forget
         +childframe)                    ; use childframes for error popups (Emacs 26+ only)
-       ;; spell             ; tasing you for misspelling mispelling -- XXX broken with which-key--update when using z leader key
-       ;;grammar           ; tasing grammar mistake every you make
+       spell             ; tasing you for misspelling mispelling -- XXX broken with which-key--update when using z leader key
+       grammar           ; tasing grammar mistake every you make
 
        :tools
        ;;ansible
-       debugger                         ; FIXME stepping through code, to help you add bugs
+       (debugger
+        +lsp)                         ; FIXME stepping through code, to help you add bugs
        ;;direnv
        docker
-       editorconfig                     ; let someone else argue about tabs vs spaces
+       ;; editorconfig                     ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
        (eval +overlay)     ; run code, run (also, repls)
        ;;gist              ; interacting with github gists
@@ -108,12 +113,11 @@
        (pass
         +auth)                             ; password manager for nerds
        pdf               ; pdf enhancements
-       prodigy                          ; FIXME managing external services & code builders
+       ;; prodigy                          ; FIXME managing external services & code builders
        rgb                              ; creating color strings
        ;;tmux              ; an API for interacting with tmux
        ;; terraform
        ;;upload            ; map local to remote projects via ssh/ftp
-       ;;wakatime
 
        :lang
        ;;agda              ; types of types of types of types...
@@ -131,12 +135,12 @@
        emacs-lisp                       ; drown in parentheses
        ess                              ; emacs speaks statistics
        ;;fsharp           ; ML stands for Microsoft's Language
-       go                               ; the hipster dialect
+       (go +lsp)                               ; the hipster dialect
        ;;(haskell +intero) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
        ;;(java +meghanada) ; the poster child for carpal tunnel syndrome
-       ;;javascript        ; all(hope(abandon(ye(who(enter(here))))))
+       (javascript +lsp)        ; all(hope(abandon(ye(who(enter(here))))))
        json
        ;;julia             ; a better, faster MATLAB
        ;;latex             ; writing papers in Emacs has never been so fun
@@ -154,10 +158,11 @@
        ;;  +present                        ; using Emacs for presentations
        ;;  +journal)
        perl                             ; write code no one else can comprehend
-       ;;php               ; perl's insecure younger brother
+       php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        (python
+        +lsp
         +ipython)                        ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
