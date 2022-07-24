@@ -61,8 +61,8 @@ function prompt_num_jobs() {
       command_execution_time    # previous command duration
       time
       background_jobs
-      nordvpn
-      vpn_ip
+      # nordvpn                 # lags the whole prompt on resume from sleep
+      # vpn_ip
       battery
       newline                   # \n
       vim_shell
@@ -200,7 +200,7 @@ function prompt_num_jobs() {
   # Grey current time.
   typeset -g POWERLEVEL9K_TIME_FOREGROUND=$grey
   # Format for the current time: 09:51:02. See `man 3 strftime`.
-  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%H:%M:%S}'
+  typeset -g POWERLEVEL9K_TIME_FORMAT='%D{%a %H:%M:%S}'
   # If set to true, time will update when you hit enter. This way prompts for the past
   # commands will contain the start times of their commands rather than the end times of
   # their preceding commands.

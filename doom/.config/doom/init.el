@@ -14,6 +14,8 @@
 ;;      Alternatively, press 'gd' (or 'C-c g d') on a module to browse its
 ;;      directory (for easy access to its source code).
 (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.1:-VERS-TLS1.0")
+(add-to-list 'load-path "/home/cpearson/.local/share/emacs/site-lisp/mu4e")
+(add-to-list 'Info-default-directory-list "/home/cpearson/.local/share/info")
 
 
 (doom! :completion
@@ -96,7 +98,7 @@
        ;;ansible
        (debugger
         +lsp)                         ; FIXME stepping through code, to help you add bugs
-       ;;direnv
+       direnv
        docker
        ;; editorconfig                     ; let someone else argue about tabs vs spaces
        ;;ein               ; tame Jupyter notebooks with emacs
@@ -133,9 +135,9 @@
        ;;elixir            ; erlang done right
        ;;elm               ; care for a cup of TEA?
        emacs-lisp                       ; drown in parentheses
-       ess                              ; emacs speaks statistics
+       ;;ess                              ; emacs speaks statistics
        ;;fsharp           ; ML stands for Microsoft's Language
-       (go +lsp)                               ; the hipster dialect
+       ;;(go +lsp)                               ; the hipster dialect
        ;;(haskell +intero) ; a language that's lazier than I am
        ;;hy                ; readability of scheme w/ speed of python
        ;;idris             ;
@@ -157,17 +159,18 @@
        ;;  +pandoc                         ; pandoc integration into org's exporter
        ;;  +present                        ; using Emacs for presentations
        ;;  +journal)
-       perl                             ; write code no one else can comprehend
+       ;;perl                             ; write code no one else can comprehend
        php               ; perl's insecure younger brother
        ;;plantuml          ; diagrams for confusing people more
        ;;purescript        ; javascript, but functional
        (python
         +lsp
+        +pyright
         +ipython)                        ; beautiful is better than ugly
        ;;qt                ; the 'cutest' gui framework ever
        ;;racket            ; a DSL for DSLs
        rest                             ; Emacs as a REST client
-       (ruby)                         ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
+       ;;(ruby)                         ; 1.step do {|i| p "Ruby is #{i.even? ? 'love' : 'life'}"}
        ;; rust                             ; Fe2O3.unwrap().unwrap().unwrap().unwrap()
        ;;scala             ; java, but good
        sh                               ; she sells (ba|z)sh shells on the C xor
@@ -177,7 +180,7 @@
        web                              ; the tubes
 
        :email
-       (mu4e)       ; WIP
+       (mu4e +org)       ; WIP
        ;;notmuch             ; WIP
        ;;(wanderlust +gmail) ; WIP
 
@@ -186,7 +189,7 @@
        ;; should be loaded late.
        :app
        calendar
-       irc               ; how neckbeards socialize
+       ;;irc               ; how neckbeards socialize
        ;;(rss +org)        ; emacs as an RSS reader
        ;;twitter           ; twitter client https://twitter.com/vnought
 
@@ -203,20 +206,20 @@
        ;; a Spacemacs-inspired keybinding scheme, a custom yasnippet library,
        ;; and additional ex commands for evil-mode. Use it as a reference for
        ;; your own modules.
-       (default +bindings +smartparens +evil-commands))
+       (default +bindings +smartparens))
 
 
 ;; https://github.com/hlissner/doom-emacs/issues/4498
 ;; emacs --debug-init
 ;; benchmark-init/show-durations-tabuled
 ;; benchmark-init/show-durations-tree
-(when doom-debug-p
-  (define-advice define-obsolete-function-alias (:filter-args (ll) fix-obsolete)
-  (let ((obsolete-name (pop ll))
-        (current-name (pop ll))
-        (when (if ll (pop ll) "1"))
-        (docstring (if ll (pop ll) nil)))
-    (list obsolete-name current-name when docstring)))
-
-  (require 'benchmark-init)
-  (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))
+;; (when doom-debug-p
+;;   (define-advice define-obsolete-function-alias (:filter-args (ll) fix-obsolete)
+;;   (let ((obsolete-name (pop ll))
+;;         (current-name (pop ll))
+;;         (when (if ll (pop ll) "1"))
+;;         (docstring (if ll (pop ll) nil)))
+;;     (list obsolete-name current-name when docstring)))
+;; 
+;;   (require 'benchmark-init)
+;;   (add-hook 'doom-first-input-hook #'benchmark-init/deactivate))

@@ -119,6 +119,8 @@ autoload -Uz zmv
 setopt NUMERIC_GLOB_SORT
 
 if [[ "$TERM" != "dumb" ]]; then
+    # (( ${+commands[direnv]} )) && emulate zsh -c "$(asdf exec direnv export zsh)"
+
     # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
     # Initialization code that may require console input (password prompts, [y/n]
     # confirmations, etc.) must go above this block, everything else may go below.
@@ -126,6 +128,8 @@ if [[ "$TERM" != "dumb" ]]; then
     source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
     fi
 
+    source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
+    export DIRENV_LOG_FORMAT=''
 
     # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
     [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -155,3 +159,7 @@ if [[ "$PROFILE_STARTUP" == true ]]; then
     unsetopt xtrace
     exec 2>&3 3>&-
 fi
+
+
+# add Pulumi to the PATH
+export PATH=$PATH:$HOME/.pulumi/bin

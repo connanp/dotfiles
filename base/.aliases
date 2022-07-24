@@ -231,3 +231,12 @@ mount_docs() {
 
 alias vpnup='nmcli conn up vpn.mapsonline.net'
 alias vpndown='nmcli conn down vpn.mapsonline.net'
+
+start_aws_creds() {
+    if ip addr show label lo:0; then
+        sudo ip route del 169.254.0.0/16
+        sudo ip addr del 169.254.169.254/24 dev lo label lo:0
+    fi
+    sudo pkill -f "aws-vault exec $USER -s"
+    /home/cpearson/bin/aws-vault exec $USER -s &
+}

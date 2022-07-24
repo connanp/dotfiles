@@ -20,6 +20,9 @@
  (:map smartparens-mode-map
    :n "M-o" #'sp-open-line-below-sexp-command)
 
+ (:map sql-mode-map
+   "C-c SPC" #'sql/redirect-to-buf)
+
  (:leader
    (:prefix "f"
      (:desc "Find file in org dir" :n "o" #'ckp/org-find-file))
@@ -40,6 +43,26 @@
    (:prefix "b"
      (:desc "Yank entire buffer" :n "Y" #'ckp/copy-buffer))
    )
+
+ ;; (nvmap :prefix ", s"
+ ;;  :keymaps 'smartparens-mode-map
+ ;;  "<" '(sp-backward-barf-sexp :wk "Barf backward")
+ ;;  ">" '(sp-forward-barf-sexp :wk "Barf forward")
+ ;;  "(" '(sp-backward-slurp-sexp :wk "Slurp backward")
+ ;;  ")" '(sp-forward-slurp-sexp :wk "Slurp forward")
+ ;;  "}" '(sp-slurp-hybrid-sexp :wk "Slurp (hybrid)")
+ ;;  "+" '(sp-join-sexp :wk "Join")
+ ;;  "-" '(sp-split-sexp :wk "Split")
+ ;;  "a" '(sp-absorb-sexp :wk "Absorb")
+ ;;  "c" '(sp-clone-sexp :wk "Clone")
+ ;;  "C" '(sp-convolute-sexp :wk "Convolute")
+ ;;  "m" '(sp-mark-sexp :wk "Mark")
+ ;;  "r" '(sp-raise-sexp :wk "Raise")
+ ;;  "s" '(sp-splice-sexp-killing-around :wk "Splice")
+ ;;  "t" '(sp-transpose-sexp :wk "Transpose")
+ ;;  "T" '(sp-transpose-hybrid-sexp :wk "Transpose (hybrid)")
+ ;;  ;; Narrow and Widen, use default emacs for widening
+ ;;  "n" '(sp-narrow-to-sexp :wk "Narrow"))
 
  (:after term
    ;; similar to setting bindkey -v in shell, but shell must use bindkey -e

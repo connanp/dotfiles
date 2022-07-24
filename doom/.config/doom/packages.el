@@ -11,6 +11,7 @@
 (when (featurep! :lang markdown +pandoc)
   (package! ox-gfm))
 
+(package! mmm-mode)
 (package! esh-autosuggest)
 (package! circadian)
 ;; (package! ob-async)
@@ -25,7 +26,7 @@
 (package! magit-todos :disable t)
 (package! eshell-did-you-mean :disable t)
 
-(package! counsel-tramp)
+;;(package! counsel-tramp)
 (package! docker-tramp)
 
 (when (featurep! :lang go)
@@ -34,12 +35,13 @@
 (when (featurep! :ui emoji)
   (package! emoji-cheat-sheet-plus))
 (package! alert)
-(package! slack)
+;;(package! slack)
 
 (package! string-inflection)
 
 ;; https://github.com/hlissner/doom-emacs/issues/4498
 (package! benchmark-init)
 
+(package! window-end-visible)
 (if (file-exists-p (expand-file-name "~/local-pkgs.el"))
     (load! (expand-file-name "~/local-pkgs.el")))

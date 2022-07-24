@@ -1,4 +1,5 @@
 ;;; config.el -*- lexical-binding: t; -*-
+;;(setq comp-deferred-compilation-deny-list '("vterm" "evil-collection-vterm"))
 (setq custom-file "~/.emacs-custom.el")
 ;; site-local things
 (load custom-file)
@@ -12,6 +13,8 @@
 (load! "+lisp")
 (when (featurep! :tools debugger)
   (load! "+debug"))
+(after! sql
+  (load! "+sql"))
 
 (setq-default
  user-full-name "Connan Pearson"
@@ -48,23 +51,7 @@
 ;;             '((show-trailing-whitespace . nil)
 ;;               (truncate-lines . nil)))))
 
-(setq doom-theme 'doom-homage-black)
-(use-package! circadian
-  :config
-  (setq calendar-latitude 47.603230)
-  (setq calendar-longitude -122.330276)
-  (setq circadian-themes '((:sunrise . doom-gruvbox-light)
-                           ("12:00" . doom-opera-light)
-                           ("15:00" . doom-nord-light)
-                           ("19:00" . doom-outrun-electric)
-                           ("20:00" . doom-palenight)
-                           (:sunset  . doom-city-lights)
-                           ("22:00" . doom-homage-black)))
-
-  (add-hook! circadian-after-load-theme-hook (lambda (theme) (setq doom-theme theme)))
-  (add-hook! circadian-before-load-theme-hook (disable-theme doom-theme))
-
-  (circadian-setup))
+(setq doom-theme 'doom-ephemeral)
 
 ;; TODO replace with custom-theme-set-faces!
 ;; monochrome theme so that unbalanced parens are obvious.
@@ -107,6 +94,10 @@
 
 (when (member "Libre Baskerville" (font-family-list))
   (setq doom-variable-pitch-font (font-spec :family "Libre Baskerville" :size 16)))
+
+; make sure all frames have the font spec from above. when calling emacsclient, new frames won't have the customizations without this.
+; specifically happens when launching with emacs --daemon
+(set-face-attribute 'default nil :font doom-font)
 
 ;; performance
 (setq flyspell-issue-message-flag nil)
@@ -271,10 +262,6 @@
 
   (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/bin"))
   (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/.local/bin"))
-  (add-to-list 'tramp-remote-path (concat "/home/" (user-login-name) "/.toolbox/bin"))
-  (add-to-list 'tramp-remote-path "/apollo/env/envImprovement/bin")
-  (add-to-list 'tramp-remote-path "/apollo/env/ApolloCommandLine/bin")
-  (add-to-list 'tramp-remote-path "/apollo/env/BrazilThirdPartyTool/bin")
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 
@@ -352,26 +339,29 @@
 
 (add-function :after after-focus-change-function #'save-all)
 
-(use-package! counsel-tramp
-  :config
-  (add-hook! 'counsel-tramp-pre-command-hook
-    (projectile-mode 0)
-    (editorconfig-mode 0))
-  (add-hook! 'counsel-tramp-quit-hook
-    (projectile-mode 1)
-    (editorconfig-mode 1)))
+;; (use-package! counsel-tramp
+;;   :config
+;;   (add-hook! 'counsel-tramp-pre-command-hook
+;;     (projectile-mode 0)
+;;     (editorconfig-mode 0))
+;;   (add-hook! 'counsel-tramp-quit-hook
+;;     (projectile-mode 1)
+;;     (editorconfig-mode 1)))
 
 (when (featurep! :app write +langtool)
   (setq langtool-language-tool-jar (expand-file-name "~/.local/LanguageTool-4.6/languagetool-commandline.jar")))
 
-(add-hook! 'go-mode-hook indent-tabs-mode t)
+(after! go-mode
+  (add-hook! 'go-mode-hook indent-tabs-mode t))
 
 (add-hook! '(text-mode-hook markdown-mode-hook) #'+word-wrap-mode)
 
 (setq ispell-dictionary "en")
 (after! spell-fu
-  (setq spell-fu-idle-delay 0.5)
-  (remove-hook! 'text-mode #'spell-fu-mode))  ; default is 0.25
+  (setq spell-fu-ignore-modes (list #'yaml-mode))
+  (add-hook 'yaml-mode-hook #'spell-fu-mode-disable) ; inherits text-mode hook...
+  (setq spell-fu-idle-delay 0.5)  ; default is 0.25
+  )
 
 (after! deft
   (setq
@@ -421,10 +411,130 @@
           (apply fun args)))
     (apply fun args))))
 
-;; slack api is fast moving and package needs maintenance
-;; (load! "+slack.el")
+(after! python-mode
+  (set-ligatures! 'python-mode
+    ;; Functional
+    :def "def"
+    :lambda "lambda"
+    ;; Types
+    :null "None"
+    :true "True" :false "False"
+    :int "int" :str "str"
+    :float "float"
+    :bool "bool"
+    :tuple "tuple"
+    ;; Flow
+    :not "not"
+    :in "in" :not-in "not in"
+    :and "and" :or "or"
+    :for "for"
+    :return "return" :yield "yield")
+
+  (setq python-indent-guess-indent-offset-verbose nil)
+  )
 
 (use-package! string-inflection)
+(use-package! window-end-visible)
+
+(after! mu4e
+  (defun skip-spam-mu4e-query (query)
+    (if (string-match-p "\\<maildir:" query)
+        ;; If the query already has a maildir: restriction, don't
+        ;; rewrite it.
+        query
+      ;; Otherwise restrict the search to the maildirs I marked as
+      ;; relevant in this context and exclude boring maildirs such as
+      ;; spam and trash.
+      (let ((q (concat query
+                       ;; (when th/mu4e-context-maildir-regexp
+                       ;;   (format " AND maildir:\"/%s/\"" th/mu4e-context-maildir-regexp))
+                       ;; Don't consider boring groups such as trash and spam.
+                       (format " AND NOT maildir:\"/%s/\""
+                               (regexp-opt '("/peoplegis.com/Spam" "/peoplegis.com/Trash"
+                                             "/peoplegis.com/automated/mail"))))))
+        ;;(message "Rewritten query: %s" q)
+        q)))
+
+  (setq mu4e-query-rewrite-function
+        #'skip-spam-mu4e-query)
+
+  (defun my/mu4e-delete-page ()
+    (interactive)
+    (set-mark (window-start))
+    (goto-char (window-end-visible))
+    (activate-mark)
+    (mu4e-headers-mark-for-trash)
+    (mu4e-mark-execute-all t)
+    (deactivate-mark)
+    (goto-char (window-start)))
+
+  (map! (:map mu4e-headers-mode-map
+    :n "]d" #'my/mu4e-delete-page))
+
+  (setq sendmail-program (executable-find "msmtp")
+        send-mail-function #'smtpmail-send-it
+        message-sendmail-f-is-evil t
+        message-sendmail-extra-arguments '("--read-envelope-from")
+        message-send-mail-function #'message-send-mail-with-sendmail
+        mu4e-index-cleanup nil
+        ;; folders are labels in fastmail just like gmail
+        mu4e-index-lazy-check t
+        mu4e-get-mail-command "mbsync pgis-default"
+        mu4e-root-maildir "~/Maildir"
+        mu4e-attachment-dir "~/Downloads/email-attachments"
+        mu4e-update-interval (* 60 15))
+
+  (set-email-account! "peoplegis.com"
+  '((mu4e-sent-folder       . "/peoplegis.com/Sent")
+    (mu4e-drafts-folder     . "/peoplegis.com/Drafts")
+    (mu4e-trash-folder      . "/peoplegis.com/Trash")
+    (mu4e-refile-folder     . (lambda (msg)
+                                (cond
+                                 ;; support requests
+                                 ((string-prefix-p "/peoplegis.com/SRs"
+                                                (mu4e-message-field msg :maildir))
+                                  "/peoplegis.com/SRs/Archive")
+                                 ((string-prefix-p "/peoplegis.com/automated"
+                                                (mu4e-message-field msg :maildir))
+                                  "/peoplegis.com/Trash")
+                                 ((mu4e-message-contact-field-matches msg :to "do_not_reply@peoplegis.com"))
+                                 ;; messages sent by me go to the sent folder
+                                 ((mu4e-message-sent-by-me msg)
+                                  mu4e-sent-folder)
+                                 ;; everything else
+                                 (t  "/peoplegis.com/Archive"))))
+    (smtpmail-smtp-user     . "connan@peoplegis.com")
+    (mu4e-maildir-shortcuts . ((:maildir "/peoplegis.com/INBOX" :key ?i)
+                               (:maildir "/peoplegis.com/SRs" :key ?s)
+                               (:maildir "/peoplegis.com/automated" :key ?p)
+                               (:maildir "/peoplegis.com/Archive" :key ?a)
+                               (:maildir "/peoplegis.com/Sent" :key ?z)))
+    (mu4e-compose-signature . "---\nConnan"))
+  t)
+
+  (add-to-list 'mu4e-bookmarks
+             '("maildir:/peoplegis.com/INBOX OR maildir:/peoplegis.com/SRs" "Inbox" ?z))
+  (add-to-list 'mu4e-bookmarks
+             '("from:budgets@costalerts.amazonaws.com OR subject:\"AWS Budgets:\"" "AWS Budget" ?a)))
+
+
+
+(use-package! aws-mode
+  :bind ;; some functions which make sense to bind to something
+  ("C-c a a" . aws)
+  ("C-c a l" . aws-login)
+  ("C-c a i" . aws-organizations-get-account-id)
+  ("C-c a n" . aws-organizations-get-account-name)
+  :load-path "~/repos/aws.el"
+  :custom
+  ;; (aws-vault t) ;; when t use aws-vault cmd to get into aws session
+  (aws-output "json") ;; optional: yaml, json, text (default: yaml)
+  (aws-organizations-account "cpearson") ;; profile of organizations account. organizations commands are automatically executed against this account, when specified
+  (setq aws-profile "cpearson"))
+
+(use-package! aws-evil
+  :after (aws-mode evil)
+  :load-path "~/repos/aws.el")
 
 (load "~/local.el" 'noerror 'nomessage)
 
