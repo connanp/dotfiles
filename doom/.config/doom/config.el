@@ -35,22 +35,6 @@
     (mapc (apply-partially 'add-to-list 'so-long-minor-modes)
           '(rainbow-delimiters-mode diff-hl-mode diff-hl-amend-mode diff-hl-flydiff-mode))))
 
-;; (when (>= emacs-major-version 27)
-;;   ;; will be included in installation in 27.1
-;;   (if (stringp (find-library-name "so-long"))
-;;       (require 'so-long)
-;;     (load! "+so-long"))
-;;   (after! so-long
-;;       (global-so-long-mode 1)
-
-;;       ;; Additional buffer-local minor modes to disable.
-;;       (mapc (apply-partially 'add-to-list 'so-long-minor-modes)
-;;             '(rainbow-delimiters-mode diff-hl-mode diff-hl-amend-mode diff-hl-flydiff-mode))
-;;       ;; Additional variables to override.
-;;       (mapc (apply-partially 'add-to-list 'so-long-variable-overrides)
-;;             '((show-trailing-whitespace . nil)
-;;               (truncate-lines . nil)))))
-
 (setq doom-theme 'doom-ephemeral)
 
 ;; TODO replace with custom-theme-set-faces!
@@ -69,13 +53,6 @@
   '(rainbow-delimiters-depth-9-face :foreground (doom-color 'fg-alt))
   ;; org headlines inherit this value
   '(outline-1 :background nil))
-
-;; emacs 27+ bug
-;; https://github.com/hlissner/doom-emacs/issues/1988
-;; (custom-set-faces!
-;;   '((hl-line solaire-hl-line-face org-indent
-;;      outline-1 outline-2 outline-3 outline-4 outline-5 outline-6 outline-7 outline-8)
-;;     :extend t))
 
 (when IS-MAC
   (setq mac-mouse-wheel-smooth-scroll t))
@@ -195,21 +172,8 @@
 (use-package! request)
 (use-package! request-deferred)
 
-;; TODO this is buffer-local and may not even be needed anymore.
-;; shell-mode echos every command and `stty -echo' doesn't change that fact
-;; (setq comint-process-echoes t)
-
 (after! projectile
-  ;; messes with tramp, so much file check spam
-  ;; (projectile-mode -1)
-
   (setq projectile-project-search-path '("~/Development" "~/repos"))
-
-  ;; https://github.com/bbatsov/projectile/issues/657
-  ;; (add-hook 'find-file-hook
-  ;;           (lambda ()
-  ;;             (if (locate-dominating-file default-directory ".git")
-  ;;                 (projectile-mode 1))))
 
   (setq projectile-file-exists-local-cache-expire (* 5 60))
   (defvar ckp/projectile-project-name-cache nil)
@@ -280,11 +244,6 @@
       (let ((text (delete-and-extract-region start end)))
         (insert (funcall func text)))))
 
-(defun ckp/copy-buffer ()
-  "Copy entire buffer to kill ring."
-  (interactive)
-  (clipboard-kill-ring-save (point-min) (point-max)))
-
 (require 'bookmark)
 
 (after! magit
@@ -338,15 +297,6 @@
     (save-some-buffers t)))
 
 (add-function :after after-focus-change-function #'save-all)
-
-;; (use-package! counsel-tramp
-;;   :config
-;;   (add-hook! 'counsel-tramp-pre-command-hook
-;;     (projectile-mode 0)
-;;     (editorconfig-mode 0))
-;;   (add-hook! 'counsel-tramp-quit-hook
-;;     (projectile-mode 1)
-;;     (editorconfig-mode 1)))
 
 (when (featurep! :app write +langtool)
   (setq langtool-language-tool-jar (expand-file-name "~/.local/LanguageTool-4.6/languagetool-commandline.jar")))

@@ -160,3 +160,8 @@ Version 2020-06-26 2021-07-21 2021-08-15"
             (if (eq (point) (point-max))
                 (throw 'EndReached t)
               (forward-char))))))))
+
+(defun ckp/copy-buffer ()
+  "Copy entire buffer to kill ring."
+  (interactive)
+  (clipboard-kill-ring-save (point-min) (point-max)))
