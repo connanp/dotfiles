@@ -1,0 +1,2 @@
+#!/bin/sh
+emacsclient -e '(read-passwd "sudo password: ")' | xargs

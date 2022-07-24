@@ -23,6 +23,9 @@
  (:map sql-mode-map
    "C-c SPC" #'sql/redirect-to-buf)
 
+ (:map lisp-mode-map
+  "C-c SPC" #'stumpwm-sly-connect)
+
  (:leader
    (:prefix "f"
      (:desc "Find file in org dir" :n "o" #'ckp/org-find-file))

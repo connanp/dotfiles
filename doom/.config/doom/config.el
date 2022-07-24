@@ -63,18 +63,15 @@
 
 (setq-default line-spacing 0.1)
 (setq doom-font (font-spec :family "fixed" :size 14 :weight 'medium)
-      doom-modeline-icon nil)
-(when (member "FiraCode Nerd Font" (font-family-list))
-  (setq doom-font (font-spec :family "FiraCode Nerd Font" :size 14 :weight 'medium)
-        doom-big-font (font-spec :family "FiraCode Nerd Font" :size 19 :weight 'light)
-        doom-modeline-icon t))
+       doom-modeline-icon nil)
 
-(when (member "Libre Baskerville" (font-family-list))
-  (setq doom-variable-pitch-font (font-spec :family "Libre Baskerville" :size 16)))
+(setq doom-font (font-spec :family "FiraCode Nerd Font" :size 14 :weight 'medium)
+      doom-big-font (font-spec :family "FiraCode Nerd Font" :size 19 :weight 'light)
+      doom-modeline-icon t)
 
-; make sure all frames have the font spec from above. when calling emacsclient, new frames won't have the customizations without this.
-; specifically happens when launching with emacs --daemon
-(set-face-attribute 'default nil :font doom-font)
+;; (when (member "Libre Baskerville" (font-family-list))
+;;  (setq doom-variable-pitch-font (font-spec :family "Libre Baskerville" :size 16))
+;; )
 
 ;; performance
 (setq flyspell-issue-message-flag nil)

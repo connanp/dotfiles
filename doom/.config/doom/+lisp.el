@@ -11,7 +11,15 @@
         sly-net-coding-system 'utf-8-unix)
 
   (sp-local-pair '(sly-mrepl-mode) "'" "'" :actions nil)
-  (sp-local-pair '(sly-mrepl-mode) "`" "`" :actions nil))
+  (sp-local-pair '(sly-mrepl-mode) "`" "`" :actions nil)
+
+  (defun stumpwm-sly-connect ()
+    "Connect to StumpWM slynk"
+    (interactive)
+    (sly-connect "localhost" 4004)
+    (with-current-buffer (sly-buffer-name :mrepl :connection (sly-connection))
+      (insert "(cl:in-package :stumpwm-cfg)")
+      (comint-send-input))))
 
 ;; (defun insert-literal-left-bracket (fun arg)
 ;;   "Advice for inserting `[` instead of the movement when inside a string."
