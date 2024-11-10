@@ -117,6 +117,7 @@ This command currently blocks the UI, sorry."
       (hide-sublevels 1))))
 
 (add-hook! 'sql-mode-hook #'sql/maybe-setup-pgdump-outline)
+(add-hook! 'sql-mode-hook (setq indent-tabs-mode t))
 
 (defun sql/redirect-to-buf (beg end &optional copy)
   "Send and redirect region"

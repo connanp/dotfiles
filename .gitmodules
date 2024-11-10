@@ -4,10 +4,19 @@
 [submodule ".config/opp.zsh"]
 	path = .config/opp.zsh
 	url = https://github.com/hchbaw/opp.zsh
-[submodule ".zprezto"]
-	path = .zprezto
+[submodule "zsh/.zprezto"]
+	path = zsh/.zprezto
 	url = https://github.com/sorin-ionescu/prezto
 	branch = master
 [submodule ".config/doom/snippets"]
 	path = .config/doom/snippets
 	url = https://github.com/hlissner/emacs-snippets
+[submodule ".config/tmux/resurrect"]
+	path = .config/tmux/resurrect
+	url = https://github.com/tmux-plugins/tmux-resurrect
+[submodule ".config/tmux/sensible"]
+	path = .config/tmux/sensible
+	url = https://github.com/tmux-plugins/tmux-sensible
+[submodule ".config/tmux/pain-control"]
+	path = .config/tmux/pain-control
+	url = https://github.com/tmux-plugins/tmux-pain-control

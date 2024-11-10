@@ -21,6 +21,9 @@ export EDITOR="emacsclient -n -s /run/user/$UID/emacs/server"
 export VISUAL="emacsclient -n -s /run/user/$UID/emacs/server"
 export PAGER='less'
 
+# infinality mode
+export FREETYPE_PROPERTIES="truetype:interpreter-version=38"
+
 #
 # Language
 #

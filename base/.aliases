@@ -240,3 +240,7 @@ start_aws_creds() {
     sudo pkill -f "aws-vault exec $USER -s"
     /home/cpearson/bin/aws-vault exec $USER -s &
 }
+
+interpolate() {
+    perl -i -pe 's|\\n|\n|g;s|\\t|\t|g' "$*"
+}

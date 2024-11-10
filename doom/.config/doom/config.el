@@ -1,5 +1,7 @@
 ;;; config.el -*- lexical-binding: t; -*-
 ;;(setq comp-deferred-compilation-deny-list '("vterm" "evil-collection-vterm"))
+;; this seems to be needed now
+(doom-load-envvars-file "~/.emacs.d/.local/env")
 (setq custom-file "~/.emacs-custom.el")
 ;; site-local things
 (load custom-file)
@@ -15,6 +17,14 @@
   (load! "+debug"))
 (after! sql
   (load! "+sql"))
+
+(after! js-mode
+  (add-hook! 'js-mode-hook (setq indent-tabs-mode t)))
+
+(after! python-mode
+  (add-hook! 'python-mode-hook (setq indent-tabs-mode t)))
+
+(setq-default tab-width 2)
 
 (setq-default
  user-full-name "Connan Pearson"
@@ -95,16 +105,54 @@
 (defalias 'sh 'shell)
 (defalias 'sl 'sort-lines)
 
+(after! lsp-mode
+  ;; fucking annoying help popups
+  (setq lsp-signature-auto-activate nil))
+
+(after! flycheck
+  (setq flycheck-display-errors-delay 2.0))
+
+(after! envrc
+  (setq envrc-global-mode t))
+
+(after! eglot
+  (add-to-list 'eglot-server-programs `(typescript-tsx-mode . ("typescript-language-server" "--stdio")))
+  ;; npm i --no-save typescript-eslint-language-service@2.x.x --legacy-peer-deps
+  ;; tsconfig.json should have:
+  ;; {...
+  ;;  "compilerOptions": {
+  ;;     "plugins": [{
+  ;;      "name": "typescript-eslint-language-service"
+  ;;    }]
+  ;;    ...
+  ;;  }
+  ;; }
+  (add-to-list 'eglot-server-programs
+               `(python-mode
+                 . ,(eglot-alternatives '("pylsp"
+                                          "jedi-language-server"
+                                          ("pyright-langserver" "--stdio")))))
+  (cl-defmethod project-root ((project (head eglot-project)))
+    (cdr project))
+
+  (defun my-project-try-config-files (dir)
+    (when-let* ((found (locate-dominating-file dir (lambda (path)
+                                                     (directory-files path nil (rx (or "tsconfig.json" "pyproject.toml")) nil 1)))))
+      (cons 'eglot-project found)))
+
+  (add-hook 'project-find-functions
+            'my-project-try-config-files nil nil))
+
 (after! ivy
   (setq ivy-count-format "(%d/%d) "))
 
 (after! avy
   (setq avy-all-windows 'all-frames))
 
-(when (featurep! :lang common-lisp)
+(when (modulep! :lang common-lisp)
   (use-package! common-lisp-snippets))
 
-(when (featurep! :lang org)
+(when (modulep! :lang org)
   (after! org
     (load! "+org")
     (load! "+org-time-tracking")))
@@ -431,6 +479,14 @@
         mu4e-attachment-dir "~/Downloads/email-attachments"
         mu4e-update-interval (* 60 15))
 
+  (defun my-mu4e-any-message-field-at-point (msg hdr)
+  "Quick & dirty way to get an arbitrary header HDR at
+point. Requires the 'formail' tool from procmail."
+  (replace-regexp-in-string "\n$" ""
+    (shell-command-to-string
+      (concat "formail -x " hdr " -c < "
+        (shell-quote-argument (mu4e-message-field msg :path))))))
+
   (set-email-account! "peoplegis.com"
   '((mu4e-sent-folder       . "/peoplegis.com/Sent")
     (mu4e-drafts-folder     . "/peoplegis.com/Drafts")
@@ -448,6 +504,9 @@
                                  ;; messages sent by me go to the sent folder
                                  ((mu4e-message-sent-by-me msg)
                                   mu4e-sent-folder)
+                                 ((not (string-match "Country='US'"
+                                                     (my-mu4e-any-message-field-at-point msg "X-Spam-source")))
+                                  "/peoplegis.com/Spam")
                                  ;; everything else
                                  (t  "/peoplegis.com/Archive"))))
     (smtpmail-smtp-user     . "connan@peoplegis.com")

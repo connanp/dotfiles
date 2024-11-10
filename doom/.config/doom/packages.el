@@ -32,8 +32,6 @@
 (when (featurep! :lang go)
   (package! go-impl))
 
-(when (featurep! :ui emoji)
-  (package! emoji-cheat-sheet-plus))
 (package! alert)
 ;;(package! slack)
 

@@ -108,7 +108,7 @@
         +dictionary
         +offline
         +docsets)                       ; ...or in Dash docsets locally
-       lsp
+       (lsp +eglot)
        ;;macos             ; MacOS-specific commands
        make                             ; run make tasks from Emacs
        magit                            ;
@@ -117,13 +117,13 @@
        pdf               ; pdf enhancements
        ;; prodigy                          ; FIXME managing external services & code builders
        rgb                              ; creating color strings
+       tree-sitter
        ;;tmux              ; an API for interacting with tmux
        ;; terraform
        ;;upload            ; map local to remote projects via ssh/ftp
 
        :lang
        ;;agda              ; types of types of types of types...
-       assembly                         ; assembly for fun or debugging
        (cc +lsp)               ; C/C++/Obj-C madness
        ;;clojure           ; java with a lisp
        common-lisp                      ; if you've seen one lisp, you've seen them all

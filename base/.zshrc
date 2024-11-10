@@ -27,18 +27,20 @@ if [ -d $HOME/.config/site/preload ]; then
 fi
 
 # Emacs and other terms
-if [[ "$TERM" == "dumb" ]]; then
+if [[ "$TERM" == "dumb" || "$TERM_PROGRAM" == "WarpTerminal" ]]; then
     zstyle ':prezto:module:prompt' theme 'minimal'
     zstyle ':prezto:module:terminal' auto-title 'no'
     zstyle ':prezto:module:editor' key-bindings 'emacs'
     unsetopt zle
     unsetopt prompt_cr
     unsetopt prompt_subst
-    unfunction precmd
-    unfunction preexec
+    # unfunction precmd
+    # unfunction preexec
     PS1='$ '
+    export PS1
 else
-    zstyle ':prezto:module:prompt' theme 'powerlevel10k'
+    zstyle ':prezto:module:prompt' theme 'minimal'
+    zstyle ':prezto:module:prompt' managed 'yes'
     zstyle ':prezto:module:terminal' auto-title 'yes'
     zstyle ':prezto:module:terminal:window-title' format '%n@%m: %s'
     zstyle ':prezto:module:terminal:tab-title' format '%m: %s'
@@ -66,17 +68,13 @@ else
     # vi insert mode to respect backspace
     zle -A .backward-kill-word vi-backward-kill-word
     zle -A .backward-delete-char vi-backward-delete-char
-fi
-
 zstyle ':completion:*' squeeze-slashes true
 zstyle -e ':completion:*' special-dirs '[[ $PREFIX = (../)#(|.|..) ]] && reply=(..)'
 
-zstyle ':prezto:module:prompt' theme 'powerlevel10k'
 zstyle ':prezto:module:editor' dot-expansion 'no'
 zstyle ':prezto:module:history-substring-search' color 'yes'
 zstyle ':prezto:module:autosuggestions' color 'yes'
 
-zstyle ':prezto:module:ssh:load' identities 'id_rsa' 'personal_rsa'
 
 zstyle ':prezto:module:syntax-highlighting' highlighters \
   'main' \
@@ -88,6 +86,10 @@ zstyle ':prezto:module:syntax-highlighting' highlighters \
 zstyle ':prezto:module:python' skip-virtualenvwrapper-init 'on'
 zstyle ':prezto:module:python:virtualenv' initialize 'no'
 
+# needs external source for the .zsh files i guess
+#zstyle ':prezto:module:fzf' key-bindings 'yes'
+#zstyle ':prezto:module:fzf' completion 'yes'
+
 zstyle ':prezto:load' pmodule-dirs $HOME/.zprezto-contrib
 zstyle ':prezto:load' pmodule \
   'environment' \
@@ -95,22 +97,19 @@ zstyle ':prezto:load' pmodule \
   'editor' \
   'history' \
   'directory' \
-  'spectrum' \
   'utility' \
   'asdf' \
   'completion' \
   'archive' \
-  'osx' \
   'git' \
   'fasd' \
   'rsync' \
   'gpg' \
-  'python' \
-  'ruby' \
   'syntax-highlighting' \
   'history-substring-search' \
-  'autosuggestions' \
+  'fzf' \
   'prompt'
+fi
 
 source $HOME/.zprezto/runcoms/zshrc
 source $HOME/.aliases
@@ -118,31 +117,30 @@ autoload -Uz zmv
 
 setopt NUMERIC_GLOB_SORT
 
-if [[ "$TERM" != "dumb" ]]; then
+if [[ "$TERM" != "dumb" && "$TERM_PROGRAM" != "WarpTerminal" ]]; then
     # (( ${+commands[direnv]} )) && emulate zsh -c "$(asdf exec direnv export zsh)"
 
     # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
     # Initialization code that may require console input (password prompts, [y/n]
     # confirmations, etc.) must go above this block, everything else may go below.
-    if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-    fi
+    #if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+    #source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+    #fi
 
-    source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/zshrc"
     export DIRENV_LOG_FORMAT=''
 
     # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-    [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-    if [[ -f ~/.bash-my-aws/aliases ]]; then
-      export PATH="$PATH:$HOME/.bash-my-aws/bin"
-      source ~/.bash-my-aws/aliases
+    #[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+    #if [[ -f ~/.bash-my-aws/aliases ]]; then
+    #  export PATH="$PATH:$HOME/.bash-my-aws/bin"
+    #  source ~/.bash-my-aws/aliases
 
-      # For ZSH users, uncomment the following two lines:
-      autoload -U +X compinit && compinit
-      autoload -U +X bashcompinit && bashcompinit
+    #  # For ZSH users, uncomment the following two lines:
+    #  autoload -U +X compinit && compinit
+    #  autoload -U +X bashcompinit && bashcompinit
 
-      source ~/.bash-my-aws/bash_completion.sh
-    fi
+    #  source ~/.bash-my-aws/bash_completion.sh
+    #fi
 fi
 
 if [ -d $HOME/.config/site ]; then
@@ -163,3 +161,12 @@ fi
 
 # add Pulumi to the PATH
 export PATH=$PATH:$HOME/.pulumi/bin
+
+export SSH_AUTH_SOCK=/var/run/user/1000/keyring/ssh;
+
+eval "$(starship init zsh)"
+
+function z() {
+    [ $# -gt 0 ] && fasd_cd -d "$*" && return
+    cd "$(fasd_cd -d -l 2>&1 | fzf --height 40% --nth 2.. --reverse --inline-info +s --tac --query "${*##-* }" | sed 's/^[0-9,.]* *//')"
+  }
