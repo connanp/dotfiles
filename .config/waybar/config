@@ -56,9 +56,6 @@
     "menu-actions": {
         "exit": "wlogout -m 260px 70px",
         "emojisearch": "$HOME/bin/wofi-emoji",
-        "malarchive": "$HOME/.config/hypr/scripts/animelist-archive",
-        "videodl": "$HOME/.config/hypr/scripts/video-download",
-        "musicdl": "$HOME/.config/hypr/scripts/song-download",
         "colorpicker": "$HOME/.config/hypr/scripts/colorpick",
         "killapp": "XCURSOR_THEME=crosshair XCURSOR_SIZE=24 hyprctl kill",
       },
@@ -191,18 +188,17 @@
 	  "format": "<span font=\"Font Awesome 6 Free\"></span> {specific_free:0.1f}GB",
     "path": "/",
     "on-click": "hyprctl dispatch exec nemo",
-    "on-click-right": "hyprctl dispatch exec gnome-system-monitor",
+    "on-click-right": "hyprctl dispatch exec htop",
 	  "unit": "GB"
     },
     "network": {
-      "interface": "wlp4s0",
+      "interface": "wlp0s20f3",
       "tooltip-format": "SSID: {essid} ({signalStrength}%)\nInterface: {ifname}\n {bandwidthDownBits}\n {bandwidthUpBits}",
       "format-disconnected": "{essid}   ",
       "interval": 2,
       "format-wifi": "{essid}  ",
       "format-icons": ["󰤟", "󰤢", "󰤥", "󰤨"], 
-      "format-ethernet": "",
-      "on-click": "hyprctl dispatch exec nm-connection-editor",
+      "format-ethernet": ""
     },
      "battery": {
         "format": "{capacity}% <span font=\"Font Awesome 6 Free\">{icon}</span>",

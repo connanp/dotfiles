@@ -139,3 +139,5 @@
     smtpserver = /usr/bin/msmtp
 	annotate = yes
 	confirm = auto
+[advice]
+	detachedHead = false
