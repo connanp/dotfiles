@@ -82,6 +82,7 @@ zstyle ':prezto:module:syntax-highlighting' highlighters \
   'pattern' \
   'cursor' \
   'root'
+zstyle ':prezto:module:history-substring-search' color 'no'
 
 zstyle ':prezto:module:python' skip-virtualenvwrapper-init 'on'
 zstyle ':prezto:module:python:virtualenv' initialize 'no'
@@ -108,6 +109,7 @@ zstyle ':prezto:load' pmodule \
   'syntax-highlighting' \
   'history-substring-search' \
   'fzf' \
+  'zsh-fzf-history-search' \
   'prompt'
 fi
 

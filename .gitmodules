@@ -20,3 +20,6 @@
 [submodule ".config/tmux/pain-control"]
 	path = .config/tmux/pain-control
 	url = https://github.com/tmux-plugins/tmux-pain-control
+[submodule "zsh/.zprezto-contrib/zsh-fzf-history-search"]
+	path = zsh/.zprezto-contrib/zsh-fzf-history-search
+	url = https://github.com/joshskidmore/zsh-fzf-history-search

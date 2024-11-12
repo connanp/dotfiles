@@ -123,7 +123,6 @@
         "transition-left-to-right": false,
        },
 		"modules": [
-			"pulseaudio",
 			"backlight",
       "custom/hyprshade",
 	  	]
@@ -186,13 +185,13 @@
   "disk": {
 	  "interval": 60,
 	  "format": "<span font=\"Font Awesome 6 Free\"></span> {specific_free:0.1f}GB",
-    "path": "/",
+    "path": "/home",
     "on-click": "hyprctl dispatch exec nemo",
     "on-click-right": "hyprctl dispatch exec htop",
 	  "unit": "GB"
     },
     "network": {
-      "interface": "wlp0s20f3",
+      "interface": "wlan0",
       "tooltip-format": "SSID: {essid} ({signalStrength}%)\nInterface: {ifname}\n {bandwidthDownBits}\n {bandwidthUpBits}",
       "format-disconnected": "{essid}   ",
       "interval": 2,

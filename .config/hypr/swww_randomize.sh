@@ -15,6 +15,7 @@ fi
 # Edit below to control the images transition
 export SWWW_TRANSITION_FPS=60
 export SWWW_TRANSITION_STEP=2
+export SWWW_TRANSITION=wave
 
 # This controls (in seconds) when to switch to the next image
 INTERVAL=${2:-300}
